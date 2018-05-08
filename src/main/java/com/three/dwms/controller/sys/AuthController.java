@@ -25,14 +25,14 @@ public class AuthController {
     @Resource
     private SysUserService sysUserService;
 
-    @RequestMapping(value = "/unLogin")
+    @RequestMapping(value = "/noLogin")
     public JsonData unLogin(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        return JsonData.fail("没有登录，无法调用接口");
+        return JsonData.fail("没有登录，无法调用接口，请联系管理员");
     }
 
-    @RequestMapping(value = "/unAccess")
+    @RequestMapping(value = "/noAuth")
     public JsonData unAccess(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        return JsonData.fail("没有访问接口的权限");
+        return JsonData.fail("没有访问权限，无法调用接口，请联系管理员");
     }
 
     @RequestMapping(value = "/logout", method = RequestMethod.GET)

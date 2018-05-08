@@ -54,13 +54,42 @@ public class SysUserService {
         sysUserRepository.save(sysUser);
     }
 
-    public void updateStateById(int id, StateCode delete) {
-
+    @Transactional
+    public void updateStateById(int id, StateCode stateCode) {
+        SysUser sysUser = sysUserRepository.findOne(id);
+        Preconditions.checkNotNull(sysUser, "用户不存在");
+        sysUser.setStatus(stateCode.getCode());
+        sysUserRepository.save(sysUser);
     }
 
     @Transactional
     public void update(UserParam param) {
+        BeanValidator.check(param);
+        if (checkUsernameExist(param.getUsername(), param.getId())) {
+            throw new ParamException("用户名已经存在");
+        }
+        if (checkTelephoneExist(param.getTel(), param.getId())) {
+            throw new ParamException("电话已被占用");
+        }
+        if (checkEmailExist(param.getEmail(), param.getId())) {
+            throw new ParamException("邮箱已被占用");
+        }
 
+        SysUser before = sysUserRepository.findOne(param.getId());
+        Preconditions.checkNotNull(before, "待更新的用户不存在");
+
+        before.setUsername(param.getUsername());
+        before.setEmail(param.getEmail());
+        before.setTel(param.getTel());
+        before.setSex(param.getSex());
+        before.setStatus(param.getStatus());
+        before.setRemark(param.getRemark());
+
+        before.setOperatorId(RequestHolder.getCurrentUser().getId());
+        before.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
+        before.setOperateTime(new Date());
+
+        sysUserRepository.save(before);
     }
 
     public List<SysUser> findAll() {
@@ -68,7 +97,7 @@ public class SysUserService {
     }
 
     public SysUser findByKeyword(String keyword) {
-        Preconditions.checkNotNull(keyword, "查找用户时，查找条件为空");
+        Preconditions.checkNotNull(keyword, "查找用户条件为空");
         return sysUserRepository.findByUsernameOrTelOrEmail(keyword, keyword, keyword);
     }
 

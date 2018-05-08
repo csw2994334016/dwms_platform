@@ -8,6 +8,15 @@
         <welcome-file>index.html</welcome-file>
     </welcome-file-list>
 
+    <!-- Spring beans 配置文件所在目录 -->
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>classpath:config/applicationContext.xml</param-value>
+    </context-param>
+
     <!-- Encoding -->
     <filter>
         <filter-name>encodingFilter</filter-name>
@@ -26,23 +35,23 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
-    <!-- 同源策略解决方案-->
+    <!-- 同源策略过滤器-->
     <filter>
         <filter-name>cors</filter-name>
-        <filter-class>com.three.dwms.common.CORSFilter</filter-class>
+        <filter-class>com.three.dwms.filter.CORSFilter</filter-class>
     </filter>
     <filter-mapping>
         <filter-name>cors</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
-    <!--登录过滤器-->
+    <!--登录、权限控制过滤器-->
     <filter>
-        <filter-name>loginFilter</filter-name>
-        <filter-class>com.three.dwms.common.LoginFilter</filter-class>
+        <filter-name>aclControlFilter</filter-name>
+        <filter-class>com.three.dwms.filter.AclControlFilter</filter-class>
     </filter>
     <filter-mapping>
-        <filter-name>loginFilter</filter-name>
+        <filter-name>aclControlFilter</filter-name>
         <url-pattern>/api/*</url-pattern>
     </filter-mapping>
 
@@ -65,13 +74,5 @@
         <url-pattern>*.html</url-pattern>
     </servlet-mapping>
 
-    <!-- Spring beans 配置文件所在目录 -->
-    <listener>
-        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-    </listener>
-    <context-param>
-        <param-name>contextConfigLocation</param-name>
-        <param-value>classpath:config/applicationContext.xml</param-value>
-    </context-param>
 
 </web-app>
