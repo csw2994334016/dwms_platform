@@ -20,15 +20,16 @@ public class BaseEntity {
     @Column(unique = true, nullable = false)
     private Integer id;
 
+    //状态，1：可用，0：禁用，2：删除
     private Integer status;
 
     private String remark;
 
-    private Integer createId;
+    private String creator;
 
     private Date createTime;
 
-    private Integer operatorId;
+    private String operator;
 
     private Date operateTime;
 

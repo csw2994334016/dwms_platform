@@ -5,6 +5,7 @@ import com.three.dwms.common.RequestHolder;
 import com.three.dwms.constant.StateCode;
 import com.three.dwms.entity.sys.SysUser;
 import com.three.dwms.exception.ParamException;
+import com.three.dwms.param.sys.User;
 import com.three.dwms.param.sys.UserParam;
 import com.three.dwms.repository.sys.SysUserRepository;
 import com.three.dwms.utils.BeanValidator;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -39,15 +41,15 @@ public class SysUserService {
         if (checkEmailExist(param.getEmail(), param.getId())) {
             throw new ParamException("邮箱已被占用");
         }
-        String password = "888888";
-        String encryptedPassword = MD5Util.encrypt(password);
+
+        String encryptedPassword = MD5Util.encrypt(param.getPassword());
         SysUser sysUser = SysUser.builder().username(param.getUsername()).password(encryptedPassword).tel(param.getTel()).email(param.getEmail()).sex(param.getSex()).build();
 
         sysUser.setStatus(StateCode.NORMAL.getCode());
-        sysUser.setCreateId(RequestHolder.getCurrentUser().getId());
+        sysUser.setCreator(RequestHolder.getCurrentUser().getUsername());
         sysUser.setCreateTime(new Date());
 
-        sysUser.setOperatorId(RequestHolder.getCurrentUser().getId());
+        sysUser.setOperator(RequestHolder.getCurrentUser().getUsername());
         sysUser.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
         sysUser.setOperateTime(new Date());
 
@@ -63,7 +65,7 @@ public class SysUserService {
     }
 
     @Transactional
-    public void update(UserParam param) {
+    public SysUser update(UserParam param) {
         BeanValidator.check(param);
         if (checkUsernameExist(param.getUsername(), param.getId())) {
             throw new ParamException("用户名已经存在");
@@ -78,22 +80,48 @@ public class SysUserService {
         SysUser before = sysUserRepository.findOne(param.getId());
         Preconditions.checkNotNull(before, "待更新的用户不存在");
 
-        before.setUsername(param.getUsername());
+        if (!before.getUsername().equals(param.getUsername())) {
+            throw new ParamException("用户名不能修改");
+        }
+
         before.setEmail(param.getEmail());
         before.setTel(param.getTel());
         before.setSex(param.getSex());
         before.setStatus(param.getStatus());
         before.setRemark(param.getRemark());
 
-        before.setOperatorId(RequestHolder.getCurrentUser().getId());
+        before.setOperator(RequestHolder.getCurrentUser().getUsername());
         before.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
         before.setOperateTime(new Date());
 
-        sysUserRepository.save(before);
+        SysUser update = sysUserRepository.save(before);
+        Preconditions.checkNotNull(update, "更新用户失败");
+
+        //更新用户，要更新session
+        bindUserRoleAcl(update);
+        RequestHolder.getCurrentRequest().setAttribute("user", update);
+
+        return update;
+    }
+
+    @Transactional
+    public SysUser updatePassword(User user) {
+        SysUser before = sysUserRepository.findOne(user.getId());
+        Preconditions.checkNotNull(before, "待更改密码的用户不存在");
+
+        if (!before.getPassword().equals(MD5Util.encrypt(user.getOldPassword()))) {
+            throw new ParamException("旧密码不正确");
+        }
+        before.setPassword(MD5Util.encrypt(user.getPassword()));
+        return null;
     }
 
     public List<SysUser> findAll() {
-        return (List<SysUser>) sysUserRepository.findAll();
+        List<SysUser> sysUserList = (List<SysUser>) sysUserRepository.findAll();
+        for (SysUser sysUser : sysUserList) {
+            sysUser.setPassword(null);
+        }
+        return sysUserList;
     }
 
     public SysUser findByKeyword(String keyword) {
@@ -120,5 +148,9 @@ public class SysUserService {
             return sysUserRepository.countByTelAndId(tel, id) > 0;
         }
         return sysUserRepository.countByTel(tel) > 0;
+    }
+
+    public void bindUserRoleAcl(SysUser sysUser) {
+
     }
 }

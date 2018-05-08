@@ -4,12 +4,14 @@ import com.three.dwms.beans.JsonData;
 import com.three.dwms.beans.PageQuery;
 import com.three.dwms.constant.StateCode;
 import com.three.dwms.entity.sys.SysUser;
+import com.three.dwms.param.sys.User;
 import com.three.dwms.param.sys.UserParam;
 import com.three.dwms.service.sys.SysUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -37,20 +39,21 @@ public class SysUserController {
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-    public JsonData update(@PathVariable int id, @RequestBody UserParam userParam) {
+    public JsonData update(@PathVariable int id, @RequestBody UserParam userParam, HttpServletRequest request) {
         userParam.setId(id);
-        sysUserService.update(userParam);
-        return JsonData.success();
+        SysUser sysUser = sysUserService.update(userParam);
+        return JsonData.success(sysUser);
+    }
+
+    @RequestMapping(value = "/password/{id}", method = RequestMethod.PUT)
+    public JsonData updatePassword(@PathVariable int id, User user) {
+        user.setId(id);
+        SysUser sysUser = sysUserService.updatePassword(user);
+        return JsonData.success(sysUser);
     }
 
     @RequestMapping(method = RequestMethod.GET)
     public JsonData findAll() {
-        List<SysUser> sysUserList = sysUserService.findAll();
-        return JsonData.success(sysUserList);
-    }
-
-    @RequestMapping(value = "/page",method = RequestMethod.GET)
-    public JsonData findAllByPage(@RequestBody PageQuery pageQuery) {
         List<SysUser> sysUserList = sysUserService.findAll();
         return JsonData.success(sysUserList);
     }

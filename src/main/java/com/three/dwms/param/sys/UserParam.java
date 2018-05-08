@@ -27,6 +27,10 @@ public class UserParam {
     @Length(min = 1, max = 20, message = "用户名长度需要在20个字以内")
     private String username;
 
+    @NotBlank(message = "密码不可以为空")
+    @Length(min = 1, max = 50, message = "密码长度需要在20个字以内")
+    private String password;
+
     @NotNull(message = "必须指定用户的性别")
     @Min(value = 0, message = "用户性别不合法")
     @Max(value = 1, message = "用户性别不合法")
@@ -48,11 +52,11 @@ public class UserParam {
     @Length(min = 0, max = 200, message = "备注长度需要在200个字以内")
     private String remark;
 
-    private String createId;
+    private String creator;
 
     private Date createTime;
 
-    private String operatorId;
+    private String operator;
 
     private Date operateTime;
 

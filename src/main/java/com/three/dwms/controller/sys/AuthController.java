@@ -64,6 +64,7 @@ public class AuthController {
             } else if (sysUser.getStatus() != 1) {
                 errorMsg = "用户已被禁用，请联系管理员";
             } else {
+                sysUserService.bindUserRoleAcl(sysUser);
                 request.getSession().setAttribute("user", sysUser);
                 return JsonData.success(sysUser);
             }
