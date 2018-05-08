@@ -1,6 +1,7 @@
 package com.three.dwms.controller.sys;
 
 import com.three.dwms.beans.JsonData;
+import com.three.dwms.beans.PageQuery;
 import com.three.dwms.constant.StateCode;
 import com.three.dwms.entity.sys.SysUser;
 import com.three.dwms.param.sys.UserParam;
@@ -44,6 +45,12 @@ public class SysUserController {
 
     @RequestMapping(method = RequestMethod.GET)
     public JsonData findAll() {
+        List<SysUser> sysUserList = sysUserService.findAll();
+        return JsonData.success(sysUserList);
+    }
+
+    @RequestMapping(value = "/page",method = RequestMethod.GET)
+    public JsonData findAllByPage(@RequestBody PageQuery pageQuery) {
         List<SysUser> sysUserList = sysUserService.findAll();
         return JsonData.success(sysUserList);
     }

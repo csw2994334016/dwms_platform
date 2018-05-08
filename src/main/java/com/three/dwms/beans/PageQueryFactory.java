@@ -1,6 +1,7 @@
-package com.three.dwms.common;
+package com.three.dwms.beans;
 
 import com.three.dwms.beans.PageQuery;
+import com.three.dwms.common.RequestHolder;
 
 import javax.servlet.http.HttpServletRequest;
 
