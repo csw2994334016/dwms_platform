@@ -1,9 +1,10 @@
 package com.three.dwms.entity.sys;
 
+import com.three.dwms.entity.base.BaseEntity;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.io.Serializable;
 
 @Builder
 @NoArgsConstructor
@@ -13,25 +14,17 @@ import java.util.Date;
 @ToString
 @Entity
 @Table(name = "sys_user")
-public class SysUser {
+public class SysUser extends BaseEntity implements Serializable{
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", unique = true, nullable = false)
-    private Integer id;
-
+    @Column(length = 20)
     private String username;
 
     private String password;
 
-    private Integer status;
+    private Integer sex;
 
-    private String remark;
+    private String email;
 
-    private String operator;
-
-    private Date operateTime;
-
-    private String operateIp;
-
+    @Column(length = 13)
+    private String tel;
 }

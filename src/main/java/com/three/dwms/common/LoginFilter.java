@@ -27,10 +27,10 @@ public class LoginFilter implements Filter{
 //        log.info("sessionId: " + request.getSession().getId());
 
         SysUser sysUser = (SysUser) request.getSession().getAttribute("user");
-//        if (sysUser == null) {
-//            request.getRequestDispatcher("/tips/logTip").forward(request, response);
-//            return;
-//        }
+        if (sysUser == null) {
+            request.getRequestDispatcher("/auth/unLogin").forward(request, response);
+            return;
+        }
 
         RequestHolder.add(sysUser);
         RequestHolder.add(request);
