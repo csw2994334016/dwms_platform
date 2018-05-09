@@ -19,9 +19,9 @@ import java.io.Serializable;
 public class SysUserRole extends BaseEntity implements Serializable {
 
     @Column(nullable = false)
-    private Integer userId;
+    private Integer userId; //用户id
 
     @Column(nullable = false)
-    private Integer roleId;
+    private Integer roleId; //角色id
 
 }

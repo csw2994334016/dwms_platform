@@ -52,13 +52,4 @@ public class UserParam {
     @Length(min = 0, max = 200, message = "备注长度需要在200个字以内")
     private String remark;
 
-    private String creator;
-
-    private Date createTime;
-
-    private String operator;
-
-    private Date operateTime;
-
-    private String operateIp;
 }

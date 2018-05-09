@@ -18,18 +18,18 @@ import java.io.Serializable;
 @Table(name = "sys_acl")
 public class SysAcl extends BaseEntity implements Serializable {
 
-    private String code;
+    private String code; //英文权限码
 
-    private String name;
+    private String name; //权限名称
 
-    private Integer parentId;
+    private Integer parentId; //上级权限，可以分模块
 
-    private String icon;
+    private String icon; //css图标
 
-    private String url;
+    private String url; //接口地址（可以填正则表达式）：api/sys/users
 
-    private Integer type;
+    private Integer type; //权限类型：1：菜单，2：按钮，3：其他
 
-    private Integer seq;
+    private Integer seq; //权限在当前模块下的顺序，由小到大
 
 }

@@ -18,22 +18,21 @@ public class BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(unique = true, nullable = false)
-    private Integer id;
+    private Integer id; //主键
 
-    //状态，1：可用，0：禁用，2：删除
-    private Integer status;
+    private Integer status; //状态：1：可用，0：禁用，2：删除
 
-    private String remark;
+    private String remark; //备注
 
-    private String creator;
+    private String creator; //创建者
 
-    private Date createTime;
+    private Date createTime; //创建时间
 
-    private String operator;
+    private String operator; //最后一次操作者
 
-    private Date operateTime;
+    private Date operateTime; //最后一次操作时间
 
-    private String operateIp;
+    private String operateIp; //最后一次操作的ip地址
 
 
 }

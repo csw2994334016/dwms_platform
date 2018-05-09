@@ -113,7 +113,7 @@ public class SysUserService {
             throw new ParamException("旧密码不正确");
         }
         before.setPassword(MD5Util.encrypt(user.getPassword()));
-        return null;
+        return sysUserRepository.save(before);
     }
 
     public List<SysUser> findAll() {

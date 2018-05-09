@@ -4,11 +4,6 @@ import lombok.*;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
-import java.util.Date;
-
 /**
  * Created by csw on 2018/5/6.
  * Description:
@@ -28,7 +23,7 @@ public class User {
     private String username;
 
     @NotBlank(message = "旧密码不可以为空")
-    @Length(min = 1, max = 20, message = "旧密码长度需要在20个字以内")
+    @Length(min = 1, max = 0, message = "旧密码长度需要在20个字以内")
     private String oldPassword;
 
     @NotBlank(message = "密码不可以为空")

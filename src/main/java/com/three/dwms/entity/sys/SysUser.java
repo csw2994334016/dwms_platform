@@ -17,14 +17,14 @@ import java.io.Serializable;
 public class SysUser extends BaseEntity implements Serializable{
 
     @Column(length = 20)
-    private String username;
+    private String username; //用户名
 
-    private String password;
+    private String password; //密码（秘文）
 
-    private Integer sex;
+    private Integer sex; //性别
 
-    private String email;
+    private String email; //邮箱
 
     @Column(length = 13)
-    private String tel;
+    private String tel; //电话
 }

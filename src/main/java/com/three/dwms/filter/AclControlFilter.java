@@ -55,7 +55,6 @@ public class AclControlFilter implements Filter {
         }
 
         filterChain.doFilter(servletRequest, servletResponse);
-        return;
     }
 
     @Override

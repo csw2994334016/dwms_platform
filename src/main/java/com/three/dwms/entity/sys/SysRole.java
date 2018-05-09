@@ -18,8 +18,10 @@ import java.io.Serializable;
 @Table(name = "sys_role")
 public class SysRole extends BaseEntity implements Serializable {
 
-    private String name;
+    private String code; //角色代码：ROLE_ADMIN、ROLE_USER
 
-    private Integer type;
+    private String name; //角色名称
+
+    private Integer type; //角色类型
 
 }

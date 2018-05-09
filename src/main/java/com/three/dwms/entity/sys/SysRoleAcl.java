@@ -20,9 +20,9 @@ import java.io.Serializable;
 public class SysRoleAcl extends BaseEntity implements Serializable {
 
     @Column(nullable = false)
-    private Integer roleId;
+    private Integer roleId; //角色id
 
     @Column(nullable = false)
-    private Integer aclId;
+    private Integer aclId; //权限id
 
 }
