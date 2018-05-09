@@ -14,7 +14,7 @@ import lombok.*;
 @Getter
 @Setter
 @ToString
-public class SessionUser {
+public class UserRoleAcl {
 
     private SysUser sysUser;
 

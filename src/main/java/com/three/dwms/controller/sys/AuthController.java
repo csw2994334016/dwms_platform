@@ -3,7 +3,7 @@ package com.three.dwms.controller.sys;
 import com.three.dwms.beans.JsonData;
 import com.three.dwms.constant.StateCode;
 import com.three.dwms.entity.sys.SysUser;
-import com.three.dwms.param.sys.SessionUser;
+import com.three.dwms.param.sys.UserRoleAcl;
 import com.three.dwms.param.sys.User;
 import com.three.dwms.param.sys.UserParam;
 import com.three.dwms.service.sys.SysUserService;
@@ -37,17 +37,20 @@ public class AuthController {
     @Value("#{props['init.remark']}")
     private String remark;
 
+    @Value("#{props['init.sessionInterval']}")
+    private Integer sessionInterval;
+
     @Resource
     private SysUserService sysUserService;
 
     @RequestMapping(value = "/noLogin")
     public JsonData unLogin(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        return JsonData.fail("没有登录，无法调用接口，请联系管理员");
+        return JsonData.fail("没有登录，无法调用接口");
     }
 
     @RequestMapping(value = "/noAuth")
     public JsonData unAccess(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        return JsonData.fail("没有访问权限，无法调用接口，请联系管理员");
+        return JsonData.fail("没有访问权限，无法调用接口");
     }
 
     @RequestMapping(value = "/initSuperAdmin", method = RequestMethod.GET)
@@ -90,8 +93,9 @@ public class AuthController {
                 errorMsg = "用户已被禁用，请联系管理员";
             } else {
                 request.getSession().setAttribute("user", sysUser);
-                SessionUser sessionUser = sysUserService.bindSessionUser(sysUser);
-                return JsonData.success(sessionUser);
+                request.getSession().setMaxInactiveInterval(sessionInterval);
+                UserRoleAcl userRoleAcl = sysUserService.createUserAndRoleAndAcl(sysUser);
+                return JsonData.success(userRoleAcl);
             }
         }
 

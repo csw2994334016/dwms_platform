@@ -5,13 +5,15 @@ import com.three.dwms.common.RequestHolder;
 import com.three.dwms.constant.StateCode;
 import com.three.dwms.entity.sys.SysUser;
 import com.three.dwms.exception.ParamException;
-import com.three.dwms.param.sys.SessionUser;
+import com.three.dwms.param.sys.UserRoleAcl;
 import com.three.dwms.param.sys.User;
 import com.three.dwms.param.sys.UserParam;
 import com.three.dwms.repository.sys.SysUserRepository;
 import com.three.dwms.utils.BeanValidator;
 import com.three.dwms.utils.IpUtil;
 import com.three.dwms.utils.MD5Util;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,10 +27,14 @@ import java.util.List;
  * Description:
  */
 @Service
+@Slf4j
 public class SysUserService {
 
     @Value("#{props['init.username']}")
     private String username;
+
+    @Value("#{props['init.defaultPassword']}")
+    private String defaultPassword;
 
     @Resource
     private SysUserRepository sysUserRepository;
@@ -46,11 +52,13 @@ public class SysUserService {
             throw new ParamException("邮箱已被占用");
         }
 
-        String encryptedPassword = MD5Util.encrypt(param.getPassword());
-        SysUser sysUser = SysUser.builder().username(param.getUsername()).password(encryptedPassword).tel(param.getTel()).email(param.getEmail()).sex(param.getSex()).build();
+        //密码为空，初始化默认密码
+        String password = StringUtils.isBlank(param.getPassword()) ? defaultPassword : param.getPassword();
+        password = MD5Util.encrypt(password);
 
-        SysUser curUser = RequestHolder.getCurrentUser();
-        if (curUser != null) {
+        SysUser sysUser = SysUser.builder().username(param.getUsername()).password(password).tel(param.getTel()).email(param.getEmail()).sex(param.getSex()).build();
+
+        if (RequestHolder.getCurrentUser() != null) {
             sysUser.setCreator(RequestHolder.getCurrentUser().getUsername());
             sysUser.setOperator(RequestHolder.getCurrentUser().getUsername());
             sysUser.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
@@ -62,19 +70,6 @@ public class SysUserService {
         sysUser.setOperateTime(new Date());
 
         sysUserRepository.save(sysUser);
-
-        //添加用户-角色
-//        int count = sysRoleRepository.countByCode(roleCode);
-//        if (count == 0) {
-//            throw new ParamException("添加用户时，根据角色代码没有查找到相应角色");
-//        } else if (count == 1) {
-//            SysRole sysRole = sysRoleRepository.findByCode(roleCode);
-//            SysUser createUser = sysUserRepository.findByUsername(param.getUsername());
-//            SysUserRole sysUserRole = SysUserRole.builder().userId(createUser.getId()).roleId(sysRole.getId()).build();
-//            sysUserRoleRepository.save(sysUserRole);
-//        } else {
-//            throw new ParamException("角色代码异常，数据库有相同的角色代码");
-//        }
     }
 
     @Transactional
@@ -88,6 +83,14 @@ public class SysUserService {
     @Transactional
     public SysUser update(UserParam param) {
         BeanValidator.check(param);
+
+        SysUser before = sysUserRepository.findOne(param.getId());
+        Preconditions.checkNotNull(before, "待更新的用户不存在");
+
+        if (!before.getUsername().equals(param.getUsername())) {
+            throw new ParamException("用户名不能修改");
+        }
+
         if (checkUsernameExist(param.getUsername(), param.getId())) {
             throw new ParamException("用户名已经存在");
         }
@@ -96,13 +99,6 @@ public class SysUserService {
         }
         if (checkEmailExist(param.getEmail(), param.getId())) {
             throw new ParamException("邮箱已被占用");
-        }
-
-        SysUser before = sysUserRepository.findOne(param.getId());
-        Preconditions.checkNotNull(before, "待更新的用户不存在");
-
-        if (!before.getUsername().equals(param.getUsername())) {
-            throw new ParamException("用户名不能修改");
         }
 
         before.setEmail(param.getEmail());
@@ -149,35 +145,39 @@ public class SysUserService {
         return sysUserList;
     }
 
+    public SysUser findById(int id) {
+        return sysUserRepository.findOne(id);
+    }
+
     public SysUser findByKeyword(String keyword) {
-        Preconditions.checkNotNull(keyword, "查找用户条件为空");
+        Preconditions.checkNotNull(keyword, "查找用户的条件为空");
         return sysUserRepository.findByUsernameOrTelOrEmail(keyword, keyword, keyword);
     }
 
     private boolean checkUsernameExist(String username, Integer id) {
         if (id != null) {
-            return sysUserRepository.countByUsernameAndId(username, id) > 0;
+            return sysUserRepository.countByUsernameAndIdNot(username, id) > 0;
         }
         return sysUserRepository.countByUsername(username) > 0;
     }
 
     private boolean checkEmailExist(String email, Integer id) {
         if (id != null) {
-            return sysUserRepository.countByEmailAndId(email, id) > 0;
+            return sysUserRepository.countByEmailAndIdNot(email, id) > 0;
         }
         return sysUserRepository.countByEmail(email) > 0;
     }
 
     private boolean checkTelephoneExist(String tel, Integer id) {
         if (id != null) {
-            return sysUserRepository.countByTelAndId(tel, id) > 0;
+            return sysUserRepository.countByTelAndIdNot(tel, id) > 0;
         }
         return sysUserRepository.countByTel(tel) > 0;
     }
 
-    public SessionUser bindSessionUser(SysUser sysUser) {
-        SessionUser sessionUser = new SessionUser();
-        sessionUser.setSysUser(sysUser);
-        return sessionUser;
+    public UserRoleAcl createUserAndRoleAndAcl(SysUser sysUser) {
+        UserRoleAcl userRoleAcl = new UserRoleAcl();
+        userRoleAcl.setSysUser(sysUser);
+        return userRoleAcl;
     }
 }

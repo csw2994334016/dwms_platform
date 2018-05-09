@@ -11,6 +11,6 @@ public interface SysRoleRepository extends PagingAndSortingRepository<SysRole, I
 
     int countByName(String name);
 
-    boolean countByNameAndId(String name, Integer id);
+    boolean countByNameAndIdNot(String name, Integer id);
 
 }

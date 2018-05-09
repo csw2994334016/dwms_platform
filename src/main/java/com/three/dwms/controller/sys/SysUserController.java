@@ -1,10 +1,9 @@
 package com.three.dwms.controller.sys;
 
 import com.three.dwms.beans.JsonData;
-import com.three.dwms.beans.PageQuery;
 import com.three.dwms.constant.StateCode;
 import com.three.dwms.entity.sys.SysUser;
-import com.three.dwms.param.sys.SessionUser;
+import com.three.dwms.param.sys.UserRoleAcl;
 import com.three.dwms.param.sys.User;
 import com.three.dwms.param.sys.UserParam;
 import com.three.dwms.service.sys.SysUserService;
@@ -12,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -40,25 +38,32 @@ public class SysUserController {
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-    public JsonData update(@PathVariable int id, @RequestBody UserParam userParam, HttpServletRequest request) {
+    public JsonData update(@PathVariable int id, @RequestBody UserParam userParam) {
         userParam.setId(id);
         SysUser sysUser = sysUserService.update(userParam);
-        SessionUser sessionUser = sysUserService.bindSessionUser(sysUser);
-        return JsonData.success(sessionUser);
+        UserRoleAcl userRoleAcl = sysUserService.createUserAndRoleAndAcl(sysUser);
+        return JsonData.success(userRoleAcl);
     }
 
     @RequestMapping(value = "/password/{id}", method = RequestMethod.PUT)
     public JsonData updatePassword(@PathVariable int id, User user) {
         user.setId(id);
         SysUser sysUser = sysUserService.updatePassword(user);
-        SessionUser sessionUser = sysUserService.bindSessionUser(sysUser);
-        return JsonData.success(sessionUser);
+        UserRoleAcl userRoleAcl = sysUserService.createUserAndRoleAndAcl(sysUser);
+        return JsonData.success(userRoleAcl);
     }
 
     @RequestMapping(method = RequestMethod.GET)
     public JsonData findAll() {
         List<SysUser> sysUserList = sysUserService.findAll();
         return JsonData.success(sysUserList);
+    }
+
+    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
+    public JsonData findOne(@PathVariable int id) {
+        SysUser sysUser = sysUserService.findById(id);
+        UserRoleAcl userRoleAcl = sysUserService.createUserAndRoleAndAcl(sysUser);
+        return JsonData.success(userRoleAcl);
     }
 
 }

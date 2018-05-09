@@ -39,7 +39,7 @@ public class AclControlFilter implements Filter {
         SysUser sysUser = (SysUser) request.getSession().getAttribute("user");
 
         if (sysUser == null) {
-            log.info("someone visit: {}, but no login, parameter: {}", servletPath, JsonMapper.obj2String(requestMap));
+            log.error("someone visit: {}, but no login, parameter: {}", servletPath, JsonMapper.obj2String(requestMap));
             request.getRequestDispatcher("/auth/noLogin").forward(request, response);
             return;
         }
@@ -49,7 +49,7 @@ public class AclControlFilter implements Filter {
 
         SysCoreService sysCoreService = ContextHelper.popBean(SysCoreService.class);
         if (!sysCoreService.hasUrlAcl(servletPath)) {
-            log.info("{} visit: {}, but no access auth, parameter: {}", JsonMapper.obj2String(sysUser), servletPath, JsonMapper.obj2String(requestMap));
+            log.error("{} visit: {}, but no access auth, parameter: {}", JsonMapper.obj2String(sysUser), servletPath, JsonMapper.obj2String(requestMap));
             request.getRequestDispatcher("/auth/noAuth").forward(request, response);
             return;
         }

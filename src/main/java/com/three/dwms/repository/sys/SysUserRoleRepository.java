@@ -8,4 +8,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
  * Description:
  */
 public interface SysUserRoleRepository extends PagingAndSortingRepository<SysUserRole, Integer> {
+    SysUserRole findByRoleIdAndUserId(int roleId, Integer userId);
+
+    void deleteByRoleId(int roleId);
 }
