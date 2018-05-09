@@ -1,11 +1,15 @@
 package com.three.dwms.controller.sys;
 
 import com.three.dwms.beans.JsonData;
+import com.three.dwms.constant.StateCode;
 import com.three.dwms.entity.sys.SysUser;
+import com.three.dwms.param.sys.SessionUser;
 import com.three.dwms.param.sys.User;
+import com.three.dwms.param.sys.UserParam;
 import com.three.dwms.service.sys.SysUserService;
 import com.three.dwms.utils.MD5Util;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -22,6 +26,17 @@ import java.io.IOException;
 @RequestMapping(value = "/auth")
 public class AuthController {
 
+    private Integer stateCode = StateCode.NORMAL.getCode();
+
+    @Value("#{props['init.username']}")
+    private String username;
+
+    @Value("#{props['init.password']}")
+    private String password;
+
+    @Value("#{props['init.remark']}")
+    private String remark;
+
     @Resource
     private SysUserService sysUserService;
 
@@ -33,6 +48,16 @@ public class AuthController {
     @RequestMapping(value = "/noAuth")
     public JsonData unAccess(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         return JsonData.fail("没有访问权限，无法调用接口，请联系管理员");
+    }
+
+    @RequestMapping(value = "/initSuperAdmin", method = RequestMethod.GET)
+    public JsonData initAdminData() {
+        //超级管理员用户
+        UserParam userParam = UserParam.builder().username(username).password(password).sex(1).status(stateCode).remark(remark).build();
+
+        sysUserService.create(userParam);
+
+        return JsonData.success();
     }
 
     @RequestMapping(value = "/logout", method = RequestMethod.GET)
@@ -64,9 +89,9 @@ public class AuthController {
             } else if (sysUser.getStatus() != 1) {
                 errorMsg = "用户已被禁用，请联系管理员";
             } else {
-                sysUserService.bindUserRoleAcl(sysUser);
                 request.getSession().setAttribute("user", sysUser);
-                return JsonData.success(sysUser);
+                SessionUser sessionUser = sysUserService.bindSessionUser(sysUser);
+                return JsonData.success(sessionUser);
             }
         }
 

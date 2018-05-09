@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.io.Serializable;
@@ -18,10 +19,13 @@ import java.io.Serializable;
 @Table(name = "sys_acl")
 public class SysAcl extends BaseEntity implements Serializable {
 
+    @Column(unique = true, nullable = false)
     private String code; //英文权限码
 
+    @Column(unique = true, nullable = false)
     private String name; //权限名称
 
+    @Column(unique = true, nullable = false)
     private Integer parentId; //上级权限，可以分模块
 
     private String icon; //css图标

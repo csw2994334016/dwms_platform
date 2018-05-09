@@ -1,11 +1,9 @@
 package com.three.dwms.entity.sys;
 
 import com.three.dwms.entity.base.BaseEntity;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.io.Serializable;
@@ -18,10 +16,10 @@ import java.io.Serializable;
 @Table(name = "sys_role")
 public class SysRole extends BaseEntity implements Serializable {
 
-    private String code; //角色代码：ROLE_ADMIN、ROLE_USER
-
+    @Column(unique = true, nullable = false)
     private String name; //角色名称
 
-    private Integer type; //角色类型
+    @Column(nullable = false)
+    private String type; //角色类型，1：超级管理员角色ROLE_ADMIN，2：其他ROLE_USER
 
 }

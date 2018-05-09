@@ -5,17 +5,18 @@ import com.three.dwms.common.RequestHolder;
 import com.three.dwms.constant.StateCode;
 import com.three.dwms.entity.sys.SysUser;
 import com.three.dwms.exception.ParamException;
+import com.three.dwms.param.sys.SessionUser;
 import com.three.dwms.param.sys.User;
 import com.three.dwms.param.sys.UserParam;
 import com.three.dwms.repository.sys.SysUserRepository;
 import com.three.dwms.utils.BeanValidator;
 import com.three.dwms.utils.IpUtil;
 import com.three.dwms.utils.MD5Util;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -25,6 +26,9 @@ import java.util.List;
  */
 @Service
 public class SysUserService {
+
+    @Value("#{props['init.username']}")
+    private String username;
 
     @Resource
     private SysUserRepository sysUserRepository;
@@ -45,15 +49,32 @@ public class SysUserService {
         String encryptedPassword = MD5Util.encrypt(param.getPassword());
         SysUser sysUser = SysUser.builder().username(param.getUsername()).password(encryptedPassword).tel(param.getTel()).email(param.getEmail()).sex(param.getSex()).build();
 
-        sysUser.setStatus(StateCode.NORMAL.getCode());
-        sysUser.setCreator(RequestHolder.getCurrentUser().getUsername());
-        sysUser.setCreateTime(new Date());
+        SysUser curUser = RequestHolder.getCurrentUser();
+        if (curUser != null) {
+            sysUser.setCreator(RequestHolder.getCurrentUser().getUsername());
+            sysUser.setOperator(RequestHolder.getCurrentUser().getUsername());
+            sysUser.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
+        }
 
-        sysUser.setOperator(RequestHolder.getCurrentUser().getUsername());
-        sysUser.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
+        sysUser.setStatus(param.getStatus());
+        sysUser.setRemark(param.getRemark());
+        sysUser.setCreateTime(new Date());
         sysUser.setOperateTime(new Date());
 
         sysUserRepository.save(sysUser);
+
+        //添加用户-角色
+//        int count = sysRoleRepository.countByCode(roleCode);
+//        if (count == 0) {
+//            throw new ParamException("添加用户时，根据角色代码没有查找到相应角色");
+//        } else if (count == 1) {
+//            SysRole sysRole = sysRoleRepository.findByCode(roleCode);
+//            SysUser createUser = sysUserRepository.findByUsername(param.getUsername());
+//            SysUserRole sysUserRole = SysUserRole.builder().userId(createUser.getId()).roleId(sysRole.getId()).build();
+//            sysUserRoleRepository.save(sysUserRole);
+//        } else {
+//            throw new ParamException("角色代码异常，数据库有相同的角色代码");
+//        }
     }
 
     @Transactional
@@ -95,10 +116,8 @@ public class SysUserService {
         before.setOperateTime(new Date());
 
         SysUser update = sysUserRepository.save(before);
-        Preconditions.checkNotNull(update, "更新用户失败");
 
         //更新用户，要更新session
-        bindUserRoleAcl(update);
         RequestHolder.getCurrentRequest().setAttribute("user", update);
 
         return update;
@@ -113,7 +132,13 @@ public class SysUserService {
             throw new ParamException("旧密码不正确");
         }
         before.setPassword(MD5Util.encrypt(user.getPassword()));
-        return sysUserRepository.save(before);
+
+        SysUser update = sysUserRepository.save(before);
+
+        //更新用户，要更新session
+        RequestHolder.getCurrentRequest().setAttribute("user", update);
+
+        return update;
     }
 
     public List<SysUser> findAll() {
@@ -150,7 +175,9 @@ public class SysUserService {
         return sysUserRepository.countByTel(tel) > 0;
     }
 
-    public void bindUserRoleAcl(SysUser sysUser) {
-
+    public SessionUser bindSessionUser(SysUser sysUser) {
+        SessionUser sessionUser = new SessionUser();
+        sessionUser.setSysUser(sysUser);
+        return sessionUser;
     }
 }

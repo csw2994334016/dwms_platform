@@ -7,7 +7,6 @@ import org.hibernate.validator.constraints.NotBlank;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import java.util.Date;
 
 /**
  * Created by csw on 2018/5/6.
@@ -36,12 +35,12 @@ public class UserParam {
     @Max(value = 1, message = "用户性别不合法")
     private Integer sex;
 
-    @NotBlank(message = "邮箱不允许为空")
-    @Length(min = 5, max = 50, message = "邮箱长度需要在50个字符以内")
+//    @NotBlank(message = "邮箱不允许为空")
+    @Length(min = 0, max = 50, message = "邮箱长度需要在50个字符以内")
     private String email;
 
-    @NotBlank(message = "电话不可以为空")
-    @Length(min = 1, max = 13, message = "电话长度需要在13个字以内")
+//    @NotBlank(message = "电话不可以为空")
+    @Length(min = 0, max = 13, message = "电话长度需要在13个字以内")
     private String tel;
 
     @NotNull(message = "必须指定用户的状态")

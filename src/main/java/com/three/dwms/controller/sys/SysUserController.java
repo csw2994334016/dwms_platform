@@ -4,6 +4,7 @@ import com.three.dwms.beans.JsonData;
 import com.three.dwms.beans.PageQuery;
 import com.three.dwms.constant.StateCode;
 import com.three.dwms.entity.sys.SysUser;
+import com.three.dwms.param.sys.SessionUser;
 import com.three.dwms.param.sys.User;
 import com.three.dwms.param.sys.UserParam;
 import com.three.dwms.service.sys.SysUserService;
@@ -42,14 +43,16 @@ public class SysUserController {
     public JsonData update(@PathVariable int id, @RequestBody UserParam userParam, HttpServletRequest request) {
         userParam.setId(id);
         SysUser sysUser = sysUserService.update(userParam);
-        return JsonData.success(sysUser);
+        SessionUser sessionUser = sysUserService.bindSessionUser(sysUser);
+        return JsonData.success(sessionUser);
     }
 
     @RequestMapping(value = "/password/{id}", method = RequestMethod.PUT)
     public JsonData updatePassword(@PathVariable int id, User user) {
         user.setId(id);
         SysUser sysUser = sysUserService.updatePassword(user);
-        return JsonData.success(sysUser);
+        SessionUser sessionUser = sysUserService.bindSessionUser(sysUser);
+        return JsonData.success(sessionUser);
     }
 
     @RequestMapping(method = RequestMethod.GET)
