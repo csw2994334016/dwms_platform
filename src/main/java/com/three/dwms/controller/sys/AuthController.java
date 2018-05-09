@@ -53,7 +53,7 @@ public class AuthController {
         return JsonData.fail("没有访问权限，无法调用接口");
     }
 
-    @RequestMapping(value = "/initSuperAdmin", method = RequestMethod.GET)
+    @RequestMapping(value = "/initSystemAdmin", method = RequestMethod.GET)
     public JsonData initAdminData() {
         //超级管理员用户
         UserParam userParam = UserParam.builder().username(username).password(password).sex(1).status(stateCode).remark(remark).build();

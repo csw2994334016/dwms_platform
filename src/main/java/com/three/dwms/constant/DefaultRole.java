@@ -6,7 +6,8 @@ package com.three.dwms.constant;
  */
 public enum DefaultRole {
 
-    ROLE_ADMIN("ROLE_ADMIN", "超级管理员"), ROLE_USER("ROLE_USER", "普通用户");
+    SYSTEM_ADMIN("SYSTEM_ADMIN", "系统管理员"),
+    ADMIN("ADMIN", "管理员"), USER("USER", "普通用户");
 
     private String type;
     private String name;

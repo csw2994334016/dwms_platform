@@ -45,7 +45,7 @@ public class SysUserService {
         if (checkUsernameExist(param.getUsername(), param.getId())) {
             throw new ParamException("用户名已经存在");
         }
-        if (checkTelephoneExist(param.getTel(), param.getId())) {
+        if (checkTelExist(param.getTel(), param.getId())) {
             throw new ParamException("电话已被占用");
         }
         if (checkEmailExist(param.getEmail(), param.getId())) {
@@ -94,7 +94,7 @@ public class SysUserService {
         if (checkUsernameExist(param.getUsername(), param.getId())) {
             throw new ParamException("用户名已经存在");
         }
-        if (checkTelephoneExist(param.getTel(), param.getId())) {
+        if (checkTelExist(param.getTel(), param.getId())) {
             throw new ParamException("电话已被占用");
         }
         if (checkEmailExist(param.getEmail(), param.getId())) {
@@ -162,17 +162,24 @@ public class SysUserService {
     }
 
     private boolean checkEmailExist(String email, Integer id) {
-        if (id != null) {
-            return sysUserRepository.countByEmailAndIdNot(email, id) > 0;
+        if (!StringUtils.isBlank(email)) {
+            if (id != null) {
+                return sysUserRepository.countByEmailAndIdNot(email, id) > 0;
+            }
+            return sysUserRepository.countByEmail(email) > 0;
         }
-        return sysUserRepository.countByEmail(email) > 0;
+        return false;
     }
 
-    private boolean checkTelephoneExist(String tel, Integer id) {
-        if (id != null) {
-            return sysUserRepository.countByTelAndIdNot(tel, id) > 0;
+    private boolean checkTelExist(String tel, Integer id) {
+        if (!StringUtils.isBlank(tel)) {
+            if (id != null) {
+                return sysUserRepository.countByTelAndIdNot(tel, id) > 0;
+            }
+            return sysUserRepository.countByTel(tel) > 0;
         }
-        return sysUserRepository.countByTel(tel) > 0;
+        return false;
+
     }
 
     public UserRoleAcl createUserAndRoleAndAcl(SysUser sysUser) {
