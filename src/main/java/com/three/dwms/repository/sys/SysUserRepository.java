@@ -12,7 +12,6 @@ public interface SysUserRepository extends PagingAndSortingRepository<SysUser, I
 
     SysUser findByUsername(String admin);
 
-//    @Query(value = "select count(1) from sys_user user where user.username=?1 and user.id!=?2", nativeQuery = true)
     int countByUsernameAndIdNot(String username, Integer id);
 
     int countByUsername(String username);
@@ -26,4 +25,8 @@ public interface SysUserRepository extends PagingAndSortingRepository<SysUser, I
     int countByTel(String tel);
 
     SysUser findByUsernameOrTelOrEmail(String keyword, String keyword1, String keyword2);
+
+    int countByRealNameAndIdNot(String realName, Integer id);
+
+    int countByRealName(String realName);
 }

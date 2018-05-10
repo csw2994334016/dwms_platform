@@ -45,6 +45,9 @@ public class SysUserService {
         if (checkUsernameExist(param.getUsername(), param.getId())) {
             throw new ParamException("用户名已经存在");
         }
+        if (checkRealNameExist(param.getRealName(), param.getId())) {
+            throw new ParamException("用户真实姓名已经存在");
+        }
         if (checkTelExist(param.getTel(), param.getId())) {
             throw new ParamException("电话已被占用");
         }
@@ -56,7 +59,7 @@ public class SysUserService {
         String password = StringUtils.isBlank(param.getPassword()) ? defaultPassword : param.getPassword();
         password = MD5Util.encrypt(password);
 
-        SysUser sysUser = SysUser.builder().username(param.getUsername()).password(password).tel(param.getTel()).email(param.getEmail()).sex(param.getSex()).build();
+        SysUser sysUser = SysUser.builder().username(param.getUsername()).realName(param.getRealName()).password(password).tel(param.getTel()).email(param.getEmail()).sex(param.getSex()).build();
 
         if (RequestHolder.getCurrentUser() != null) {
             sysUser.setCreator(RequestHolder.getCurrentUser().getUsername());
@@ -86,13 +89,14 @@ public class SysUserService {
 
         SysUser before = sysUserRepository.findOne(param.getId());
         Preconditions.checkNotNull(before, "待更新的用户不存在");
-
         if (!before.getUsername().equals(param.getUsername())) {
             throw new ParamException("用户名不能修改");
         }
-
         if (checkUsernameExist(param.getUsername(), param.getId())) {
             throw new ParamException("用户名已经存在");
+        }
+        if (checkRealNameExist(param.getRealName(), param.getId())) {
+            throw new ParamException("用户真实姓名已经存在");
         }
         if (checkTelExist(param.getTel(), param.getId())) {
             throw new ParamException("电话已被占用");
@@ -101,12 +105,13 @@ public class SysUserService {
             throw new ParamException("邮箱已被占用");
         }
 
+        before.setRealName(param.getRealName());
         before.setEmail(param.getEmail());
         before.setTel(param.getTel());
         before.setSex(param.getSex());
+
         before.setStatus(param.getStatus());
         before.setRemark(param.getRemark());
-
         before.setOperator(RequestHolder.getCurrentUser().getUsername());
         before.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
         before.setOperateTime(new Date());
@@ -146,7 +151,9 @@ public class SysUserService {
     }
 
     public SysUser findById(int id) {
-        return sysUserRepository.findOne(id);
+        SysUser sysUser = sysUserRepository.findOne(id);
+        Preconditions.checkNotNull(sysUser, "用户不存在");
+        return sysUser;
     }
 
     public SysUser findByKeyword(String keyword) {
@@ -159,6 +166,13 @@ public class SysUserService {
             return sysUserRepository.countByUsernameAndIdNot(username, id) > 0;
         }
         return sysUserRepository.countByUsername(username) > 0;
+    }
+
+    private boolean checkRealNameExist(String realName, Integer id) {
+        if (id != null) {
+            return sysUserRepository.countByRealNameAndIdNot(realName, id) > 0;
+        }
+        return sysUserRepository.countByRealName(realName) > 0;
     }
 
     private boolean checkEmailExist(String email, Integer id) {

@@ -44,7 +44,7 @@ public class SysRoleService {
             throw new ParamException("角色名称已经存在");
         }
         if (!DefaultRole.exist(param.getType())) {
-            throw new ParamException("角色类型不合法，只存在ROLE_ADMIN、ROLE_USER两种角色类型");
+            throw new ParamException("角色类型不合法，只存在ADMIN、USER两种角色类型");
         }
 
         SysRole sysRole = SysRole.builder().name(param.getName()).type(param.getType()).build();
@@ -58,14 +58,6 @@ public class SysRoleService {
         sysRole.setOperateTime(new Date());
 
         sysRoleRepository.save(sysRole);
-
-    }
-
-    private boolean checkNameExist(String name, Integer id) {
-        if (id != null) {
-            return sysRoleRepository.countByNameAndIdNot(name, id);
-        }
-        return sysRoleRepository.countByName(name) > 0;
     }
 
     @Transactional
@@ -79,6 +71,8 @@ public class SysRoleService {
     @Transactional
     public SysRole update(RoleParam param) {
         BeanValidator.check(param);
+        SysRole before = sysRoleRepository.findOne(param.getId());
+        Preconditions.checkNotNull(before, "待更新的角色不存在");
         if (checkNameExist(param.getName(), param.getId())) {
             throw new ParamException("角色名称已经存在");
         }
@@ -86,12 +80,8 @@ public class SysRoleService {
             throw new ParamException("角色类型不合法，只存在ROLE_ADMIN、ROLE_USER两种角色类型");
         }
 
-        SysRole before = sysRoleRepository.findOne(param.getId());
-        Preconditions.checkNotNull(before, "待更新的角色不存在");
-
         before.setName(param.getName());
         before.setType(param.getType());
-
         before.setStatus(param.getStatus());
         before.setRemark(param.getRemark());
         before.setOperator(RequestHolder.getCurrentUser().getUsername());
@@ -106,7 +96,16 @@ public class SysRoleService {
     }
 
     public SysRole findById(int id) {
-        return sysRoleRepository.findOne(id);
+        SysRole sysRole = sysRoleRepository.findOne(id);
+        Preconditions.checkNotNull(sysRole, "角色不存在");
+        return sysRole;
+    }
+
+    private boolean checkNameExist(String name, Integer id) {
+        if (id != null) {
+            return sysRoleRepository.countByNameAndIdNot(name, id) > 0;
+        }
+        return sysRoleRepository.countByName(name) > 0;
     }
 
     //todo: 角色绑定用户
@@ -121,7 +120,7 @@ public class SysRoleService {
 
     @Transactional
     private void updateUserRoles(int roleId, List<Integer> userIdList) {
-        //删除原先绑定的用户
+        //删除该角色原先绑定的用户
         sysUserRoleRepository.deleteByRoleId(roleId);
         List<SysUserRole> sysUserRoleList = new ArrayList<>();
         for (Integer userId : userIdList) {

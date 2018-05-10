@@ -24,9 +24,13 @@ public class UserParam {
 
     @NotBlank(message = "用户名不可以为空")
     @Length(min = 1, max = 20, message = "用户名长度需要在20个字以内")
-    private String username;
+    private String username; //或者叫userId，数据库唯一值，可中英文
 
     private String password;
+
+    @NotBlank(message = "用户真实姓名不可以为空")
+    @Length(min = 1, max = 20, message = "用户名长度需要在1-20个字以内")
+    private String realName; //用户真实姓名
 
     @NotNull(message = "必须指定用户的性别")
     @Min(value = 0, message = "用户性别不合法")
