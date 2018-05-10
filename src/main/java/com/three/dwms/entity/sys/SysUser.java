@@ -24,6 +24,7 @@ public class SysUser extends BaseEntity implements Serializable{
 
     private Integer sex; //性别
 
+    @Column(length = 50)
     private String email; //邮箱
 
     @Column(length = 13)
