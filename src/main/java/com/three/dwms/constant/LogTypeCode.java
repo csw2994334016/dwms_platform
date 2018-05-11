@@ -6,7 +6,11 @@ package com.three.dwms.constant;
  */
 public enum  LogTypeCode {
 
-    TYPE_DEPT(1, "部门"), TYPE_USER(2, "用户");
+    TYPE_USER(1, "用户"),
+    TYPE_ROLE(2, "角色"),
+    TYPE_ACL(3, "权限"),
+    TYPE_USER_ROLE(4, "用户角色"),
+    TYPE_USER_ACL(5, "用户权限");
 
     private int code;
     private String desc;

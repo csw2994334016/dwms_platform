@@ -3,7 +3,9 @@ package com.three.dwms.service.sys;
 import com.google.common.base.Preconditions;
 import com.three.dwms.common.RequestHolder;
 import com.three.dwms.constant.DefaultRole;
+import com.three.dwms.constant.LogTypeCode;
 import com.three.dwms.constant.StateCode;
+import com.three.dwms.entity.sys.SysLog;
 import com.three.dwms.entity.sys.SysRole;
 import com.three.dwms.entity.sys.SysUserRole;
 import com.three.dwms.exception.ParamException;
@@ -37,6 +39,9 @@ public class SysRoleService {
     @Resource
     private SysUserRoleRepository sysUserRoleRepository;
 
+    @Resource
+    private SysLogService sysLogService;
+
     @Transactional
     public void create(RoleParam param) {
         BeanValidator.check(param);
@@ -57,7 +62,9 @@ public class SysRoleService {
         sysRole.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
         sysRole.setOperateTime(new Date());
 
-        sysRoleRepository.save(sysRole);
+        sysRole = sysRoleRepository.save(sysRole);
+        SysLog sysLog = SysLog.builder().type(LogTypeCode.TYPE_ROLE.getCode()).build();
+        sysLogService.saveSysLog(null, sysRole, sysLog);
     }
 
     @Transactional

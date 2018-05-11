@@ -2,7 +2,9 @@ package com.three.dwms.service.sys;
 
 import com.google.common.base.Preconditions;
 import com.three.dwms.common.RequestHolder;
+import com.three.dwms.constant.LogTypeCode;
 import com.three.dwms.constant.StateCode;
+import com.three.dwms.entity.sys.SysLog;
 import com.three.dwms.entity.sys.SysUser;
 import com.three.dwms.exception.ParamException;
 import com.three.dwms.param.sys.UserRoleAcl;
@@ -39,6 +41,9 @@ public class SysUserService {
     @Resource
     private SysUserRepository sysUserRepository;
 
+    @Resource
+    private SysLogService sysLogService;
+
     @Transactional
     public void create(UserParam param) {
         BeanValidator.check(param);
@@ -61,7 +66,7 @@ public class SysUserService {
 
         SysUser sysUser = SysUser.builder().username(param.getUsername()).realName(param.getRealName()).password(password).tel(param.getTel()).email(param.getEmail()).sex(param.getSex()).build();
 
-        if (RequestHolder.getCurrentUser() != null) {
+        if (RequestHolder.getCurrentUser() != null) { //SYSTEM_ADMIN
             sysUser.setCreator(RequestHolder.getCurrentUser().getUsername());
             sysUser.setOperator(RequestHolder.getCurrentUser().getUsername());
             sysUser.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
@@ -72,7 +77,11 @@ public class SysUserService {
         sysUser.setCreateTime(new Date());
         sysUser.setOperateTime(new Date());
 
-        sysUserRepository.save(sysUser);
+        SysUser create = sysUserRepository.save(sysUser);
+        if (RequestHolder.getCurrentUser() != null) { //SYSTEM_ADMIN
+            SysLog sysLog = SysLog.builder().type(LogTypeCode.TYPE_USER.getCode()).build();
+            sysLogService.saveSysLog(null, create, sysLog);
+        }
     }
 
     @Transactional
@@ -119,6 +128,9 @@ public class SysUserService {
         after.setOperateTime(new Date());
 
         SysUser update = sysUserRepository.save(after);
+
+        SysLog sysLog = SysLog.builder().type(LogTypeCode.TYPE_USER.getCode()).build();
+        sysLogService.saveSysLog(before, after, sysLog);
 
         //更新用户，要更新session
         RequestHolder.getCurrentRequest().setAttribute("user", update);
