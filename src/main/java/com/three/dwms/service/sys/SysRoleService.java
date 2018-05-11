@@ -77,18 +77,22 @@ public class SysRoleService {
             throw new ParamException("角色名称已经存在");
         }
         if (!DefaultRole.exist(param.getType())) {
-            throw new ParamException("角色类型不合法，只存在ROLE_ADMIN、ROLE_USER两种角色类型");
+            throw new ParamException("角色类型不合法，只存在ADMIN、USER两种角色类型");
         }
 
-        before.setName(param.getName());
-        before.setType(param.getType());
-        before.setStatus(param.getStatus());
-        before.setRemark(param.getRemark());
-        before.setOperator(RequestHolder.getCurrentUser().getUsername());
-        before.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
-        before.setOperateTime(new Date());
+        SysRole after = SysRole.builder().name(param.getName()).type(param.getType()).build();
+        after.setId(param.getId());
 
-        return sysRoleRepository.save(before);
+//        before.setName(param.getName());
+//        before.setType(param.getType());
+
+        after.setStatus(param.getStatus());
+        after.setRemark(param.getRemark());
+        after.setOperator(RequestHolder.getCurrentUser().getUsername());
+        after.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
+        after.setOperateTime(new Date());
+
+        return sysRoleRepository.save(after);
     }
 
     public List<SysRole> findAll() {

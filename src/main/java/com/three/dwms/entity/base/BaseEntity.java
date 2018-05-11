@@ -20,7 +20,7 @@ public class BaseEntity {
     @Column(unique = true, nullable = false)
     private Integer id; //主键
 
-    @Column(length = 1, nullable = false)
+    @Column(nullable = false)
     private Integer status; //状态：1：可用，0：禁用，2：删除
 
     private String remark; //备注

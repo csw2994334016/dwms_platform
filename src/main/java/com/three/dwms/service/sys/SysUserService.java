@@ -86,7 +86,6 @@ public class SysUserService {
     @Transactional
     public SysUser update(UserParam param) {
         BeanValidator.check(param);
-
         SysUser before = sysUserRepository.findOne(param.getId());
         Preconditions.checkNotNull(before, "待更新的用户不存在");
         if (!before.getUsername().equals(param.getUsername())) {
@@ -105,18 +104,21 @@ public class SysUserService {
             throw new ParamException("邮箱已被占用");
         }
 
-        before.setRealName(param.getRealName());
-        before.setEmail(param.getEmail());
-        before.setTel(param.getTel());
-        before.setSex(param.getSex());
+        SysUser after = SysUser.builder().username(param.getUsername()).realName(param.getRealName()).password(before.getPassword()).tel(param.getTel()).email(param.getEmail()).sex(param.getSex()).build();
+        after.setId(param.getId());
 
-        before.setStatus(param.getStatus());
-        before.setRemark(param.getRemark());
-        before.setOperator(RequestHolder.getCurrentUser().getUsername());
-        before.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
-        before.setOperateTime(new Date());
+//        before.setRealName(param.getRealName());
+//        before.setEmail(param.getEmail());
+//        before.setTel(param.getTel());
+//        before.setSex(param.getSex());
 
-        SysUser update = sysUserRepository.save(before);
+        after.setStatus(param.getStatus());
+        after.setRemark(param.getRemark());
+        after.setOperator(RequestHolder.getCurrentUser().getUsername());
+        after.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
+        after.setOperateTime(new Date());
+
+        SysUser update = sysUserRepository.save(after);
 
         //更新用户，要更新session
         RequestHolder.getCurrentRequest().setAttribute("user", update);
