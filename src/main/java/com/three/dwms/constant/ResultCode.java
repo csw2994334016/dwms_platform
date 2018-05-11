@@ -6,17 +6,18 @@ package com.three.dwms.constant;
  */
 public enum ResultCode {
 
-    SUCCESS(0, "操作成功"), FAIL(1, "操作失败");
+    SUCCESS("0000", "操作成功"), NO_LOGIN("0001", "登录失效"),
+    FAIL("0002", "操作失败");
 
-    private Integer code;
+    private String code;
     private String desc;
 
-    ResultCode(Integer code, String desc) {
+    ResultCode(String code, String desc) {
         this.code = code;
         this.desc = desc;
     }
 
-    public Integer getCode() {
+    public String getCode() {
         return code;
     }
 

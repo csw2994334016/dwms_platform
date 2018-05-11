@@ -11,7 +11,7 @@ import java.util.Map;
 @Setter
 public class JsonData {
 
-    private Integer code;
+    private String code;
 
     private String msg;
 
@@ -55,6 +55,18 @@ public class JsonData {
 
     public static JsonData fail(String msg) {
         JsonData jsonData = new JsonData(ResultCode.FAIL);
+        jsonData.msg = msg;
+        return jsonData;
+    }
+
+    public static JsonData noLogin() {
+        JsonData jsonData = new JsonData(ResultCode.NO_LOGIN);
+        jsonData.msg = ResultCode.NO_LOGIN.getDesc();
+        return jsonData;
+    }
+
+    public static JsonData noLogin(String msg) {
+        JsonData jsonData = new JsonData(ResultCode.NO_LOGIN);
         jsonData.msg = msg;
         return jsonData;
     }

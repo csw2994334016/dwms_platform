@@ -48,7 +48,7 @@ public class AuthController {
 
     @RequestMapping(value = "/noLogin")
     public JsonData unLogin(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        return JsonData.fail("没有登录，无法完成操作");
+        return JsonData.noLogin("没有登录，无法完成操作");
     }
 
     @RequestMapping(value = "/noAuth")
