@@ -16,7 +16,7 @@ import java.io.Serializable;
 @ToString
 @Entity
 @Table(name = "bm_inputDetail")
-public class inputDetail extends BaseEntity implements Serializable {
+public class InputDetail extends BaseEntity implements Serializable {
 
     @Column(length = 20, nullable = false)
     private String inputNo; //入库单编号
@@ -39,13 +39,11 @@ public class inputDetail extends BaseEntity implements Serializable {
     @Column(length = 20, nullable = false)
     private String unit; //物料单位
 
-    @Column()
     private Double unitPrice; //物料单价
 
     @Column(nullable = false)
     private Double amount; //物料数量
 
-    @Column()
     private Double totalPrice; //物料总价
 
     @Column(length = 20)
