@@ -64,9 +64,9 @@ public class SysUserService {
         if (checkUsernameExist(param.getUsername(), param.getId())) {
             throw new ParamException("用户名已经存在");
         }
-        if (checkRealNameExist(param.getRealName(), param.getId())) {
-            throw new ParamException("用户真实姓名已经存在");
-        }
+//        if (checkRealNameExist(param.getRealName(), param.getId())) {
+//            throw new ParamException("用户真实姓名已经存在");
+//        }
         if (checkTelExist(param.getTel(), param.getId())) {
             throw new ParamException("电话已被占用");
         }
@@ -104,7 +104,7 @@ public class SysUserService {
     @Transactional
     public void updateStateById(int id, StateCode stateCode) {
         SysUser sysUser = sysUserRepository.findOne(id);
-        Preconditions.checkNotNull(sysUser, "用户不存在");
+        Preconditions.checkNotNull(sysUser, "用户(id:" + id + ")不存在");
         sysUser.setStatus(stateCode.getCode());
         sysUserRepository.save(sysUser);
     }
@@ -113,16 +113,16 @@ public class SysUserService {
     public SysUser update(UserParam param) {
         BeanValidator.check(param);
         SysUser before = sysUserRepository.findOne(param.getId());
-        Preconditions.checkNotNull(before, "待更新的用户不存在");
+        Preconditions.checkNotNull(before, "待更新的用户(id:" + param.getId() + ")不存在");
         if (!before.getUsername().equals(param.getUsername())) {
             throw new ParamException("用户名不能修改");
         }
         if (checkUsernameExist(param.getUsername(), param.getId())) {
             throw new ParamException("用户名已经存在");
         }
-        if (checkRealNameExist(param.getRealName(), param.getId())) {
-            throw new ParamException("用户真实姓名已经存在");
-        }
+//        if (checkRealNameExist(param.getRealName(), param.getId())) {
+//            throw new ParamException("用户真实姓名已经存在");
+//        }
         if (checkTelExist(param.getTel(), param.getId())) {
             throw new ParamException("电话已被占用");
         }
@@ -156,7 +156,7 @@ public class SysUserService {
     @Transactional
     public SysUser updatePassword(User user) {
         SysUser before = sysUserRepository.findOne(user.getId());
-        Preconditions.checkNotNull(before, "待更改密码的用户不存在");
+        Preconditions.checkNotNull(before, "待更改密码的用户(id:" + user.getId() + ")不存在");
 
         if (!before.getPassword().equals(MD5Util.encrypt(user.getOldPassword()))) {
             throw new ParamException("旧密码不正确");
@@ -173,7 +173,6 @@ public class SysUserService {
 
     public List<SysUser> findAll() {
         List<SysUser> sysUserList = (List<SysUser>) sysUserRepository.findAll();
-        SysRole sysRole;
         for (SysUser sysUser : sysUserList) {
             sysUser.setPassword(null);
             createUserAndRoleAndAcl(sysUser);
@@ -183,7 +182,7 @@ public class SysUserService {
 
     public SysUser findById(int id) {
         SysUser sysUser = sysUserRepository.findOne(id);
-        Preconditions.checkNotNull(sysUser, "用户不存在");
+        Preconditions.checkNotNull(sysUser, "用户(id:" + id + ")不存在");
         return sysUser;
     }
 

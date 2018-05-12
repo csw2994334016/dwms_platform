@@ -1,5 +1,6 @@
 package com.three.dwms.param.sys;
 
+import com.three.dwms.constant.StateCode;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
@@ -44,10 +45,10 @@ public class AclParam {
     @NotNull(message = "必须指定权限点的展示顺序")
     private Integer seq; //权限在当前模块下的顺序，由小到大
 
-    @NotNull(message = "必须指定权限点的状态")
+//    @NotNull(message = "必须指定权限点的状态")
     @Min(value = 0, message = "权限点状态不合法")
     @Max(value = 2, message = "权限点状态不合法")
-    private Integer status;
+    private Integer status = StateCode.NORMAL.getCode();
 
     @Length(min = 0, max = 200, message = "权限点备注长度需要在200个字符以内")
     private String remark;

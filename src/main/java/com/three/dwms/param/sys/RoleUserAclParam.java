@@ -8,7 +8,7 @@ import org.hibernate.validator.constraints.NotBlank;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * Created by csw on 2018/5/8.
@@ -20,7 +20,7 @@ import javax.validation.constraints.NotNull;
 @Getter
 @Setter
 @ToString
-public class RoleParam {
+public class RoleUserAclParam {
 
     private Integer id;
 
@@ -39,4 +39,8 @@ public class RoleParam {
 
     @Length(min = 0, max = 200, message = "角色备注长度需要在200个字符以内")
     private String remark;
+
+    private List<Integer> userIds;
+
+    private List<Integer> aclIds;
 }

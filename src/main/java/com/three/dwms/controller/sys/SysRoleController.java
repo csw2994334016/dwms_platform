@@ -4,6 +4,7 @@ import com.three.dwms.beans.JsonData;
 import com.three.dwms.constant.StateCode;
 import com.three.dwms.entity.sys.SysRole;
 import com.three.dwms.param.sys.RoleParam;
+import com.three.dwms.param.sys.RoleUserAclParam;
 import com.three.dwms.service.sys.SysRoleService;
 import com.three.dwms.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -25,8 +26,8 @@ public class SysRoleController {
     private SysRoleService sysRoleService;
 
     @RequestMapping(method = RequestMethod.POST)
-    public JsonData create(@RequestBody RoleParam roleParam) {
-        sysRoleService.create(roleParam);
+    public JsonData create(@RequestBody RoleUserAclParam roleUserAclParam) {
+        sysRoleService.create(roleUserAclParam);
         return JsonData.success();
     }
 
@@ -57,14 +58,14 @@ public class SysRoleController {
     @RequestMapping(value = "/bindUser", method = RequestMethod.PUT)
     public JsonData bindUser(@RequestParam int roleId, @RequestParam(required = false, defaultValue = "") String userIds) {
         List<Integer> userIdList = StringUtil.splitToIntListByReg(userIds, ",");
-        sysRoleService.bindUser(roleId, userIdList);
+        sysRoleService.bindUsers(roleId, userIdList);
         return JsonData.success();
     }
 
     @RequestMapping(value = "/bindAcl", method = RequestMethod.PUT)
     public JsonData bindAcl(@RequestParam int roleId, @RequestParam(required = false, defaultValue = "") String aclIds) {
         List<Integer> aclIdList = StringUtil.splitToIntListByReg(aclIds, ",");
-        sysRoleService.bindAcl(roleId, aclIdList);
+        sysRoleService.bindAcls(roleId, aclIdList);
         return JsonData.success();
     }
 }
