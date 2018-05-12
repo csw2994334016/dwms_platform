@@ -18,8 +18,8 @@ import java.io.Serializable;
 @Table(name = "wh_area")
 public class WhArea extends BaseEntity implements Serializable {
 
-    @Column(length = 20, nullable = false)
-    private String areaCode; //储区编号
+    @Column(nullable = false)
+    private Integer areaCode; //储区编号
 
     @Column(length = 20, nullable = false)
     private String zoneName; //储区名称

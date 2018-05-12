@@ -1,5 +1,6 @@
 package com.three.dwms.param.sys;
 
+import com.google.common.collect.Lists;
 import com.three.dwms.constant.RoleTypeCode;
 import com.three.dwms.constant.StateCode;
 import lombok.*;
@@ -40,7 +41,8 @@ public class RoleUserAclParam {
     @Length(min = 0, max = 200, message = "角色备注长度需要在200个字符以内")
     private String remark;
 
-    private List<Integer> userIds;
-
-    private List<Integer> aclIds;
+    @Builder.Default
+    private List<Integer> userIds = Lists.newArrayList();
+    @Builder.Default
+    private List<Integer> aclIds = Lists.newArrayList();
 }

@@ -5,10 +5,7 @@ import com.three.dwms.common.RequestHolder;
 import com.three.dwms.constant.RoleTypeCode;
 import com.three.dwms.constant.LogTypeCode;
 import com.three.dwms.constant.StateCode;
-import com.three.dwms.entity.sys.SysLog;
-import com.three.dwms.entity.sys.SysRole;
-import com.three.dwms.entity.sys.SysRoleAcl;
-import com.three.dwms.entity.sys.SysUserRole;
+import com.three.dwms.entity.sys.*;
 import com.three.dwms.exception.ParamException;
 import com.three.dwms.param.sys.RoleParam;
 import com.three.dwms.param.sys.RoleUserAclParam;
@@ -41,7 +38,7 @@ public class SysRoleService {
     private SysUserRoleRepository sysUserRoleRepository;
 
     @Resource
-    private SysAclRepository sysAclRepository;
+    private SysAclService sysAclService;
 
     @Resource
     private SysRoleAclRepository sysRoleAclRepository;
@@ -146,7 +143,7 @@ public class SysRoleService {
         for (SysUserRole sysUserRole : sysUserRoleList) { //如果用户有绑定过角色，查找出来全部更新
             sysUserRole.setRoleId(roleId);
         }
-        if (CollectionUtils.isEmpty(sysUserRoleList)) { //没有就新建用户-角色记录
+        if (CollectionUtils.isEmpty(sysUserRoleList)) { //没有就新建用户-角色记录（因为用户只有一个角色）
             SysUserRole sysUserRoleNew = SysUserRole.builder().roleId(roleId).userId(userId).build();
             sysUserRoleNew.setStatus(StateCode.NORMAL.getCode());
             sysUserRoleNew.setOperator(RequestHolder.getCurrentUser().getUsername());
@@ -165,13 +162,14 @@ public class SysRoleService {
         sysRoleAclRepository.deleteByRoleId(roleId);
         List<SysRoleAcl> sysRoleAclList = new ArrayList<>();
         for (Integer aclId : aclIdList) {
-            SysRoleAcl sysRoleAcl = SysRoleAcl.builder().roleId(sysRole.getId()).aclId(aclId).build();
+            SysAcl sysAcl = sysAclService.findById(aclId); //权限是否存在
+            SysRoleAcl sysRoleAcl = SysRoleAcl.builder().roleId(sysRole.getId()).aclId(sysAcl.getId()).build();
             sysRoleAcl.setStatus(StateCode.NORMAL.getCode());
             sysRoleAcl.setOperator(RequestHolder.getCurrentUser().getUsername());
             sysRoleAcl.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
             sysRoleAcl.setOperateTime(new Date());
             sysRoleAclList.add(sysRoleAcl);
         }
-        sysRoleAclRepository.save(sysRoleAclList);
+        sysRoleAclRepository.save(sysRoleAclList); //批量更新（修改或插入）角色-权限表
     }
 }

@@ -6,9 +6,9 @@ import com.three.dwms.constant.LogTypeCode;
 import com.three.dwms.constant.StateCode;
 import com.three.dwms.entity.sys.*;
 import com.three.dwms.exception.ParamException;
-import com.three.dwms.param.sys.UserRoleAcl;
 import com.three.dwms.param.sys.User;
 import com.three.dwms.param.sys.UserParam;
+import com.three.dwms.param.sys.UserRoleParam;
 import com.three.dwms.repository.sys.SysRoleAclRepository;
 import com.three.dwms.repository.sys.SysUserRepository;
 import com.three.dwms.repository.sys.SysUserRoleRepository;
@@ -48,9 +48,6 @@ public class SysUserService {
 
     @Resource
     private SysRoleService sysRoleService;
-
-    @Resource
-    private SysUserRoleRepository sysUserRoleRepository;
 
     @Resource
     private SysAclService sysAclService;
@@ -95,6 +92,10 @@ public class SysUserService {
         sysUser.setOperateTime(new Date());
 
         SysUser create = sysUserRepository.save(sysUser);
+
+        //更新用户-角色表
+        sysRoleService.updateUserRoles(sysUser.getId(), sysUser.getRoleId());
+
         if (RequestHolder.getCurrentUser() != null) { //SYSTEM_ADMIN
             SysLog sysLog = SysLog.builder().type(LogTypeCode.TYPE_USER.getCode()).build();
             sysLogService.saveSysLog(null, create, sysLog);
@@ -189,6 +190,16 @@ public class SysUserService {
     public SysUser findByKeyword(String keyword) {
         Preconditions.checkNotNull(keyword, "查找用户的条件为空");
         return sysUserRepository.findByUsernameOrTelOrEmail(keyword, keyword, keyword);
+    }
+
+    public void bindRole(UserRoleParam userRoleParam) {
+        BeanValidator.check(userRoleParam);
+        SysUser sysUser = this.findById(userRoleParam.getUserId());
+        SysRole sysRole = sysRoleService.findById(userRoleParam.getRoleId());
+        sysUser.setRoleId(sysRole.getId());
+        sysUserRepository.save(sysUser);
+        //更新用户-角色表
+        sysRoleService.updateUserRoles(sysUser.getId(), sysUser.getRoleId());
     }
 
     private boolean checkUsernameExist(String username, Integer id) {

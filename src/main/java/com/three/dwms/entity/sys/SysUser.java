@@ -1,5 +1,6 @@
 package com.three.dwms.entity.sys;
 
+import com.google.common.collect.Lists;
 import com.three.dwms.entity.base.BaseEntity;
 import lombok.*;
 
@@ -40,5 +41,6 @@ public class SysUser extends BaseEntity implements Serializable {
     @Transient
     private SysRole sysRole;
     @Transient
-    private List<SysAcl> sysAclList;
+    @Builder.Default
+    private List<SysAcl> sysAclList = Lists.newArrayList();
 }

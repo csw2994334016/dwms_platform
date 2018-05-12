@@ -45,7 +45,6 @@ public class AclParam {
     @NotNull(message = "必须指定权限点的展示顺序")
     private Integer seq; //权限在当前模块下的顺序，由小到大
 
-//    @NotNull(message = "必须指定权限点的状态")
     @Min(value = 0, message = "权限点状态不合法")
     @Max(value = 2, message = "权限点状态不合法")
     private Integer status = StateCode.NORMAL.getCode();
