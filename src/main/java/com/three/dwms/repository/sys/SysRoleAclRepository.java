@@ -12,4 +12,6 @@ import java.util.List;
 public interface SysRoleAclRepository extends PagingAndSortingRepository<SysRoleAcl, Integer> {
 
     List<SysRoleAcl> findAllByRoleId(Integer id);
+
+    void deleteByRoleId(int roleId);
 }

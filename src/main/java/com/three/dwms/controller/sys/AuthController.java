@@ -5,6 +5,7 @@ import com.three.dwms.constant.RoleTypeCode;
 import com.three.dwms.constant.StateCode;
 import com.three.dwms.entity.sys.SysUser;
 import com.three.dwms.param.sys.RoleParam;
+import com.three.dwms.param.sys.RoleUserAclParam;
 import com.three.dwms.param.sys.User;
 import com.three.dwms.param.sys.UserParam;
 import com.three.dwms.service.sys.SysRoleService;
@@ -52,7 +53,7 @@ public class AuthController {
     public JsonData initRoleData() {
         //初始化角色
         for (RoleTypeCode roleTypeCode : RoleTypeCode.values()) {
-            RoleParam roleParam = RoleParam.builder().name(roleTypeCode.getName()).type(roleTypeCode.getType()).status(stateCode).remark(remark).build();
+            RoleUserAclParam roleParam = RoleUserAclParam.builder().name(roleTypeCode.getName()).type(roleTypeCode.getType()).status(stateCode).remark(remark).build();
             sysRoleService.create(roleParam);
         }
 

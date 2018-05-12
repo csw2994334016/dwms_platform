@@ -7,6 +7,7 @@ import com.three.dwms.constant.LogTypeCode;
 import com.three.dwms.constant.StateCode;
 import com.three.dwms.entity.sys.SysLog;
 import com.three.dwms.entity.sys.SysRole;
+import com.three.dwms.entity.sys.SysRoleAcl;
 import com.three.dwms.entity.sys.SysUserRole;
 import com.three.dwms.exception.ParamException;
 import com.three.dwms.param.sys.RoleParam;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -79,7 +81,6 @@ public class SysRoleService {
 
         //创建角色时绑定权限
         bindAcls(sysRole.getId(), param.getAclIds());
-
     }
 
     @Transactional
@@ -145,7 +146,7 @@ public class SysRoleService {
         for (SysUserRole sysUserRole : sysUserRoleList) { //如果用户有绑定过角色，查找出来全部更新
             sysUserRole.setRoleId(roleId);
         }
-        if (CollectionUtils.isEmpty(sysUserRoleList)) {
+        if (CollectionUtils.isEmpty(sysUserRoleList)) { //没有就新建用户-角色记录
             SysUserRole sysUserRoleNew = SysUserRole.builder().roleId(roleId).userId(userId).build();
             sysUserRoleNew.setStatus(StateCode.NORMAL.getCode());
             sysUserRoleNew.setOperator(RequestHolder.getCurrentUser().getUsername());
@@ -160,6 +161,17 @@ public class SysRoleService {
     @Transactional
     public void bindAcls(int roleId, List<Integer> aclIdList) {
         SysRole sysRole = this.findById(roleId);
-//        sysRoleAclRepository.deleteByRoleId(roleId);
+        //删除角色原先绑定的权限
+        sysRoleAclRepository.deleteByRoleId(roleId);
+        List<SysRoleAcl> sysRoleAclList = new ArrayList<>();
+        for (Integer aclId : aclIdList) {
+            SysRoleAcl sysRoleAcl = SysRoleAcl.builder().roleId(sysRole.getId()).aclId(aclId).build();
+            sysRoleAcl.setStatus(StateCode.NORMAL.getCode());
+            sysRoleAcl.setOperator(RequestHolder.getCurrentUser().getUsername());
+            sysRoleAcl.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
+            sysRoleAcl.setOperateTime(new Date());
+            sysRoleAclList.add(sysRoleAcl);
+        }
+        sysRoleAclRepository.save(sysRoleAclList);
     }
 }

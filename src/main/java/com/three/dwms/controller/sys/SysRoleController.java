@@ -56,16 +56,16 @@ public class SysRoleController {
     }
 
     @RequestMapping(value = "/bindUser", method = RequestMethod.PUT)
-    public JsonData bindUser(@RequestParam int roleId, @RequestParam(required = false, defaultValue = "") String userIds) {
-        List<Integer> userIdList = StringUtil.splitToIntListByReg(userIds, ",");
-        sysRoleService.bindUsers(roleId, userIdList);
+    public JsonData bindUser(@RequestBody RoleUserAclParam roleUserAclParam) {
+        List<Integer> userIdList = roleUserAclParam.getUserIds();
+        sysRoleService.bindUsers(roleUserAclParam.getId(), userIdList);
         return JsonData.success();
     }
 
     @RequestMapping(value = "/bindAcl", method = RequestMethod.PUT)
-    public JsonData bindAcl(@RequestParam int roleId, @RequestParam(required = false, defaultValue = "") String aclIds) {
-        List<Integer> aclIdList = StringUtil.splitToIntListByReg(aclIds, ",");
-        sysRoleService.bindAcls(roleId, aclIdList);
+    public JsonData bindAcl(@RequestBody RoleUserAclParam roleUserAclParam) {
+        List<Integer> aclIdList = roleUserAclParam.getAclIds();
+        sysRoleService.bindAcls(roleUserAclParam.getId(), aclIdList);
         return JsonData.success();
     }
 }
