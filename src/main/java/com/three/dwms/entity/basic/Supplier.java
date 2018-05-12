@@ -15,11 +15,12 @@ import java.io.Serializable;
 @Setter
 @ToString
 @Entity
-@Table(name = "supplier")
-public class Supplier extends BaseEntity implements Serializable{
+@Table(name = "basic_supplier")
+public class Supplier extends BaseEntity implements Serializable {
+
     @Column(length = 20, unique = true, nullable = false)
     private String supplierCode; //供应商编号
 
-    @Column(length = 20, unique = true,nullable = false)
+    @Column(length = 20, unique = true, nullable = false)
     private String supplierName; //供应商名称
 }

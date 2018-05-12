@@ -15,15 +15,16 @@ import java.io.Serializable;
 @Setter
 @ToString
 @Entity
-@Table(name = "inputDetail")
-public class inputDetail extends BaseEntity implements Serializable{
+@Table(name = "bm_inputDetail")
+public class inputDetail extends BaseEntity implements Serializable {
+
     @Column(length = 20, nullable = false)
     private String inputNo; //入库单编号
 
-    @Column(length = 20,nullable = false)
+    @Column(length = 20, nullable = false)
     private String whCode; //仓库名称
 
-    @Column(length = 20,  nullable = false)
+    @Column(length = 20, nullable = false)
     private String location; //物料分类号
 
     @Column(length = 20, nullable = false)
@@ -59,6 +60,6 @@ public class inputDetail extends BaseEntity implements Serializable{
     @Column(length = 20)
     private String supplierName; //供应商
 
-    @Column(length = 20,  nullable = false)
+    @Column(length = 20, nullable = false)
     private Integer state; //物料状态
 }

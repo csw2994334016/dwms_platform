@@ -1,4 +1,5 @@
 package com.three.dwms.entity.basic;
+
 import com.three.dwms.entity.base.BaseEntity;
 import lombok.*;
 
@@ -14,12 +15,12 @@ import java.io.Serializable;
 @Setter
 @ToString
 @Entity
-@Table(name = "banji")
+@Table(name = "basic_banJi")
+public class BanJi extends BaseEntity implements Serializable {
 
-public class banJi extends BaseEntity implements Serializable{
     @Column(length = 20, unique = true, nullable = false)
-    private String banjiCode; //班级编号
+    private String banJiCode; //班级编号
 
-    @Column(length = 20, unique = true,nullable = false)
-    private String banjiName; //班级名称
+    @Column(length = 20, unique = true, nullable = false)
+    private String banJiName; //班级名称
 }

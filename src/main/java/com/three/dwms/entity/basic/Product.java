@@ -15,15 +15,16 @@ import java.io.Serializable;
 @Setter
 @ToString
 @Entity
-@Table(name = "product")
-public class Product extends BaseEntity implements Serializable{
+@Table(name = "basic_product")
+public class Product extends BaseEntity implements Serializable {
+
     @Column(length = 20, unique = true, nullable = false)
     private String sku; //物料编号
 
-    @Column(length = 20,unique = true, nullable = false)
+    @Column(length = 20, unique = true, nullable = false)
     private String skuDesc; //物料名称
 
-    @Column(length = 20,  nullable = false)
+    @Column(length = 20, nullable = false)
     private String categoryId; //物料分类号
 
     @Column(length = 20)

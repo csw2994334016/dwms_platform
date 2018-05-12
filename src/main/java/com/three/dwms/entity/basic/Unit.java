@@ -15,11 +15,12 @@ import java.io.Serializable;
 @Setter
 @ToString
 @Entity
-@Table(name = "unit")
-public class Unit extends BaseEntity implements Serializable{
+@Table(name = "basic_unit")
+public class Unit extends BaseEntity implements Serializable {
+
     @Column(length = 20, unique = true, nullable = false)
     private String unitCode; //单位编号
 
-    @Column(length = 20,unique = true, nullable = false)
+    @Column(length = 20, unique = true, nullable = false)
     private String unitName; //单位名称
 }

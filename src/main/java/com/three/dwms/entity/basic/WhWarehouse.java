@@ -18,6 +18,7 @@ import java.io.Serializable;
 @Entity
 @Table(name = "wh_warehouse")
 public class WhWarehouse extends BaseEntity implements Serializable {
+
     @Column(length = 20, unique = true, nullable = false)
     private String whCode; //仓库编号
 

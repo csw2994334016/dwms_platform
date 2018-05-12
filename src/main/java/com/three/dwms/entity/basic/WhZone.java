@@ -16,14 +16,15 @@ import java.io.Serializable;
 @ToString
 @Entity
 @Table(name = "wh_zone")
-public class WhZone extends BaseEntity implements Serializable{
+public class WhZone extends BaseEntity implements Serializable {
+
     @Column(length = 20, nullable = false)
     private String zoneCode; //仓区编号
 
     @Column(length = 20, nullable = false)
     private String zoneName; //仓区名称
 
-    @Column(length = 20,  nullable = false)
+    @Column(length = 20, nullable = false)
     private String whCode; //仓库编号
 
 }

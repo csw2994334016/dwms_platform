@@ -16,17 +16,18 @@ import java.io.Serializable;
 @ToString
 @Entity
 @Table(name = "wh_loc")
-public class WhLoc extends BaseEntity implements Serializable{
-    @Column(length = 20,  nullable = false)
+public class WhLoc extends BaseEntity implements Serializable {
+
+    @Column(length = 20, nullable = false)
     private String locCode; //储位编号
 
     @Column(length = 20, nullable = false)
     private String locName; //储位名称
 
-    @Column(length = 20,nullable = false)
+    @Column(length = 20, nullable = false)
     private String areaCode; //储区编号
 
-    @Column(length = 20,  nullable = false)
+    @Column(length = 20, nullable = false)
     private String zoneCode; //仓区编号
 
     @Column(length = 20, nullable = false)

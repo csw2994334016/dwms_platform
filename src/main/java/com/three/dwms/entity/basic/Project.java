@@ -15,12 +15,13 @@ import java.io.Serializable;
 @Setter
 @ToString
 @Entity
-@Table(name = "project")
-public class Project extends BaseEntity implements Serializable{
+@Table(name = "basic_project")
+public class Project extends BaseEntity implements Serializable {
+
     @Column(length = 20, unique = true, nullable = false)
     private String projectCode; //项目编号
 
-    @Column(length = 20,unique = true, nullable = false)
-    private String peojectName; //项目名称
+    @Column(length = 20, unique = true, nullable = false)
+    private String projectName; //项目名称
 
 }
