@@ -22,6 +22,6 @@ public class SysRole extends BaseEntity implements Serializable {
     private String name; //角色名称
 
     @Column(nullable = false)
-    private String type; //角色类型，1：超级管理员角色ROLE_ADMIN，2：其他ROLE_USER
+    private String type; //角色类型，1：系统管理员角色SYSTEM_ADMIN、管理员ADMIN、普通用户USER
 
 }

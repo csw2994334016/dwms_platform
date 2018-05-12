@@ -1,5 +1,6 @@
 package com.three.dwms.repository.sys;
 
+import com.three.dwms.entity.sys.SysRole;
 import com.three.dwms.entity.sys.SysUserRole;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
@@ -11,4 +12,8 @@ public interface SysUserRoleRepository extends PagingAndSortingRepository<SysUse
     SysUserRole findByRoleIdAndUserId(int roleId, Integer userId);
 
     void deleteByRoleId(int roleId);
+
+    SysUserRole findByUserId(Integer id);
+
+    int countByUserId(Integer id);
 }

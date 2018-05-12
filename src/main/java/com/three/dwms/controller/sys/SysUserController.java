@@ -41,7 +41,7 @@ public class SysUserController {
     public JsonData update(@PathVariable int id, @RequestBody UserParam userParam) {
         userParam.setId(id);
         SysUser sysUser = sysUserService.update(userParam);
-        UserRoleAcl userRoleAcl = sysUserService.createUserAndRoleAndAcl(sysUser);
+        SysUser userRoleAcl = sysUserService.createUserAndRoleAndAcl(sysUser);
         return JsonData.success(userRoleAcl);
     }
 
@@ -49,8 +49,8 @@ public class SysUserController {
     public JsonData updatePassword(@PathVariable int id, User user) {
         user.setId(id);
         SysUser sysUser = sysUserService.updatePassword(user);
-        UserRoleAcl userRoleAcl = sysUserService.createUserAndRoleAndAcl(sysUser);
-        return JsonData.success(userRoleAcl);
+        SysUser userRoleAcl = sysUserService.createUserAndRoleAndAcl(sysUser);
+        return JsonData.success(sysUser);
     }
 
     @RequestMapping(method = RequestMethod.GET)
@@ -62,8 +62,8 @@ public class SysUserController {
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public JsonData findOne(@PathVariable int id) {
         SysUser sysUser = sysUserService.findById(id);
-        UserRoleAcl userRoleAcl = sysUserService.createUserAndRoleAndAcl(sysUser);
-        return JsonData.success(userRoleAcl);
+        SysUser userRoleAcl = sysUserService.createUserAndRoleAndAcl(sysUser);
+        return JsonData.success(sysUser);
     }
 
 }

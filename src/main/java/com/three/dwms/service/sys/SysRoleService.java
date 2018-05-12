@@ -2,7 +2,7 @@ package com.three.dwms.service.sys;
 
 import com.google.common.base.Preconditions;
 import com.three.dwms.common.RequestHolder;
-import com.three.dwms.constant.DefaultRole;
+import com.three.dwms.constant.RoleTypeCode;
 import com.three.dwms.constant.LogTypeCode;
 import com.three.dwms.constant.StateCode;
 import com.three.dwms.entity.sys.SysLog;
@@ -48,7 +48,7 @@ public class SysRoleService {
         if (checkNameExist(param.getName(), param.getId())) {
             throw new ParamException("角色名称已经存在");
         }
-        if (!DefaultRole.exist(param.getType())) {
+        if (!RoleTypeCode.exist(param.getType())) {
             throw new ParamException("角色类型不合法，只存在ADMIN、USER两种角色类型");
         }
 
@@ -56,10 +56,13 @@ public class SysRoleService {
 
         sysRole.setStatus(param.getStatus());
         sysRole.setRemark(param.getRemark());
-        sysRole.setCreator(RequestHolder.getCurrentUser().getUsername());
+
+        if (RequestHolder.getCurrentUser() != null) {
+            sysRole.setCreator(RequestHolder.getCurrentUser().getUsername());
+            sysRole.setOperator(RequestHolder.getCurrentUser().getUsername());
+            sysRole.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
+        }
         sysRole.setCreateTime(new Date());
-        sysRole.setOperator(RequestHolder.getCurrentUser().getUsername());
-        sysRole.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
         sysRole.setOperateTime(new Date());
 
         sysRole = sysRoleRepository.save(sysRole);
@@ -83,7 +86,7 @@ public class SysRoleService {
         if (checkNameExist(param.getName(), param.getId())) {
             throw new ParamException("角色名称已经存在");
         }
-        if (!DefaultRole.exist(param.getType())) {
+        if (!RoleTypeCode.exist(param.getType())) {
             throw new ParamException("角色类型不合法，只存在ADMIN、USER两种角色类型");
         }
 

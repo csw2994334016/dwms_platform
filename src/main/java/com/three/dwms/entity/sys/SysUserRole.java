@@ -18,8 +18,8 @@ import java.io.Serializable;
 @Table(name = "sys_user_role")
 public class SysUserRole extends BaseEntity implements Serializable {
 
-    @Column(nullable = false)
-    private Integer userId; //用户id
+    @Column(unique = true, nullable = false)
+    private Integer userId; //用户id，用户只有一个角色
 
     @Column(nullable = false)
     private Integer roleId; //角色id

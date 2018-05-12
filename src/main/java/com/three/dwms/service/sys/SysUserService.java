@@ -4,13 +4,14 @@ import com.google.common.base.Preconditions;
 import com.three.dwms.common.RequestHolder;
 import com.three.dwms.constant.LogTypeCode;
 import com.three.dwms.constant.StateCode;
-import com.three.dwms.entity.sys.SysLog;
-import com.three.dwms.entity.sys.SysUser;
+import com.three.dwms.entity.sys.*;
 import com.three.dwms.exception.ParamException;
 import com.three.dwms.param.sys.UserRoleAcl;
 import com.three.dwms.param.sys.User;
 import com.three.dwms.param.sys.UserParam;
+import com.three.dwms.repository.sys.SysRoleAclRepository;
 import com.three.dwms.repository.sys.SysUserRepository;
+import com.three.dwms.repository.sys.SysUserRoleRepository;
 import com.three.dwms.utils.BeanValidator;
 import com.three.dwms.utils.IpUtil;
 import com.three.dwms.utils.MD5Util;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -44,6 +46,18 @@ public class SysUserService {
     @Resource
     private SysLogService sysLogService;
 
+    @Resource
+    private SysRoleService sysRoleService;
+
+    @Resource
+    private SysUserRoleRepository sysUserRoleRepository;
+
+    @Resource
+    private SysAclService sysAclService;
+
+    @Resource
+    private SysRoleAclRepository sysRoleAclRepository;
+
     @Transactional
     public void create(UserParam param) {
         BeanValidator.check(param);
@@ -60,11 +74,14 @@ public class SysUserService {
             throw new ParamException("邮箱已被占用");
         }
 
+        //查找角色
+        SysRole sysRole = sysRoleService.findById(param.getRoleId());
+
         //密码为空，初始化默认密码
         String password = StringUtils.isBlank(param.getPassword()) ? defaultPassword : param.getPassword();
         password = MD5Util.encrypt(password);
 
-        SysUser sysUser = SysUser.builder().username(param.getUsername()).realName(param.getRealName()).password(password).tel(param.getTel()).email(param.getEmail()).sex(param.getSex()).build();
+        SysUser sysUser = SysUser.builder().username(param.getUsername()).realName(param.getRealName()).password(password).roleId(sysRole.getId()).tel(param.getTel()).email(param.getEmail()).sex(param.getSex()).build();
 
         if (RequestHolder.getCurrentUser() != null) { //SYSTEM_ADMIN
             sysUser.setCreator(RequestHolder.getCurrentUser().getUsername());
@@ -113,13 +130,11 @@ public class SysUserService {
             throw new ParamException("邮箱已被占用");
         }
 
-        SysUser after = SysUser.builder().username(param.getUsername()).realName(param.getRealName()).password(before.getPassword()).tel(param.getTel()).email(param.getEmail()).sex(param.getSex()).build();
-        after.setId(param.getId());
+        //查找角色
+        SysRole sysRole = sysRoleService.findById(param.getId());
 
-//        before.setRealName(param.getRealName());
-//        before.setEmail(param.getEmail());
-//        before.setTel(param.getTel());
-//        before.setSex(param.getSex());
+        SysUser after = SysUser.builder().username(param.getUsername()).realName(param.getRealName()).password(before.getPassword()).tel(param.getTel()).email(param.getEmail()).sex(param.getSex()).roleId(sysRole.getId()).build();
+        after.setId(param.getId());
 
         after.setStatus(param.getStatus());
         after.setRemark(param.getRemark());
@@ -158,8 +173,10 @@ public class SysUserService {
 
     public List<SysUser> findAll() {
         List<SysUser> sysUserList = (List<SysUser>) sysUserRepository.findAll();
+        SysRole sysRole;
         for (SysUser sysUser : sysUserList) {
             sysUser.setPassword(null);
+            createUserAndRoleAndAcl(sysUser);
         }
         return sysUserList;
     }
@@ -207,12 +224,20 @@ public class SysUserService {
             return sysUserRepository.countByTel(tel) > 0;
         }
         return false;
-
     }
 
-    public UserRoleAcl createUserAndRoleAndAcl(SysUser sysUser) {
-        UserRoleAcl userRoleAcl = new UserRoleAcl();
-        userRoleAcl.setSysUser(sysUser);
-        return userRoleAcl;
+    public SysUser createUserAndRoleAndAcl(SysUser sysUser) {
+        //给用户绑定角色
+        SysRole sysRole = sysRoleService.findById(sysUser.getRoleId());
+        sysUser.setSysRole(sysRole);
+
+        //给用户绑定权限
+        List<SysRoleAcl> sysRoleAclList = sysRoleAclRepository.findAllByRoleId(sysRole.getId());
+        for (SysRoleAcl sysRoleAcl : sysRoleAclList) {
+            SysAcl sysAcl = sysAclService.findById(sysRoleAcl.getAclId());
+            sysUser.getSysAclList().add(sysAcl);
+        }
+
+        return sysUser;
     }
 }

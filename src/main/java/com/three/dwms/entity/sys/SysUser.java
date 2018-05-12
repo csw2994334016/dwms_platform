@@ -5,6 +5,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.List;
 
 @Builder
 @NoArgsConstructor
@@ -26,11 +27,19 @@ public class SysUser extends BaseEntity implements Serializable{
     private String realName; //真实姓名
 
     @Column(length = 1)
-    private Integer sex; //性别
+    private Integer sex; //性别，1:男，0：女
 
     @Column(length = 50, unique = true)
     private String email; //邮箱
 
     @Column(length = 13, unique = true)
     private String tel; //电话
+
+    @Column(unique = true, nullable = false)
+    private Integer roleId; //角色Id，唯一值
+
+    @Transient
+    private SysRole sysRole;
+    @Transient
+    private List<SysAcl> sysAclList;
 }

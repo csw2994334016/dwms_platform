@@ -1,7 +1,11 @@
 package com.three.dwms.param.sys;
 
+import com.three.dwms.entity.sys.SysAcl;
+import com.three.dwms.entity.sys.SysRole;
 import com.three.dwms.entity.sys.SysUser;
 import lombok.*;
+
+import java.util.List;
 
 
 /**
@@ -17,5 +21,7 @@ import lombok.*;
 public class UserRoleAcl {
 
     private SysUser sysUser;
+
+    private List<SysAcl> sysAclList;
 
 }

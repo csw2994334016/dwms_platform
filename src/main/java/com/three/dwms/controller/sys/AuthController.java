@@ -1,11 +1,13 @@
 package com.three.dwms.controller.sys;
 
 import com.three.dwms.beans.JsonData;
+import com.three.dwms.constant.RoleTypeCode;
 import com.three.dwms.constant.StateCode;
 import com.three.dwms.entity.sys.SysUser;
-import com.three.dwms.param.sys.UserRoleAcl;
+import com.three.dwms.param.sys.RoleParam;
 import com.three.dwms.param.sys.User;
 import com.three.dwms.param.sys.UserParam;
+import com.three.dwms.service.sys.SysRoleService;
 import com.three.dwms.service.sys.SysUserService;
 import com.three.dwms.utils.MD5Util;
 import org.apache.commons.lang3.StringUtils;
@@ -44,6 +46,30 @@ public class AuthController {
     private Integer sessionInterval;
 
     @Resource
+    private SysRoleService sysRoleService;
+
+    @RequestMapping(value = "/role", method = RequestMethod.GET)
+    public JsonData initRoleData() {
+        //初始化角色
+        for (RoleTypeCode roleTypeCode : RoleTypeCode.values()) {
+            RoleParam roleParam = RoleParam.builder().name(roleTypeCode.getName()).type(roleTypeCode.getType()).status(stateCode).remark(remark).build();
+            sysRoleService.create(roleParam);
+        }
+
+        return JsonData.success();
+    }
+
+    @RequestMapping(value = "/admin", method = RequestMethod.GET)
+    public JsonData initAdminData() {
+        //系统管理员用户
+        UserParam userParam = UserParam.builder().username(username).realName(realName).password(password).sex(1).roleId(1).status(stateCode).remark(remark).build();
+
+        sysUserService.create(userParam);
+
+        return JsonData.success();
+    }
+
+    @Resource
     private SysUserService sysUserService;
 
     @RequestMapping(value = "/noLogin")
@@ -54,16 +80,6 @@ public class AuthController {
     @RequestMapping(value = "/noAuth")
     public JsonData unAccess(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         return JsonData.fail("没有访问权限，无法完成操作");
-    }
-
-    @RequestMapping(value = "/initSystemAdmin", method = RequestMethod.GET)
-    public JsonData initAdminData() {
-        //超级管理员用户
-        UserParam userParam = UserParam.builder().username(username).realName(realName).password(password).sex(1).status(stateCode).remark(remark).build();
-
-        sysUserService.create(userParam);
-
-        return JsonData.success();
     }
 
     @RequestMapping(value = "/logout", method = RequestMethod.GET)
@@ -97,7 +113,7 @@ public class AuthController {
             } else {
                 request.getSession().setAttribute("user", sysUser);
                 request.getSession().setMaxInactiveInterval(sessionInterval);
-                UserRoleAcl userRoleAcl = sysUserService.createUserAndRoleAndAcl(sysUser);
+                SysUser userRoleAcl = sysUserService.createUserAndRoleAndAcl(sysUser);
                 return JsonData.success(userRoleAcl);
             }
         }

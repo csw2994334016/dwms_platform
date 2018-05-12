@@ -4,7 +4,7 @@ package com.three.dwms.constant;
  * Created by csw on 2018/5/9.
  * Description:
  */
-public enum DefaultRole {
+public enum RoleTypeCode {
 
     SYSTEM_ADMIN("SYSTEM_ADMIN", "系统管理员"),
     ADMIN("ADMIN", "管理员"), USER("USER", "普通用户");
@@ -12,7 +12,7 @@ public enum DefaultRole {
     private String type;
     private String name;
 
-    DefaultRole(String type, String name) {
+    RoleTypeCode(String type, String name) {
         this.type = type;
         this.name = name;
     }
@@ -26,8 +26,8 @@ public enum DefaultRole {
     }
 
     public static boolean exist(String type) {
-        for (DefaultRole defaultRole : DefaultRole.values()) {
-            if (defaultRole.getType().equals(type)) {
+        for (RoleTypeCode roleTypeCode : RoleTypeCode.values()) {
+            if (roleTypeCode.getType().equals(type)) {
                 return true;
             }
         }

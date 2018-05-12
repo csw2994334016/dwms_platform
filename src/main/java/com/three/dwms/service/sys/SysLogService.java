@@ -28,8 +28,10 @@ public class SysLogService {
         sysLog.setTargetId(after == null ? before.getId() : after.getId());
         sysLog.setOldValue(before == null ? "" : JsonMapper.obj2String(before));
         sysLog.setNewValue(after == null ? "" : JsonMapper.obj2String(after));
-        sysLog.setOperator(RequestHolder.getCurrentUser().getUsername());
-        sysLog.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
+        if (RequestHolder.getCurrentUser() != null) {
+            sysLog.setOperator(RequestHolder.getCurrentUser().getUsername());
+            sysLog.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
+        }
         sysLog.setOperateTime(new Date());
         sysLogRepository.save(sysLog);
     }

@@ -1,12 +1,9 @@
 package com.three.dwms.controller.sys;
 
 import com.three.dwms.beans.JsonData;
-import com.three.dwms.constant.AclTypeCode;
-import com.three.dwms.constant.DefaultRole;
+import com.three.dwms.constant.RoleTypeCode;
 import com.three.dwms.constant.StateCode;
-import com.three.dwms.param.sys.AclParam;
 import com.three.dwms.param.sys.RoleParam;
-import com.three.dwms.service.sys.SysAclService;
 import com.three.dwms.service.sys.SysRoleService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,8 +37,8 @@ public class InitDataController {
     @RequestMapping(value = "/role", method = RequestMethod.GET)
     public JsonData initRoleData() {
         //默认角色
-        for (DefaultRole defaultRole : DefaultRole.values()) {
-            RoleParam roleParam = RoleParam.builder().name(defaultRole.getName()).type(defaultRole.getType()).status(stateCode).remark(remark).build();
+        for (RoleTypeCode roleTypeCode : RoleTypeCode.values()) {
+            RoleParam roleParam = RoleParam.builder().name(roleTypeCode.getName()).type(roleTypeCode.getType()).status(stateCode).remark(remark).build();
             sysRoleService.create(roleParam);
         }
 

@@ -35,7 +35,10 @@ public class UserParam {
     @NotNull(message = "必须指定用户的性别")
     @Min(value = 0, message = "用户性别不合法")
     @Max(value = 1, message = "用户性别不合法")
-    private Integer sex;
+    private Integer sex; //性别，1:男，0：女
+
+    @NotNull(message = "用户角色不可以为空")
+    private Integer roleId;
 
 //    @NotBlank(message = "邮箱不允许为空")
     @Length(min = 0, max = 50, message = "邮箱长度需要在50个字符以内")
