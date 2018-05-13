@@ -46,7 +46,7 @@ public class SysAclController {
         return JsonData.success(sysAclList);
     }
 
-    @RequestMapping(value = "tree", method = RequestMethod.GET)
+    @RequestMapping(value = "/tree", method = RequestMethod.GET)
     public JsonData findAllByTree() {
         List<AclTree> aclTreeList = sysAclService.findAllByTree();
         return JsonData.success(aclTreeList);

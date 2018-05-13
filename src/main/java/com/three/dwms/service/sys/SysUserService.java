@@ -1,6 +1,7 @@
 package com.three.dwms.service.sys;
 
 import com.google.common.base.Preconditions;
+import com.three.dwms.beans.PageQuery;
 import com.three.dwms.common.RequestHolder;
 import com.three.dwms.constant.LogTypeCode;
 import com.three.dwms.constant.StateCode;
@@ -18,6 +19,9 @@ import com.three.dwms.utils.MD5Util;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -179,6 +183,17 @@ public class SysUserService {
             createUserAndRoleAndAcl(sysUser);
         }
         return sysUserList;
+    }
+
+    public Page<SysUser> findAll(PageQuery pageQuery) {
+        BeanValidator.check(pageQuery);
+        Pageable pageable = new PageRequest(pageQuery.getPageNo(), pageQuery.getPageSize());
+        Page<SysUser> sysUserPage = sysUserRepository.findAll(pageable);
+        for (SysUser sysUser : sysUserPage.getContent()) {
+            sysUser.setPassword(null);
+            createUserAndRoleAndAcl(sysUser);
+        }
+        return sysUserPage;
     }
 
     public SysUser findById(int id) {

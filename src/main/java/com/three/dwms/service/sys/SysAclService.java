@@ -13,16 +13,12 @@ import com.three.dwms.repository.sys.SysAclRepository;
 import com.three.dwms.utils.BeanValidator;
 import com.three.dwms.utils.IpUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.security.acl.Acl;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by csw on 2018/5/10.
@@ -104,7 +100,11 @@ public class SysAclService {
     }
 
     public List<SysAcl> findAll() {
-        return (List<SysAcl>) sysAclRepository.findAll();
+        List<Sort.Order> orders = Lists.newArrayList();
+        orders.add(new Sort.Order(Sort.Direction.ASC,"parentId"));
+        orders.add(new Sort.Order(Sort.Direction.ASC,"seq"));
+        Sort sorts = new Sort(orders);
+        return (List<SysAcl>) sysAclRepository.findAll(sorts);
     }
 
     public List<AclTree> findAllByTree() {
@@ -127,48 +127,72 @@ public class SysAclService {
 
     private List<AclTree> convertToAclTree(List<SysAcl> sysAclList) {
         Map<Integer, AclTree> tempMap = Maps.newHashMap(); //<aclId, AclTree>
+        List<AclTree> aclTreeList = Lists.newArrayList();
         for (SysAcl sysAcl : sysAclList) {
-            AclTree aclTree = AclTree.builder().id(sysAcl.getId()).name(sysAcl.getName()).build();
-            if (sysAcl.getParentId() == 0) { //是一级权限
-                tempMap.put(sysAcl.getId(), aclTree);
+            AclTree aclTree = AclTree.builder().id(sysAcl.getId()).parentId(sysAcl.getParentId()).name(sysAcl.getName()).seq(sysAcl.getSeq()).build();
+            aclTreeList.add(aclTree);
+        }
+        for (AclTree aclTree : aclTreeList) {
+            if (aclTree.getParentId() == 0) { //定义parentId=0是一级权限
+                tempMap.put(aclTree.getId(), aclTree);
             } else {
-                if (tempMap.get(sysAcl.getParentId()) != null) { //上级权限就是一级权限
-                    tempMap.get(sysAcl.getParentId()).getChildren().add(aclTree);
-                } else { //否则查找上级权限
-                    AclTree parentAclTree = findParentAclTree(sysAcl.getParentId(), tempMap);
+                if (tempMap.get(aclTree.getParentId()) != null) { //父级权限就是一级权限
+                    tempMap.get(aclTree.getParentId()).getChildren().add(aclTree);
+                } else {
+                    AclTree parentAclTree = findParentAclTree(aclTree.getParentId(), tempMap); //在一级权限的子节点逐级往下查找父级权限
                     if (parentAclTree != null) {
                         parentAclTree.getChildren().add(aclTree);
-                    } else {
-                        log.error("权限(name: " + sysAcl.getName() + ")数据错误：不是一级权限找，不到上级权限");
+                    } else { //有可能父级权限还没有绑定到tempMap里，在aclTreeList里查找父级权限进行绑定
+                        parentAclTree = recursion(aclTree.getParentId(), aclTreeList);
+                        if (parentAclTree != null) {
+                            parentAclTree.getChildren().add(aclTree);
+                        } else {
+                            log.error("权限(name: " + aclTree.getName() + ")数据错误：不是一级权限，没有上级权限");
+                        }
                     }
                 }
             }
         }
-        return Lists.newArrayList(tempMap.values());
+        //对树进行排序
+        aclTreeList = Lists.newArrayList(tempMap.values());
+        recursionSort(aclTreeList);
+        return aclTreeList;
+    }
+
+    private void recursionSort(List<AclTree> aclTreeList) {
+        sort(aclTreeList);
+        for (AclTree aclTree : aclTreeList) {
+            recursionSort(aclTree.getChildren());
+        }
+    }
+
+
+    private void sort(List<AclTree> aclTreeList) {
+        aclTreeList.sort((o1, o2) -> {
+            if (o1.getParentId().compareTo(o2.getParentId()) == 0) {
+                return o1.getSeq().compareTo(o2.getSeq());
+            }
+            return o1.getParentId().compareTo(o2.getParentId());
+        });
     }
 
     private AclTree findParentAclTree(Integer parentId, Map<Integer, AclTree> tempMap) {
         AclTree parentAclTree;
         for (Map.Entry<Integer, AclTree> entry : tempMap.entrySet()) {
-            for (AclTree child : entry.getValue().getChildren()) {
-                parentAclTree = recursion(parentId, child);
-                if (parentAclTree != null) {
-                    return parentAclTree;
-                }
+            parentAclTree = recursion(parentId, entry.getValue().getChildren());
+            if (parentAclTree != null) {
+                return parentAclTree;
             }
         }
         return null;
     }
 
-    private AclTree recursion(Integer id, AclTree aclTree) {
-        if (aclTree.getId().equals(id)) {
-            return aclTree;
-        }
-        for (AclTree child : aclTree.getChildren()) {
-            if (child.getId().equals(id)) {
-                return child;
+    private AclTree recursion(Integer id, List<AclTree> aclTreeList) {
+        for (AclTree aclTree : aclTreeList) {
+            if (aclTree.getId().equals(id)) {
+                return aclTree;
             } else {
-                recursion(id, child);
+                recursion(id, aclTree.getChildren());
             }
         }
         return null;

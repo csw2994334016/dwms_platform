@@ -19,7 +19,11 @@ public class AclTree {
 
     private Integer id;
 
+    private Integer parentId;
+
     private String name;
+
+    private Integer seq;
 
     @Builder.Default
     private List<AclTree> children = Lists.newArrayList();
