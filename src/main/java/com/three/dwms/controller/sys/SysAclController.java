@@ -1,10 +1,12 @@
 package com.three.dwms.controller.sys;
 
+import com.google.common.collect.Lists;
 import com.three.dwms.beans.JsonData;
 import com.three.dwms.constant.StateCode;
 import com.three.dwms.entity.sys.SysAcl;
 import com.three.dwms.param.sys.AclParam;
 import com.three.dwms.param.sys.AclTree;
+import com.three.dwms.param.sys.RoleParam;
 import com.three.dwms.service.sys.SysAclService;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,6 +36,18 @@ public class SysAclController {
         return JsonData.success();
     }
 
+    @RequestMapping(value = "/batch", method = RequestMethod.DELETE)
+    public JsonData deleteBatch(@RequestBody List<AclParam> aclParamList) {
+        List<Integer> ids = Lists.newArrayList();
+        for (AclParam aclParam : aclParamList) {
+            if (aclParam.getId() != null) {
+                ids.add(aclParam.getId());
+            }
+        }
+        sysAclService.deleteByIds(ids);
+        return JsonData.success();
+    }
+
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
     public JsonData update(@PathVariable int id, @RequestBody AclParam aclParam) {
         aclParam.setId(id);
@@ -43,6 +57,12 @@ public class SysAclController {
     @RequestMapping(method = RequestMethod.GET)
     public JsonData findAll() {
         List<SysAcl> sysAclList = sysAclService.findAll();
+        return JsonData.success(sysAclList);
+    }
+
+    @RequestMapping(value = "/role/{id}", method = RequestMethod.GET)
+    public JsonData findAllByRole(@PathVariable("id") int id) {
+        List<SysAcl> sysAclList = sysAclService.findAllByRole(id);
         return JsonData.success(sysAclList);
     }
 

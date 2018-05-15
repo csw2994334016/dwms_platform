@@ -4,6 +4,8 @@ import com.three.dwms.entity.sys.SysUser;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
+import java.util.List;
+
 /**
  * Created by csw on 2018/5/6.
  * Description:
@@ -29,4 +31,6 @@ public interface SysUserRepository extends PagingAndSortingRepository<SysUser, I
     int countByRealNameAndIdNot(String realName, Integer id);
 
     int countByRealName(String realName);
+
+    List<SysUser> findAllByUsernameContainingOrTelContainingOrEmailContaining(String keyword, String keyword1, String keyword2);
 }

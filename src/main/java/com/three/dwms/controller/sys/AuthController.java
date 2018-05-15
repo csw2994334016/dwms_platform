@@ -13,6 +13,7 @@ import com.three.dwms.service.sys.SysUserService;
 import com.three.dwms.utils.MD5Util;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -74,6 +75,7 @@ public class AuthController {
     private SysUserService sysUserService;
 
     @RequestMapping(value = "/noLogin")
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public JsonData unLogin(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         return JsonData.noLogin("没有登录，无法完成操作");
     }

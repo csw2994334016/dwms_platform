@@ -10,7 +10,8 @@ public enum  LogTypeCode {
     TYPE_ROLE(2, "角色"),
     TYPE_ACL(3, "权限"),
     TYPE_USER_ROLE(4, "用户角色"),
-    TYPE_USER_ACL(5, "用户权限");
+    TYPE_USER_ACL(5, "用户权限"),
+    TYPE_CATEGORY(6, "物料分类"), TYPE_PRODUCT(5, "物料信息");
 
     private int code;
     private String desc;

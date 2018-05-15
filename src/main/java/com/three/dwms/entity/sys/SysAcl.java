@@ -3,9 +3,7 @@ package com.three.dwms.entity.sys;
 import com.three.dwms.entity.base.BaseEntity;
 import lombok.*;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.io.Serializable;
 
 @Builder
@@ -32,4 +30,12 @@ public class SysAcl extends BaseEntity implements Serializable {
 
     private Integer seq; //权限在当前模块下的顺序，由小到大
 
+    @OneToOne(cascade = CascadeType.REFRESH)
+    @JoinColumn(name="sysAcl")
+    private SysAcl sysAcl; //上级权限，可以分模块管理权限；一级权限parentId=0;
+
+    @Transient
+    private Boolean open = true;
+    @Transient
+    private Boolean checked = false;
 }

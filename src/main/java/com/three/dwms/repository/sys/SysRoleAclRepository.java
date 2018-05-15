@@ -1,7 +1,10 @@
 package com.three.dwms.repository.sys;
 
 import com.three.dwms.entity.sys.SysRoleAcl;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -13,5 +16,9 @@ public interface SysRoleAclRepository extends PagingAndSortingRepository<SysRole
 
     List<SysRoleAcl> findAllByRoleId(Integer id);
 
-    void deleteByRoleId(int roleId);
+    void deleteByRoleId(@Param("roleId") int roleId);
+
+    int countByRoleId(Integer id);
+
+    int countByRoleIdAndAclId(Integer id, Integer id1);
 }

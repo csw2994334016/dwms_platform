@@ -1,14 +1,15 @@
 package com.three.dwms.controller.sys;
 
+import com.google.common.collect.Lists;
 import com.three.dwms.beans.JsonData;
 import com.three.dwms.beans.PageQuery;
-import com.three.dwms.constant.StateCode;
 import com.three.dwms.entity.sys.SysUser;
 import com.three.dwms.param.sys.User;
 import com.three.dwms.param.sys.UserParam;
 import com.three.dwms.param.sys.UserRoleParam;
 import com.three.dwms.service.sys.SysUserService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,7 +36,17 @@ public class SysUserController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public JsonData delete(@PathVariable int id) {
-        sysUserService.updateStateById(id, StateCode.DELETE);
+        sysUserService.deleteById(id);
+        return JsonData.success();
+    }
+
+    @RequestMapping(value = "/batch", method = RequestMethod.DELETE)
+    public JsonData deleteBatch(@RequestBody List<UserParam> userParamList) {
+        List<Integer> ids = Lists.newArrayList();
+        for (UserParam userParam : userParamList) {
+            ids.add(userParam.getId());
+        }
+        sysUserService.deleteByIds(ids);
         return JsonData.success();
     }
 
@@ -74,8 +85,15 @@ public class SysUserController {
         return JsonData.success(sysUser);
     }
 
+    @RequestMapping(value = "/fuzzySearch", method = RequestMethod.POST)
+    public JsonData fuzzySearch(@RequestBody UserParam userParam) {
+        List<SysUser> sysUserList = sysUserService.fuzzySearch(userParam.getKeyword());
+//        sysUser = sysUserService.createUserAndRoleAndAcl(sysUser);
+        return JsonData.success(sysUserList);
+    }
+
     @RequestMapping(value = "/bindRole", method = RequestMethod.POST)
-    public JsonData bindRole(UserRoleParam userRoleParam) {
+    public JsonData bindRole(@RequestBody UserRoleParam userRoleParam) {
         sysUserService.bindRole(userRoleParam);
         return JsonData.success();
     }

@@ -10,6 +10,7 @@ import com.three.dwms.exception.ParamException;
 import com.three.dwms.param.sys.AclParam;
 import com.three.dwms.param.sys.AclTree;
 import com.three.dwms.repository.sys.SysAclRepository;
+import com.three.dwms.repository.sys.SysRoleAclRepository;
 import com.three.dwms.utils.BeanValidator;
 import com.three.dwms.utils.IpUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,9 @@ public class SysAclService {
 
     @Resource
     private SysAclRepository sysAclRepository;
+
+    @Resource
+    private SysRoleAclRepository sysRoleAclRepository;
 
     @Transactional
     public void create(AclParam param) {
@@ -66,6 +70,14 @@ public class SysAclService {
 
         sysAcl.setStatus(stateCode.getCode());
         sysAclRepository.save(sysAcl);
+    }
+
+    public void deleteByIds(List<Integer> ids) {
+        List<SysAcl> sysAcls = Lists.newArrayList();
+        for (Integer id : ids) {
+            sysAcls.add(this.findById(id));
+        }
+        sysAclRepository.delete(sysAcls);
     }
 
     public SysAcl update(AclParam param) {
@@ -105,6 +117,14 @@ public class SysAclService {
         orders.add(new Sort.Order(Sort.Direction.ASC,"seq"));
         Sort sorts = new Sort(orders);
         return (List<SysAcl>) sysAclRepository.findAll(sorts);
+    }
+
+    public List<SysAcl> findAllByRole(Integer id) {
+        List<SysAcl> sysAclList = this.findAll();
+        for (SysAcl sysAcl : sysAclList) {
+            sysAcl.setChecked(sysRoleAclRepository.countByRoleIdAndAclId(id, sysAcl.getId()) > 0);
+        }
+        return sysAclList;
     }
 
     public List<AclTree> findAllByTree() {

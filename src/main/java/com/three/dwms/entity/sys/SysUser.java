@@ -35,11 +35,13 @@ public class SysUser extends BaseEntity implements Serializable {
     @Column(length = 13, unique = true)
     private String tel; //电话
 
-    @Column(unique = true, nullable = false)
-    private Integer roleId; //角色Id，唯一值
+//    @Column(unique = true, nullable = false)
+//    private Integer roleId; //角色Id，唯一值
 
-    @Transient
-    private SysRole sysRole;
+    @OneToOne(cascade = CascadeType.REFRESH)
+    @JoinColumn(name="role_id")
+    private SysRole sysRole; //角色Id，唯一值
+
     @Transient
     @Builder.Default
     private List<SysAcl> sysAclList = Lists.newArrayList();

@@ -1,6 +1,7 @@
 package com.three.dwms.service.sys;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.three.dwms.beans.PageQuery;
 import com.three.dwms.common.RequestHolder;
 import com.three.dwms.constant.LogTypeCode;
@@ -12,7 +13,6 @@ import com.three.dwms.param.sys.UserParam;
 import com.three.dwms.param.sys.UserRoleParam;
 import com.three.dwms.repository.sys.SysRoleAclRepository;
 import com.three.dwms.repository.sys.SysUserRepository;
-import com.three.dwms.repository.sys.SysUserRoleRepository;
 import com.three.dwms.utils.BeanValidator;
 import com.three.dwms.utils.IpUtil;
 import com.three.dwms.utils.MD5Util;
@@ -26,7 +26,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -82,7 +81,7 @@ public class SysUserService {
         String password = StringUtils.isBlank(param.getPassword()) ? defaultPassword : param.getPassword();
         password = MD5Util.encrypt(password);
 
-        SysUser sysUser = SysUser.builder().username(param.getUsername()).realName(param.getRealName()).password(password).roleId(sysRole.getId()).tel(param.getTel()).email(param.getEmail()).sex(param.getSex()).build();
+        SysUser sysUser = SysUser.builder().username(param.getUsername()).realName(param.getRealName()).password(password).sysRole(sysRole).tel(param.getTel()).email(param.getEmail()).sex(param.getSex()).build();
 
         if (RequestHolder.getCurrentUser() != null) { //SYSTEM_ADMIN
             sysUser.setCreator(RequestHolder.getCurrentUser().getUsername());
@@ -98,7 +97,7 @@ public class SysUserService {
         SysUser create = sysUserRepository.save(sysUser);
 
         //更新用户-角色表
-        sysRoleService.updateUserRoles(sysUser.getId(), sysUser.getRoleId());
+        sysRoleService.updateUserRoles(sysUser.getId(), sysUser.getSysRole().getId());
 
         if (RequestHolder.getCurrentUser() != null) { //SYSTEM_ADMIN
             SysLog sysLog = SysLog.builder().type(LogTypeCode.TYPE_USER.getCode()).build();
@@ -115,10 +114,37 @@ public class SysUserService {
     }
 
     @Transactional
+    public void deleteById(Integer id) {
+        SysUser sysUser = this.findById(id);
+        sysUserRepository.delete(sysUser);
+
+        if (RequestHolder.getCurrentUser() != null) { //SYSTEM_ADMIN
+            SysLog sysLog = SysLog.builder().type(LogTypeCode.TYPE_USER.getCode()).build();
+            sysLogService.saveSysLog(sysUser, null, sysLog);
+        }
+    }
+
+    @Transactional
+    public void deleteByIds(List<Integer> ids) {
+        List<SysUser> sysUsers = Lists.newArrayList();
+        for (Integer id : ids) {
+            SysUser sysUser = this.findById(id);
+            sysUsers.add(sysUser);
+        }
+        sysUserRepository.delete(sysUsers);
+
+        if (RequestHolder.getCurrentUser() != null) { //SYSTEM_ADMIN
+            for (SysUser sysUser : sysUsers) {
+                SysLog sysLog = SysLog.builder().type(LogTypeCode.TYPE_USER.getCode()).build();
+                sysLogService.saveSysLog(sysUser, null, sysLog);
+            }
+        }
+    }
+
+    @Transactional
     public SysUser update(UserParam param) {
         BeanValidator.check(param);
-        SysUser before = sysUserRepository.findOne(param.getId());
-        Preconditions.checkNotNull(before, "待更新的用户(id:" + param.getId() + ")不存在");
+        SysUser before = this.findById(param.getId());
         if (!before.getUsername().equals(param.getUsername())) {
             throw new ParamException("用户名不能修改");
         }
@@ -136,9 +162,9 @@ public class SysUserService {
         }
 
         //查找角色
-        SysRole sysRole = sysRoleService.findById(param.getId());
+        SysRole sysRole = sysRoleService.findById(param.getRoleId());
 
-        SysUser after = SysUser.builder().username(param.getUsername()).realName(param.getRealName()).password(before.getPassword()).tel(param.getTel()).email(param.getEmail()).sex(param.getSex()).roleId(sysRole.getId()).build();
+        SysUser after = SysUser.builder().username(param.getUsername()).realName(param.getRealName()).password(before.getPassword()).tel(param.getTel()).email(param.getEmail()).sex(param.getSex()).sysRole(sysRole).build();
         after.setId(param.getId());
 
         after.setStatus(param.getStatus());
@@ -203,18 +229,31 @@ public class SysUserService {
     }
 
     public SysUser findByKeyword(String keyword) {
-        Preconditions.checkNotNull(keyword, "查找用户的条件为空");
+        Preconditions.checkNotNull(keyword, "查找用户的关键字不可以为空");
         return sysUserRepository.findByUsernameOrTelOrEmail(keyword, keyword, keyword);
+    }
+
+    public List<SysUser> fuzzySearch(String keyword) {
+        if (StringUtils.isBlank(keyword)) {
+            return this.findAll();
+        } else {
+            List<SysUser> sysUserList = sysUserRepository.findAllByUsernameContainingOrTelContainingOrEmailContaining(keyword, keyword, keyword);
+            for (SysUser sysUser : sysUserList) {
+                sysUser.setPassword(null);
+                createUserAndRoleAndAcl(sysUser);
+            }
+            return sysUserList;
+        }
     }
 
     public void bindRole(UserRoleParam userRoleParam) {
         BeanValidator.check(userRoleParam);
         SysUser sysUser = this.findById(userRoleParam.getUserId());
         SysRole sysRole = sysRoleService.findById(userRoleParam.getRoleId());
-        sysUser.setRoleId(sysRole.getId());
+        sysUser.setSysRole(sysRole);
         sysUserRepository.save(sysUser);
         //更新用户-角色表
-        sysRoleService.updateUserRoles(sysUser.getId(), sysUser.getRoleId());
+        sysRoleService.updateUserRoles(sysUser.getId(), sysUser.getSysRole().getId());
     }
 
     private boolean checkUsernameExist(String username, Integer id) {
@@ -253,11 +292,11 @@ public class SysUserService {
 
     public SysUser createUserAndRoleAndAcl(SysUser sysUser) {
         //给用户绑定角色
-        SysRole sysRole = sysRoleService.findById(sysUser.getRoleId());
-        sysUser.setSysRole(sysRole);
+//        SysRole sysRole = sysRoleService.findById(sysUser.getRoleId());
+//        sysUser.setSysRole(sysRole);
 
         //给用户绑定权限
-        List<SysRoleAcl> sysRoleAclList = sysRoleAclRepository.findAllByRoleId(sysRole.getId());
+        List<SysRoleAcl> sysRoleAclList = sysRoleAclRepository.findAllByRoleId(sysUser.getSysRole().getId());
         for (SysRoleAcl sysRoleAcl : sysRoleAclList) {
             SysAcl sysAcl = sysAclService.findById(sysRoleAcl.getAclId());
             sysUser.getSysAclList().add(sysAcl);

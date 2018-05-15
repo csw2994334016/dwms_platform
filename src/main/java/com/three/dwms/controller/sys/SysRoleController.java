@@ -1,12 +1,12 @@
 package com.three.dwms.controller.sys;
 
+import com.google.common.collect.Lists;
 import com.three.dwms.beans.JsonData;
 import com.three.dwms.constant.StateCode;
 import com.three.dwms.entity.sys.SysRole;
 import com.three.dwms.param.sys.RoleParam;
 import com.three.dwms.param.sys.RoleUserAclParam;
 import com.three.dwms.service.sys.SysRoleService;
-import com.three.dwms.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,6 +34,18 @@ public class SysRoleController {
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public JsonData delete(@PathVariable int id) {
         sysRoleService.updateStateById(id, StateCode.DELETE);
+        return JsonData.success();
+    }
+
+    @RequestMapping(value = "/batch", method = RequestMethod.DELETE)
+    public JsonData deleteBatch(@RequestBody List<RoleParam> roleParamList) {
+        List<Integer> ids = Lists.newArrayList();
+        for (RoleParam roleParam : roleParamList) {
+            if (roleParam.getId() != null) {
+                ids.add(roleParam.getId());
+            }
+        }
+        sysRoleService.deleteByIds(ids);
         return JsonData.success();
     }
 

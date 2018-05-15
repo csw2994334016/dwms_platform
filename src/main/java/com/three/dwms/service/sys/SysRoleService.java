@@ -1,10 +1,12 @@
 package com.three.dwms.service.sys;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.three.dwms.common.RequestHolder;
 import com.three.dwms.constant.RoleTypeCode;
 import com.three.dwms.constant.LogTypeCode;
 import com.three.dwms.constant.StateCode;
+import com.three.dwms.entity.basic.Category;
 import com.three.dwms.entity.sys.*;
 import com.three.dwms.exception.ParamException;
 import com.three.dwms.param.sys.RoleParam;
@@ -39,6 +41,9 @@ public class SysRoleService {
 
     @Resource
     private SysAclService sysAclService;
+
+    @Resource
+    private SysAclRepository sysAclRepository;
 
     @Resource
     private SysRoleAclRepository sysRoleAclRepository;
@@ -89,6 +94,24 @@ public class SysRoleService {
     }
 
     @Transactional
+    public void deleteByIds(List<Integer> ids) {
+        List<SysRole> sysRoles = Lists.newArrayList();
+        List<SysRoleAcl> sysRoleAcls = Lists.newArrayList();
+        for (Integer id : ids) {
+            SysRole sysRole = this.findById(id);
+//            int count = sysRoleAclRepository.countByRoleId(id);
+//            if (count > 0) {
+//                throw new ParamException("待删除角色中配有权限，请先删除角色绑定的权限");
+//            }
+            sysRoles.add(sysRole);
+            sysRoleAcls = sysRoleAclRepository.findAllByRoleId(id);
+        }
+        sysRoleRepository.delete(sysRoles);
+        //删除角色绑定的权限信息
+        sysRoleAclRepository.delete(sysRoleAcls);
+    }
+
+    @Transactional
     public SysRole update(RoleParam param) {
         BeanValidator.check(param);
         SysRole before = sysRoleRepository.findOne(param.getId());
@@ -131,9 +154,11 @@ public class SysRoleService {
 
     //角色绑定用户
     public void bindUsers(int roleId, List<Integer> userIdList) {
-        SysRole sysRole = this.findById(roleId);
-        for (Integer userId : userIdList) {
-            updateUserRoles(userId, sysRole.getId());
+        if (CollectionUtils.isNotEmpty(userIdList)) {
+            SysRole sysRole = this.findById(roleId);
+            for (Integer userId : userIdList) {
+                updateUserRoles(userId, sysRole.getId());
+            }
         }
     }
 
@@ -157,19 +182,22 @@ public class SysRoleService {
     //角色绑定权限
     @Transactional
     public void bindAcls(int roleId, List<Integer> aclIdList) {
-        SysRole sysRole = this.findById(roleId);
-        //删除角色原先绑定的权限
-        sysRoleAclRepository.deleteByRoleId(roleId);
-        List<SysRoleAcl> sysRoleAclList = new ArrayList<>();
-        for (Integer aclId : aclIdList) {
-            SysAcl sysAcl = sysAclService.findById(aclId); //权限是否存在
-            SysRoleAcl sysRoleAcl = SysRoleAcl.builder().roleId(sysRole.getId()).aclId(sysAcl.getId()).build();
-            sysRoleAcl.setStatus(StateCode.NORMAL.getCode());
-            sysRoleAcl.setOperator(RequestHolder.getCurrentUser().getUsername());
-            sysRoleAcl.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
-            sysRoleAcl.setOperateTime(new Date());
-            sysRoleAclList.add(sysRoleAcl);
+        if (CollectionUtils.isNotEmpty(aclIdList)) {
+            SysRole sysRole = this.findById(roleId);
+            //删除角色原先绑定的权限
+            List<SysRoleAcl> sysRoleAcls = sysRoleAclRepository.findAllByRoleId(roleId);
+            sysRoleAclRepository.delete(sysRoleAcls);
+            List<SysRoleAcl> sysRoleAclList = new ArrayList<>();
+            for (Integer aclId : aclIdList) {
+                SysAcl sysAcl = sysAclService.findById(aclId); //权限是否存在
+                SysRoleAcl sysRoleAcl = SysRoleAcl.builder().roleId(sysRole.getId()).aclId(sysAcl.getId()).build();
+                sysRoleAcl.setStatus(StateCode.NORMAL.getCode());
+                sysRoleAcl.setOperator(RequestHolder.getCurrentUser().getUsername());
+                sysRoleAcl.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
+                sysRoleAcl.setOperateTime(new Date());
+                sysRoleAclList.add(sysRoleAcl);
+            }
+            sysRoleAclRepository.save(sysRoleAclList); //批量更新（修改或插入）角色-权限表
         }
-        sysRoleAclRepository.save(sysRoleAclList); //批量更新（修改或插入）角色-权限表
     }
 }

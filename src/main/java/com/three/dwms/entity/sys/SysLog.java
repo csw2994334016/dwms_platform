@@ -27,7 +27,6 @@ public class SysLog {
     @Column(nullable = false)
     private Integer type;
 
-    @Column(nullable = false)
     private Integer targetId;
 
     @Lob
