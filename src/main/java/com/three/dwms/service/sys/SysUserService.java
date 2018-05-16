@@ -97,7 +97,6 @@ public class SysUserService {
         SysUser create = sysUserRepository.save(sysUser);
 
         //更新用户-角色表
-        sysRoleService.updateUserRoles(sysUser.getId(), sysUser.getSysRole().getId());
 
         if (RequestHolder.getCurrentUser() != null) { //SYSTEM_ADMIN
             SysLog sysLog = SysLog.builder().type(LogTypeCode.TYPE_USER.getCode()).build();
@@ -211,7 +210,7 @@ public class SysUserService {
         return sysUserList;
     }
 
-    public Page<SysUser> findAll(PageQuery pageQuery) {
+    public Page<SysUser> findAllByPage(PageQuery pageQuery) {
         BeanValidator.check(pageQuery);
         Pageable pageable = new PageRequest(pageQuery.getPageNo(), pageQuery.getPageSize());
         Page<SysUser> sysUserPage = sysUserRepository.findAll(pageable);
@@ -220,6 +219,16 @@ public class SysUserService {
             createUserAndRoleAndAcl(sysUser);
         }
         return sysUserPage;
+    }
+
+    public List<SysUser> findAllByRole(Integer id) {
+        SysRole sysRole = sysRoleService.findById(id);
+        List<SysUser> sysUserList = sysUserRepository.findAllBySysRole(sysRole);
+        for (SysUser sysUser : sysUserList) {
+            sysUser.setPassword(null);
+            createUserAndRoleAndAcl(sysUser);
+        }
+        return sysUserList;
     }
 
     public SysUser findById(int id) {
@@ -253,7 +262,6 @@ public class SysUserService {
         sysUser.setSysRole(sysRole);
         sysUserRepository.save(sysUser);
         //更新用户-角色表
-        sysRoleService.updateUserRoles(sysUser.getId(), sysUser.getSysRole().getId());
     }
 
     private boolean checkUsernameExist(String username, Integer id) {

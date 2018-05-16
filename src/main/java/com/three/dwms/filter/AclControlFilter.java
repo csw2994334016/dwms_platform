@@ -36,6 +36,8 @@ public class AclControlFilter implements Filter {
             return;
         }
 
+//        log.info("sessionId: " + request.getSession().getId());
+
         SysUser sysUser = (SysUser) request.getSession().getAttribute("user");
 
         if (sysUser == null) {

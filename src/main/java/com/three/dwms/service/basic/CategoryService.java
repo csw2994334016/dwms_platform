@@ -4,12 +4,11 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.three.dwms.beans.PageQuery;
 import com.three.dwms.common.RequestHolder;
-import com.three.dwms.constant.LogTypeCode;
 import com.three.dwms.constant.StateCode;
 import com.three.dwms.entity.basic.Category;
-import com.three.dwms.entity.sys.SysLog;
 import com.three.dwms.exception.ParamException;
 import com.three.dwms.param.basic.CategoryParam;
+import com.three.dwms.param.basic.CategoryTree;
 import com.three.dwms.repository.basic.CategoryRepository;
 import com.three.dwms.repository.basic.ProductRepository;
 import com.three.dwms.service.sys.SysLogService;
@@ -22,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 
@@ -44,11 +44,11 @@ public class CategoryService {
     @Transactional
     public void create(CategoryParam param) {
         BeanValidator.check(param);
-        if (checkCategoryNameExist(param.getCategoryName(), param.getId())) {
+        if (checkNameExist(param.getName(), param.getId())) {
             throw new ParamException("分类名称已经存在");
         }
 
-        Category category = Category.builder().categoryName(param.getCategoryName()).build();
+        Category category = Category.builder().name(param.getName()).build();
 
         category.setStatus(param.getStatus());
         category.setRemark(param.getRemark());
@@ -61,11 +61,11 @@ public class CategoryService {
         categoryRepository.save(category);
     }
 
-    private boolean checkCategoryNameExist(String categoryName, Integer id) {
+    private boolean checkNameExist(String categoryName, Integer id) {
         if (id != null) {
-            return categoryRepository.countByCategoryNameAndIdNot(categoryName, id) > 0;
+            return categoryRepository.countByNameAndIdNot(categoryName, id) > 0;
         }
-        return categoryRepository.countByCategoryName(categoryName) > 0;
+        return categoryRepository.countByName(categoryName) > 0;
     }
 
     @Transactional
@@ -100,11 +100,11 @@ public class CategoryService {
     public Category update(CategoryParam param) {
         Category category = this.findById(param.getId());
         BeanValidator.check(param);
-        if (checkCategoryNameExist(param.getCategoryName(), param.getId())) {
+        if (checkNameExist(param.getName(), param.getId())) {
             throw new ParamException("分类名称已经存在");
         }
 
-        category.setCategoryName(param.getCategoryName());
+        category.setName(param.getName());
         category.setStatus(param.getStatus());
         category.setRemark(param.getRemark());
         category.setCreator(RequestHolder.getCurrentUser().getUsername());
@@ -118,6 +118,18 @@ public class CategoryService {
 
     public List<Category> findAll() {
         return (List<Category>) categoryRepository.findAll();
+    }
+
+    public List<CategoryTree> findAllByTree() {
+        List<Category> categoryList = (List<Category>) categoryRepository.findAll();
+        List<CategoryTree> categoryTreeList = Lists.newArrayList();
+        CategoryTree categoryTree = CategoryTree.builder().text("物料分类").id(0).nodes(Lists.newArrayList()).build();
+        for (Category category : categoryList) {
+            CategoryTree categoryTree1 = CategoryTree.builder().id(category.getId()).text(category.getName()).build();
+            categoryTree.getNodes().add(categoryTree1);
+        }
+        categoryTreeList.add(categoryTree);
+        return categoryTreeList;
     }
 
     public Page<Category> findAllByPage(PageQuery pageQuery) {

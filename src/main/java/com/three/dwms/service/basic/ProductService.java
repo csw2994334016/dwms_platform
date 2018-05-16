@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 
@@ -107,8 +108,6 @@ public class ProductService {
 
         product.setStatus(param.getStatus());
         product.setRemark(param.getRemark());
-        product.setCreator(RequestHolder.getCurrentUser().getUsername());
-        product.setCreateTime(new Date());
         product.setOperator(RequestHolder.getCurrentUser().getUsername());
         product.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
         product.setOperateTime(new Date());
@@ -117,6 +116,16 @@ public class ProductService {
     }
 
     public List<Product> findAll() {
+        HttpServletRequest request = RequestHolder.getCurrentRequest();
+        if (request != null && request.getParameter("categoryId") != null) {
+            int categoryId = Integer.valueOf(request.getParameter("categoryId")); //表格查询条件
+            if (categoryId > 0) {
+                Category category = categoryService.findById(categoryId);
+                return productRepository.findAllByCategory(category);
+            } else {
+                return (List<Product>) productRepository.findAll();
+            }
+        }
         return (List<Product>) productRepository.findAll();
     }
 

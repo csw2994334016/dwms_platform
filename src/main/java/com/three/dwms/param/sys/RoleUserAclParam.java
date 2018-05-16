@@ -45,4 +45,18 @@ public class RoleUserAclParam {
     private List<Integer> userIds = Lists.newArrayList();
     @Builder.Default
     private List<Integer> aclIds = Lists.newArrayList();
+
+    public List<Integer> getUserIds() {
+        if (userIds == null) {
+            return Lists.newArrayList();
+        }
+        return userIds;
+    }
+
+    public List<Integer> getAclIds() {
+        if (aclIds == null) {
+            return Lists.newArrayList();
+        }
+        return aclIds;
+    }
 }

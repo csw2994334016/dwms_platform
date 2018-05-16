@@ -66,6 +66,12 @@ public class SysAclController {
         return JsonData.success(sysAclList);
     }
 
+    @RequestMapping(value = "/roles/{id}", method = RequestMethod.GET)
+    public JsonData findAllByRoles(@PathVariable("id") int id) {
+        List<Integer> aclIdLIst = sysAclService.findAllByRoles(id);
+        return JsonData.success(aclIdLIst);
+    }
+
     @RequestMapping(value = "/tree", method = RequestMethod.GET)
     public JsonData findAllByTree() {
         List<AclTree> aclTreeList = sysAclService.findAllByTree();

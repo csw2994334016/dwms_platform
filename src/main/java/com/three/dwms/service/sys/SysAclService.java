@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import com.three.dwms.common.RequestHolder;
 import com.three.dwms.constant.StateCode;
 import com.three.dwms.entity.sys.SysAcl;
+import com.three.dwms.entity.sys.SysRoleAcl;
 import com.three.dwms.exception.ParamException;
 import com.three.dwms.param.sys.AclParam;
 import com.three.dwms.param.sys.AclTree;
@@ -125,6 +126,15 @@ public class SysAclService {
             sysAcl.setChecked(sysRoleAclRepository.countByRoleIdAndAclId(id, sysAcl.getId()) > 0);
         }
         return sysAclList;
+    }
+
+    public List<Integer> findAllByRoles(int id) {
+        List<SysRoleAcl> sysRoleAclList = sysRoleAclRepository.findAllByRoleId(id);
+        List<Integer> aclIdList = Lists.newArrayList();
+        for (SysRoleAcl sysRoleAcl : sysRoleAclList) {
+            aclIdList.add(sysRoleAcl.getAclId());
+        }
+        return aclIdList;
     }
 
     public List<AclTree> findAllByTree() {

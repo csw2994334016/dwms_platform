@@ -27,4 +27,11 @@ public class AclTree {
 
     @Builder.Default
     private List<AclTree> children = Lists.newArrayList();
+
+    public List<AclTree> getChildren() {
+        if (children == null) {
+            return Lists.newArrayList();
+        }
+        return children;
+    }
 }

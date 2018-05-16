@@ -8,7 +8,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
  * Description:
  */
 public interface CategoryRepository extends PagingAndSortingRepository<Category, Integer> {
-    int countByCategoryNameAndIdNot(String categoryName, Integer id);
+    int countByNameAndIdNot(String categoryName, Integer id);
 
-    int countByCategoryName(String categoryName);
+    int countByName(String categoryName);
 }

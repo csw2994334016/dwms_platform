@@ -6,6 +6,7 @@ import com.three.dwms.beans.PageQuery;
 import com.three.dwms.constant.StateCode;
 import com.three.dwms.entity.basic.Category;
 import com.three.dwms.param.basic.CategoryParam;
+import com.three.dwms.param.basic.CategoryTree;
 import com.three.dwms.service.basic.CategoryService;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
@@ -57,6 +58,12 @@ public class CategoryController {
     @RequestMapping(method = RequestMethod.GET)
     public JsonData findAll() {
         List<Category> categoryList = categoryService.findAll();
+        return JsonData.success(categoryList);
+    }
+
+    @RequestMapping(value = "/tree", method = RequestMethod.GET)
+    public JsonData findAllByTree() {
+        List<CategoryTree> categoryList = categoryService.findAllByTree();
         return JsonData.success(categoryList);
     }
 

@@ -25,7 +25,7 @@ public class CategoryParam {
 
     @NotBlank(message = "分类名称不可以为空")
     @Length(min = 1, max = 20, message = "分类名称长度需要在1-20个字之间")
-    private String categoryName; //分类名称，物料、耗材等分类名称
+    private String name; //分类名称，物料、耗材等分类名称
 
     @Min(value = 0, message = "权限点状态不合法")
     @Max(value = 2, message = "权限点状态不合法")

@@ -9,7 +9,6 @@ import com.three.dwms.param.sys.UserParam;
 import com.three.dwms.param.sys.UserRoleParam;
 import com.three.dwms.service.sys.SysUserService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
@@ -72,9 +71,15 @@ public class SysUserController {
         return JsonData.success(sysUserList);
     }
 
+    @RequestMapping(value = "/role/{id}", method = RequestMethod.GET)
+    public JsonData findAllByRole(@PathVariable("id") int id) {
+        List<SysUser> sysUserList = sysUserService.findAllByRole(id);
+        return JsonData.success(sysUserList);
+    }
+
     @RequestMapping(value = "/page", method = RequestMethod.POST)
     public JsonData findAll(@RequestBody PageQuery pageQuery) {
-        Page<SysUser> sysUserList = sysUserService.findAll(pageQuery);
+        Page<SysUser> sysUserList = sysUserService.findAllByPage(pageQuery);
         return JsonData.success(sysUserList);
     }
 

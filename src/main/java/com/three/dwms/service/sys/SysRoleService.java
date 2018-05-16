@@ -6,7 +6,6 @@ import com.three.dwms.common.RequestHolder;
 import com.three.dwms.constant.RoleTypeCode;
 import com.three.dwms.constant.LogTypeCode;
 import com.three.dwms.constant.StateCode;
-import com.three.dwms.entity.basic.Category;
 import com.three.dwms.entity.sys.*;
 import com.three.dwms.exception.ParamException;
 import com.three.dwms.param.sys.RoleParam;
@@ -37,7 +36,7 @@ public class SysRoleService {
     private SysUserService sysUserService;
 
     @Resource
-    private SysUserRoleRepository sysUserRoleRepository;
+    private SysUserRepository sysUserRepository;
 
     @Resource
     private SysAclService sysAclService;
@@ -153,30 +152,18 @@ public class SysRoleService {
     }
 
     //角色绑定用户
+    @Transactional
     public void bindUsers(int roleId, List<Integer> userIdList) {
         if (CollectionUtils.isNotEmpty(userIdList)) {
             SysRole sysRole = this.findById(roleId);
+            List<SysUser> sysUserList = Lists.newArrayList();
             for (Integer userId : userIdList) {
-                updateUserRoles(userId, sysRole.getId());
+                SysUser sysUser = sysUserService.findById(userId);
+                sysUser.setSysRole(sysRole);
+                sysUserList.add(sysUser);
             }
+            sysUserRepository.save(sysUserList);
         }
-    }
-
-    @Transactional
-    void updateUserRoles(int userId, int roleId) {
-        List<SysUserRole> sysUserRoleList = sysUserRoleRepository.findAllByUserId(userId);
-        for (SysUserRole sysUserRole : sysUserRoleList) { //如果用户有绑定过角色，查找出来全部更新
-            sysUserRole.setRoleId(roleId);
-        }
-        if (CollectionUtils.isEmpty(sysUserRoleList)) { //没有就新建用户-角色记录（因为用户只有一个角色）
-            SysUserRole sysUserRoleNew = SysUserRole.builder().roleId(roleId).userId(userId).build();
-            sysUserRoleNew.setStatus(StateCode.NORMAL.getCode());
-            sysUserRoleNew.setOperator(RequestHolder.getCurrentUser().getUsername());
-            sysUserRoleNew.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
-            sysUserRoleNew.setOperateTime(new Date());
-            sysUserRoleList.add(sysUserRoleNew);
-        }
-        sysUserRoleRepository.save(sysUserRoleList); //批量更新（修改或插入）用户-角色表
     }
 
     //角色绑定权限

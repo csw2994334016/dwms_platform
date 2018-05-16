@@ -6,6 +6,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 @Builder
@@ -43,6 +44,12 @@ public class SysUser extends BaseEntity implements Serializable {
     private SysRole sysRole; //角色Id，唯一值
 
     @Transient
-    @Builder.Default
-    private List<SysAcl> sysAclList = Lists.newArrayList();
+    private List<SysAcl> sysAclList;
+
+    public List<SysAcl> getSysAclList() {
+        if (sysAclList == null) {
+            return new ArrayList<>();
+        }
+        return sysAclList;
+    }
 }

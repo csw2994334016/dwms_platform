@@ -1,7 +1,10 @@
 package com.three.dwms.repository.basic;
 
+import com.three.dwms.entity.basic.Category;
 import com.three.dwms.entity.basic.Product;
 import org.springframework.data.repository.PagingAndSortingRepository;
+
+import java.util.List;
 
 /**
  * Created by csw on 2018/5/14.
@@ -17,4 +20,6 @@ public interface ProductRepository extends PagingAndSortingRepository<Product, I
     int countBySku(String sku);
 
     int countByCategoryId(int id);
+
+    List<Product> findAllByCategory(Category category);
 }
