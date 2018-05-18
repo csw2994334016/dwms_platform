@@ -1,5 +1,6 @@
 package com.three.dwms.entity.basic;
 
+
 import com.three.dwms.entity.base.BaseEntity;
 import lombok.*;
 
@@ -15,16 +16,13 @@ import java.io.Serializable;
 @Setter
 @ToString
 @Entity
-@Table(name = "wh_zone")
-public class WhZone extends BaseEntity implements Serializable {
+@Table(name = "wh_warehouse")
+public class Warehouse extends BaseEntity implements Serializable {
 
-    @Column(length = 20, nullable = false)
-    private String zoneCode; //仓区编号
-
-    @Column(length = 20, nullable = false)
-    private String zoneName; //仓区名称
-
-    @Column(length = 20, nullable = false)
+    @Column(length = 20, unique = true, nullable = false)
     private String whCode; //仓库编号
+
+    @Column(length = 20, unique = true, nullable = false)
+    private String whName; //仓库名称
 
 }

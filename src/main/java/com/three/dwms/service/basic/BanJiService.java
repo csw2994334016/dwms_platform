@@ -86,6 +86,7 @@ public class BanJiService {
         banJIRepository.delete(banJis);
     }
 
+    @Transactional
     public BanJi update(BanJiParam param) {
         BanJi banJi = this.findById(param.getId());
         BeanValidator.check(param);

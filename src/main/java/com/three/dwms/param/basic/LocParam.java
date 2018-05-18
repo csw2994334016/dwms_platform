@@ -7,6 +7,7 @@ import org.hibernate.validator.constraints.NotBlank;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
 
 /**
@@ -19,17 +20,20 @@ import javax.validation.constraints.Min;
 @Getter
 @Setter
 @ToString
-public class BanJiParam {
+public class LocParam {
 
     private Integer id;
 
-    @NotBlank(message = "班级编号不可以为空")
-    @Length(min = 1, max = 20, message = "班级编号长度需要在1-20个字之间")
-    private String banJiCode; //班级编号
+    @NotBlank(message = "储位编号不可以为空")
+    @Length(min = 1, max = 20, message = "储位编号长度需要在1-20个字之间")
+    private Integer locCode; //储位编号
 
-    @NotBlank(message = "班级名称不可以为空")
-    @Length(min = 1, max = 20, message = "班级名称长度需要在1-20个字之间")
-    private String banJiName; //班级名称
+    @NotBlank(message = "储位名称不可以为空")
+    @Length(min = 1, max = 20, message = "储位名称长度需要在1-20个字之间")
+    private String locName; //储位名称
+
+    @NotNull(message = "储区不可以为空")
+    private Integer areaId; //储区id
 
     @Min(value = 0, message = "状态不合法")
     @Max(value = 2, message = "状态不合法")

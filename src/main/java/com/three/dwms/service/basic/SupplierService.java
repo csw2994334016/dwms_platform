@@ -43,7 +43,7 @@ public class SupplierService {
             throw new ParamException("供应商名称已经存在");
         }
 
-        Supplier supplier = Supplier.builder().supplierCode(param.getSupplierCode()).supplierName(param.getSupplierName()).build();
+        Supplier supplier = Supplier.builder().supplierCode(param.getSupplierCode()).supplierName(param.getSupplierName()).supplierTel(param.getSupplierTel()).supplierAddress(param.getSupplierAddress()).build();
 
         supplier.setStatus(param.getStatus());
         supplier.setRemark(param.getRemark());
@@ -88,6 +88,7 @@ public class SupplierService {
         supplierRepository.delete(projects);
     }
 
+    @Transactional
     public Supplier update(SupplierParam param) {
         Supplier supplier = this.findById(param.getId());
         BeanValidator.check(param);
@@ -100,6 +101,8 @@ public class SupplierService {
 
         supplier.setSupplierCode(param.getSupplierCode());
         supplier.setSupplierName(param.getSupplierName());
+        supplier.setSupplierTel(param.getSupplierTel());
+        supplier.setSupplierAddress(param.getSupplierAddress());
 
         supplier.setStatus(param.getStatus());
         supplier.setRemark(param.getRemark());

@@ -88,6 +88,7 @@ public class ProjectService {
         projectRepository.delete(projects);
     }
 
+    @Transactional
     public Project update(ProjectParam param) {
         Project project = this.findById(param.getId());
         BeanValidator.check(param);

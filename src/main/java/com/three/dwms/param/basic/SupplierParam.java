@@ -31,10 +31,15 @@ public class SupplierParam {
     @Length(min = 1, max = 20, message = "项目名称长度需要在1-20个字之间")
     private String supplierName; //供应商名称
 
-    @Min(value = 0, message = "权限点状态不合法")
-    @Max(value = 2, message = "权限点状态不合法")
+    @Length(min = 0, max = 13, message = "电话长度需要在13个字以内")
+    private String supplierTel; //供应商电话
+
+    private String supplierAddress; //供应商地址
+
+    @Min(value = 0, message = "状态不合法")
+    @Max(value = 2, message = "状态不合法")
     private Integer status = StateCode.NORMAL.getCode();
 
-    @Length(min = 0, max = 200, message = "权限点备注长度需要在200个字符以内")
+    @Length(min = 0, max = 200, message = "备注长度需要在200个字符以内")
     private String remark;
 }

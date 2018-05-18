@@ -97,6 +97,7 @@ public class CategoryService {
 //        sysLogService.saveDeleteLog(ids, sysLog);
     }
 
+    @Transactional
     public Category update(CategoryParam param) {
         Category category = this.findById(param.getId());
         BeanValidator.check(param);

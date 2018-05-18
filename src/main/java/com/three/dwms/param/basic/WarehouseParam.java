@@ -19,17 +19,17 @@ import javax.validation.constraints.Min;
 @Getter
 @Setter
 @ToString
-public class BanJiParam {
+public class WarehouseParam {
 
     private Integer id;
 
-    @NotBlank(message = "班级编号不可以为空")
-    @Length(min = 1, max = 20, message = "班级编号长度需要在1-20个字之间")
-    private String banJiCode; //班级编号
+    @NotBlank(message = "仓库编号不可以为空")
+    @Length(min = 1, max = 20, message = "仓库编号长度需要在1-20个字之间")
+    private String whCode; //仓库编号
 
-    @NotBlank(message = "班级名称不可以为空")
-    @Length(min = 1, max = 20, message = "班级名称长度需要在1-20个字之间")
-    private String banJiName; //班级名称
+    @NotBlank(message = "仓库名称不可以为空")
+    @Length(min = 1, max = 20, message = "仓库名称长度需要在1-20个字之间")
+    private String whName; //仓库名称
 
     @Min(value = 0, message = "状态不合法")
     @Max(value = 2, message = "状态不合法")

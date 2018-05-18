@@ -1,8 +1,172 @@
 package com.three.dwms.service.basic;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.three.dwms.beans.PageQuery;
+import com.three.dwms.common.RequestHolder;
+import com.three.dwms.constant.StateCode;
+import com.three.dwms.constant.WhTypeCode;
+import com.three.dwms.entity.basic.Area;
+import com.three.dwms.entity.basic.Loc;
+import com.three.dwms.entity.basic.Warehouse;
+import com.three.dwms.entity.basic.Zone;
+import com.three.dwms.exception.ParamException;
+import com.three.dwms.param.basic.WarehouseParam;
+import com.three.dwms.param.basic.WarehouseTree;
+import com.three.dwms.repository.basic.AreaRepository;
+import com.three.dwms.repository.basic.LocRepository;
+import com.three.dwms.repository.basic.WarehouseRepository;
+import com.three.dwms.repository.basic.ZoneRepository;
+import com.three.dwms.utils.BeanValidator;
+import com.three.dwms.utils.IpUtil;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
+import java.util.Date;
+import java.util.List;
+
 /**
  * Created by csw on 2018/5/14.
  * Description:
  */
+@Service
 public class WarehouseService {
+
+    @Resource
+    private WarehouseRepository warehouseRepository;
+
+    @Resource
+    private ZoneRepository zoneRepository;
+
+    @Resource
+    private AreaRepository areaRepository;
+
+    @Resource
+    private LocRepository locRepository;
+
+    @Transactional
+    public void create(WarehouseParam param) {
+        BeanValidator.check(param);
+        if (checkWhCodeExist(param.getWhCode(), param.getId())) {
+            throw new ParamException("仓库编号已经存在");
+        }
+        if (checkWhNameExist(param.getWhName(), param.getId())) {
+            throw new ParamException("仓库名称已经存在");
+        }
+
+        Warehouse warehouse = Warehouse.builder().whCode(param.getWhCode()).whName(param.getWhName()).build();
+
+        warehouse.setStatus(param.getStatus());
+        warehouse.setRemark(param.getRemark());
+        warehouse.setCreator(RequestHolder.getCurrentUser().getUsername());
+        warehouse.setCreateTime(new Date());
+        warehouse.setOperator(RequestHolder.getCurrentUser().getUsername());
+        warehouse.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
+        warehouse.setOperateTime(new Date());
+
+        warehouseRepository.save(warehouse);
+    }
+
+    private boolean checkWhCodeExist(String whCode, Integer id) {
+        if (id != null) {
+            return warehouseRepository.countByWhCodeAndIdNot(whCode, id) > 0;
+        }
+        return warehouseRepository.countByWhCode(whCode) > 0;
+    }
+
+    private boolean checkWhNameExist(String whName, Integer id) {
+        if (id != null) {
+            return warehouseRepository.countByWhNameAndIdNot(whName, id) > 0;
+        }
+        return warehouseRepository.countByWhName(whName) > 0;
+    }
+
+    @Transactional
+    public void updateStateById(int id, StateCode stateCode) {
+        Warehouse warehouse = this.findById(id);
+        //假删除
+        warehouse.setStatus(stateCode.getCode());
+        warehouseRepository.save(warehouse);
+    }
+
+    @Transactional
+    public void deleteByIds(List<Integer> ids) {
+        List<Warehouse> warehouses = Lists.newArrayList();
+        for (Integer id : ids) {
+            Warehouse warehouse = this.findById(id);
+            warehouses.add(warehouse);
+        }
+        warehouseRepository.delete(warehouses);
+
+//        SysLog sysLog = SysLog.builder().type(LogTypeCode.TYPE_CATEGORY.getCode()).build();
+//        sysLogService.saveDeleteLog(ids, sysLog);
+    }
+
+    @Transactional
+    public Warehouse update(WarehouseParam param) {
+        Warehouse warehouse = this.findById(param.getId());
+        BeanValidator.check(param);
+        if (checkWhCodeExist(param.getWhCode(), param.getId())) {
+            throw new ParamException("仓库编号已经存在");
+        }
+        if (checkWhNameExist(param.getWhName(), param.getId())) {
+            throw new ParamException("仓库名称已经存在");
+        }
+
+        warehouse.setWhCode(param.getWhCode());
+        warehouse.setWhName(param.getWhName());
+
+        warehouse.setStatus(param.getStatus());
+        warehouse.setRemark(param.getRemark());
+        warehouse.setOperator(RequestHolder.getCurrentUser().getUsername());
+        warehouse.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
+        warehouse.setOperateTime(new Date());
+
+        return warehouseRepository.save(warehouse);
+    }
+
+    public List<Warehouse> findAll() {
+        return (List<Warehouse>) warehouseRepository.findAll();
+    }
+
+    public List<WarehouseTree> findAllByTree() {
+        List<WarehouseTree> warehouseTreeList = Lists.newArrayList();
+        List<Warehouse> warehouseList = (List<Warehouse>) warehouseRepository.findAll();
+        for (Warehouse warehouse : warehouseList) {
+            WarehouseTree warehouseTree1 = WarehouseTree.builder().id(warehouse.getId()).text(warehouse.getWhName()).type(WhTypeCode.WAREHOUSE.getCode()).nodes(Lists.newArrayList()).build();
+            List<Zone> zoneList = zoneRepository.findAllByWarehouse(warehouse);
+            for (Zone zone : zoneList) {
+                WarehouseTree warehouseTree2 = WarehouseTree.builder().id(zone.getId()).text(zone.getZoneName()).type(WhTypeCode.ZONE.getCode()).nodes(Lists.newArrayList()).build();
+                List<Area> areaList = areaRepository.findAllByZone(zone);
+                for (Area area : areaList) {
+                    WarehouseTree warehouseTree3 = WarehouseTree.builder().id(area.getId()).text(area.getAreaName()).type(WhTypeCode.AREA.getCode()).nodes(Lists.newArrayList()).build();
+                    List<Loc> locList = locRepository.findAllByArea(area);
+                    for (Loc loc : locList) {
+                        WarehouseTree warehouseTree4 = WarehouseTree.builder().id(loc.getId()).text(loc.getLocName()).type(WhTypeCode.LOC.getCode()).nodes(Lists.newArrayList()).build();
+                        warehouseTree3.getNodes().add(warehouseTree4);
+                    }
+                    warehouseTree2.getNodes().add(warehouseTree3);
+                }
+                warehouseTree1.getNodes().add(warehouseTree2);
+            }
+            warehouseTreeList.add(warehouseTree1);
+        }
+        return warehouseTreeList;
+    }
+
+    public Page<Warehouse> findAllByPage(PageQuery pageQuery) {
+        BeanValidator.check(pageQuery);
+        Pageable pageable = new PageRequest(pageQuery.getPageNo(), pageQuery.getPageSize());
+        return warehouseRepository.findAll(pageable);
+    }
+
+    public Warehouse findById(int id) {
+        Warehouse warehouse = warehouseRepository.findOne(id);
+        Preconditions.checkNotNull(warehouse, "仓库信息不存在");
+        return warehouse;
+    }
 }

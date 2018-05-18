@@ -31,10 +31,10 @@ public class UnitParam {
     @Length(min = 1, max = 20, message = "单位名称长度需要在1-20个字之间")
     private String unitName; //单位名称
 
-    @Min(value = 0, message = "权限点状态不合法")
-    @Max(value = 2, message = "权限点状态不合法")
+    @Min(value = 0, message = "状态不合法")
+    @Max(value = 2, message = "状态不合法")
     private Integer status = StateCode.NORMAL.getCode();
 
-    @Length(min = 0, max = 200, message = "权限点备注长度需要在200个字符以内")
+    @Length(min = 0, max = 200, message = "备注长度需要在200个字符以内")
     private String remark;
 }

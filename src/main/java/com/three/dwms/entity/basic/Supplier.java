@@ -23,4 +23,9 @@ public class Supplier extends BaseEntity implements Serializable {
 
     @Column(length = 20, unique = true, nullable = false)
     private String supplierName; //供应商名称
+
+    @Column(length = 13)
+    private String supplierTel; //供应商电话
+
+    private String supplierAddress; //供应商地址
 }

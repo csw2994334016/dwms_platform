@@ -86,6 +86,7 @@ public class UnitService {
         unitRepository.delete(units);
     }
 
+    @Transactional
     public Unit update(UnitParam param) {
         Unit unit = this.findById(param.getId());
         BeanValidator.check(param);

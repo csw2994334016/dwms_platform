@@ -75,12 +75,14 @@ public class ProductService {
         return productRepository.countBySku(sku) > 0;
     }
 
+    @Transactional
     public void updateStateById(int id, StateCode delete) {
         Product product = this.findById(id);
         product.setStatus(delete.getCode());
         productRepository.save(product);
     }
 
+    @Transactional
     public void deleteByIds(List<Integer> ids) {
         List<Product> products = Lists.newArrayList();
         for (Integer id : ids) {
@@ -89,6 +91,7 @@ public class ProductService {
         productRepository.delete(products);
     }
 
+    @Transactional
     public Product update(ProductParam param) {
         Product product = this.findById(param.getId());
         BeanValidator.check(param);
