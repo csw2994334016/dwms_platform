@@ -24,16 +24,19 @@ public class LocParam {
 
     private Integer id;
 
-    @NotBlank(message = "储位编号不可以为空")
-    @Length(min = 1, max = 20, message = "储位编号长度需要在1-20个字之间")
+//    @NotBlank(message = "储位编号不可以为空")
+//    @Length(min = 1, max = 20, message = "储位编号长度需要在1-20个字之间")
     private Integer locCode; //储位编号
 
     @NotBlank(message = "储位名称不可以为空")
     @Length(min = 1, max = 20, message = "储位名称长度需要在1-20个字之间")
     private String locName; //储位名称
 
+    @NotNull(message = "储位数量不可以为空")
+    private Integer locNum;
+
     @NotNull(message = "储区不可以为空")
-    private Integer areaId; //储区id
+    private Integer pareaId; //储区id
 
     @Min(value = 0, message = "状态不合法")
     @Max(value = 2, message = "状态不合法")

@@ -18,5 +18,6 @@ public class CategoryTree {
 
     private Integer id;
     private String text;
+    private String remark;
     private List<CategoryTree> nodes;
 }

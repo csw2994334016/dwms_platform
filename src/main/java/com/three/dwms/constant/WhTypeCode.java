@@ -6,7 +6,7 @@ package com.three.dwms.constant;
  */
 public enum WhTypeCode {
 
-    WAREHOUSE(1, "仓库"), ZONE(2, "仓区"), AREA(1, "储区"), LOC(2, "储位");
+    ROOT(0, "仓库资料"), WAREHOUSE(1, "仓库"), ZONE(2, "仓区"), AREA(3, "储区"), LOC(4, "储位");
 
     private int code;
     private String desc;

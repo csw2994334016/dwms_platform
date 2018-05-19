@@ -126,7 +126,7 @@ public class CategoryService {
         List<CategoryTree> categoryTreeList = Lists.newArrayList();
         CategoryTree categoryTree = CategoryTree.builder().text("物料分类").id(0).nodes(Lists.newArrayList()).build();
         for (Category category : categoryList) {
-            CategoryTree categoryTree1 = CategoryTree.builder().id(category.getId()).text(category.getName()).build();
+            CategoryTree categoryTree1 = CategoryTree.builder().id(category.getId()).text(category.getName()).remark(category.getRemark()).build();
             categoryTree.getNodes().add(categoryTree1);
         }
         categoryTreeList.add(categoryTree);

@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 
@@ -38,19 +39,18 @@ public class ZoneService {
     @Transactional
     public void create(ZoneParam param) {
         BeanValidator.check(param);
-        if (checkZoneCodeExist(param.getZoneCode(), param.getId())) {
+        Warehouse warehouse = warehouseService.findById(param.getPwhId());
+        if (checkZoneCodeExist(param.getZoneCode(), warehouse, param.getId())) {
             throw new ParamException("仓区编号已经存在");
         }
-        if (checkZoneNameExist(param.getZoneName(), param.getId())) {
+        if (checkZoneNameExist(param.getZoneName(), warehouse, param.getId())) {
             throw new ParamException("仓区名称已经存在");
         }
-
-        Warehouse warehouse = warehouseService.findById(param.getWarehouseId());
 
         Zone zone = Zone.builder().zoneCode(param.getZoneCode()).zoneName(param.getZoneName()).warehouse(warehouse).build();
 
         zone.setStatus(param.getStatus());
-        zone.setRemark(param.getRemark());
+        zone.setRemark(param.getZoneRemark());
         zone.setCreator(RequestHolder.getCurrentUser().getUsername());
         zone.setCreateTime(new Date());
         zone.setOperator(RequestHolder.getCurrentUser().getUsername());
@@ -60,18 +60,32 @@ public class ZoneService {
         zoneRepository.save(zone);
     }
 
-    private boolean checkZoneCodeExist(String zoneCode, Integer id) {
+    private boolean checkZoneCodeExist(String zoneCode, Warehouse warehouse, Integer id) {
         if (id != null) {
+            if (warehouse != null) {
+                return zoneRepository.countByZoneCodeAndWarehouseAndIdNot(zoneCode, warehouse, id) > 0;
+            }
             return zoneRepository.countByZoneCodeAndIdNot(zoneCode, id) > 0;
+        } else {
+            if (warehouse != null) {
+                return zoneRepository.countByZoneCodeAndWarehouse(zoneCode, warehouse) > 0;
+            }
+            return zoneRepository.countByZoneCode(zoneCode) > 0;
         }
-        return zoneRepository.countByZoneCode(zoneCode) > 0;
     }
 
-    private boolean checkZoneNameExist(String zoneName, Integer id) {
+    private boolean checkZoneNameExist(String zoneName, Warehouse warehouse, Integer id) {
         if (id != null) {
+            if (warehouse != null) {
+                return zoneRepository.countByZoneNameAndWarehouseAndIdNot(zoneName, warehouse, id) > 0;
+            }
             return zoneRepository.countByZoneNameAndIdNot(zoneName, id) > 0;
+        } else {
+            if (warehouse != null) {
+                return zoneRepository.countByZoneNameAndWarehouse(zoneName, warehouse) > 0;
+            }
+            return zoneRepository.countByZoneName(zoneName) > 0;
         }
-        return zoneRepository.countByZoneName(zoneName) > 0;
     }
 
     @Transactional
@@ -98,22 +112,21 @@ public class ZoneService {
     @Transactional
     public Zone update(ZoneParam param) {
         Zone zone = this.findById(param.getId());
+        Warehouse warehouse = warehouseService.findById(param.getPwhId());
         BeanValidator.check(param);
-        if (checkZoneCodeExist(param.getZoneCode(), param.getId())) {
+        if (checkZoneCodeExist(param.getZoneCode(), warehouse, param.getId())) {
             throw new ParamException("仓区编号已经存在");
         }
-        if (checkZoneNameExist(param.getZoneName(), param.getId())) {
+        if (checkZoneNameExist(param.getZoneName(), warehouse, param.getId())) {
             throw new ParamException("仓区名称已经存在");
         }
-
-        Warehouse warehouse = warehouseService.findById(param.getWarehouseId());
 
         zone.setZoneCode(param.getZoneCode());
         zone.setZoneName(param.getZoneName());
         zone.setWarehouse(warehouse);
 
         zone.setStatus(param.getStatus());
-        zone.setRemark(param.getRemark());
+        zone.setRemark(param.getZoneRemark());
         zone.setOperator(RequestHolder.getCurrentUser().getUsername());
         zone.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
         zone.setOperateTime(new Date());
@@ -122,6 +135,16 @@ public class ZoneService {
     }
 
     public List<Zone> findAll() {
+        HttpServletRequest request = RequestHolder.getCurrentRequest();
+        if (request != null && request.getParameter("pwhId") != null) {
+            int pwhId = Integer.valueOf(request.getParameter("pwhId")); //表格查询条件
+            if (pwhId > 0) {
+                Warehouse warehouse = warehouseService.findById(pwhId);
+                return zoneRepository.findAllByWarehouse(warehouse);
+            } else {
+                return (List<Zone>) zoneRepository.findAll();
+            }
+        }
         return (List<Zone>) zoneRepository.findAll();
     }
 

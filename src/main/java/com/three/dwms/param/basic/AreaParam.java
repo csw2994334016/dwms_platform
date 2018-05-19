@@ -24,15 +24,18 @@ public class AreaParam {
 
     private Integer id;
 
-    @NotNull(message = "储区编号不可以为空")
+//    @NotNull(message = "储区编号不可以为空")
     private Integer areaCode; //储区编号
 
     @NotBlank(message = "储区名称不可以为空")
     @Length(min = 1, max = 20, message = "储区名称长度需要在1-20个字之间")
     private String areaName; //储区名称
 
+    @NotNull(message = "储区个数不可以为空")
+    private Integer areaNum; //自动生成储区的个数
+
     @NotNull(message = "仓区不可以为空")
-    private Integer zoneId; //仓区id
+    private Integer pzoneId; //仓区id
 
     @Min(value = 0, message = "状态不合法")
     @Max(value = 2, message = "状态不合法")

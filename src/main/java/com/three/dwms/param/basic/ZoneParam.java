@@ -33,12 +33,12 @@ public class ZoneParam {
     private String zoneName; //仓区名称
 
     @NotNull(message = "仓库不可以为空")
-    private Integer warehouseId; //仓库id
+    private Integer pwhId; //仓库id
 
     @Min(value = 0, message = "状态不合法")
     @Max(value = 2, message = "状态不合法")
     private Integer status = StateCode.NORMAL.getCode();
 
     @Length(min = 0, max = 200, message = "备注长度需要在200个字符以内")
-    private String remark;
+    private String zoneRemark;
 }

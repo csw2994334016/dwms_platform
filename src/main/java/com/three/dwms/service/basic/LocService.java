@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 
@@ -40,26 +41,30 @@ public class LocService {
     @Transactional
     public void create(LocParam param) {
         BeanValidator.check(param);
-        if (checkLocCodeExist(param.getLocCode(), param.getId())) {
-            throw new ParamException("储位编号已经存在");
+
+        Area area = areaService.findById(param.getPareaId());
+
+        //自动生成储位编号和名称
+        Integer maxLocCode = locRepository.findMaxLocCodeByArea(area);
+        int start = 0;
+        if (maxLocCode != null) {
+            start = maxLocCode;
         }
-        if (checkLocNameExist(param.getLocName(), param.getId())) {
-            throw new ParamException("储位名称已经存在");
+        List<Loc> locList = Lists.newArrayList();
+        Loc loc;
+        for (int i = start + 1; i <= start + param.getLocNum(); i++) {
+            loc = Loc.builder().locCode(i).locName(area.getAreaName() + "" + String.format("%02d", i)).area(area).build();
+            loc.setStatus(param.getStatus());
+            loc.setRemark(param.getRemark());
+            loc.setCreator(RequestHolder.getCurrentUser().getUsername());
+            loc.setCreateTime(new Date());
+            loc.setOperator(RequestHolder.getCurrentUser().getUsername());
+            loc.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
+            loc.setOperateTime(new Date());
+            locList.add(loc);
         }
 
-        Area area = areaService.findById(param.getAreaId());
-
-        Loc loc = Loc.builder().locCode(param.getLocCode()).locName(param.getLocName()).area(area).build();
-
-        loc.setStatus(param.getStatus());
-        loc.setRemark(param.getRemark());
-        loc.setCreator(RequestHolder.getCurrentUser().getUsername());
-        loc.setCreateTime(new Date());
-        loc.setOperator(RequestHolder.getCurrentUser().getUsername());
-        loc.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
-        loc.setOperateTime(new Date());
-
-        locRepository.save(loc);
+        locRepository.save(locList);
     }
 
     private boolean checkLocCodeExist(Integer locCode, Integer id) {
@@ -107,7 +112,7 @@ public class LocService {
         if (checkLocNameExist(param.getLocName(), param.getId())) {
             throw new ParamException("储位名称已经存在");
         }
-        Area area = areaService.findById(param.getAreaId());
+        Area area = areaService.findById(param.getPareaId());
 
         loc.setLocCode(param.getLocCode());
         loc.setLocName(param.getLocName());
@@ -123,6 +128,11 @@ public class LocService {
     }
 
     public List<Loc> findAll() {
+        HttpServletRequest request = RequestHolder.getCurrentRequest();
+        if (request != null && request.getParameter("pareaId") != null) {
+            Area area = areaService.findById(Integer.valueOf(request.getParameter("pareaId")));
+            return locRepository.findAllByArea(area);
+        }
         return (List<Loc>) locRepository.findAll();
     }
 

@@ -22,7 +22,13 @@ public class Area extends BaseEntity implements Serializable {
     @Column(length = 20, nullable = false)
     private String areaName; //储区名称
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.DETACH)
     @JoinColumn(name="zone_id", nullable = false)
     private Zone zone; //仓区
+
+    @Transient
+    private Integer areaId;
+    public Integer getAreaId() {
+        return getId();
+    }
 }

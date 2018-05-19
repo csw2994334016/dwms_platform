@@ -2,7 +2,9 @@ package com.three.dwms.repository.basic;
 
 import com.three.dwms.entity.basic.Area;
 import com.three.dwms.entity.basic.Loc;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -20,4 +22,7 @@ public interface LocRepository extends PagingAndSortingRepository<Loc, Integer> 
     int countByLocName(String locName);
 
     List<Loc> findAllByArea(Area area);
+
+    @Query("select max(l.locCode) from Loc l where l.area = :area")
+    Integer findMaxLocCodeByArea(@Param("area") Area area);
 }

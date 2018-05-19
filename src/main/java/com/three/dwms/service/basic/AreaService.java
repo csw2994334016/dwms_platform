@@ -12,6 +12,7 @@ import com.three.dwms.param.basic.AreaParam;
 import com.three.dwms.repository.basic.AreaRepository;
 import com.three.dwms.utils.BeanValidator;
 import com.three.dwms.utils.IpUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 
@@ -27,6 +29,7 @@ import java.util.List;
  * Description:
  */
 @Service
+@Slf4j
 public class AreaService {
 
     @Resource
@@ -38,40 +41,45 @@ public class AreaService {
     @Transactional
     public void create(AreaParam param) {
         BeanValidator.check(param);
-        if (checkAreaCodeExist(param.getAreaCode(), param.getId())) {
-            throw new ParamException("储区编号已经存在");
+        Zone zone = zoneService.findById(param.getPzoneId());
+//        if (checkAreaNameExist(param.getAreaName(), zone, param.getId())) {
+//            throw new ParamException("储区名称已经存在");
+//        }
+
+        //自动生成储区编号和名称
+        Integer maxAreaCode = areaRepository.findMaxAreaCodeByZone(zone);
+        int start = 0;
+        if (maxAreaCode != null) {
+            start = maxAreaCode;
         }
-        if (checkAreaNameExist(param.getAreaName(), param.getId())) {
-            throw new ParamException("储区名称已经存在");
+        List<Area> areaList = Lists.newArrayList();
+        Area area;
+        for (int i = start + 1; i <= start + param.getAreaNum(); i++) {
+            area = Area.builder().areaCode(i).areaName(zone.getZoneCode() + "" + String.format("%02d", i)).zone(zone).build();
+            area.setStatus(param.getStatus());
+            area.setRemark(param.getRemark());
+            area.setCreator(RequestHolder.getCurrentUser().getUsername());
+            area.setCreateTime(new Date());
+            area.setOperator(RequestHolder.getCurrentUser().getUsername());
+            area.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
+            area.setOperateTime(new Date());
+            areaList.add(area);
         }
-
-        Zone zone = zoneService.findById(param.getZoneId());
-
-        Area area = Area.builder().areaCode(param.getAreaCode()).areaName(param.getAreaName()).zone(zone).build();
-
-        area.setStatus(param.getStatus());
-        area.setRemark(param.getRemark());
-        area.setCreator(RequestHolder.getCurrentUser().getUsername());
-        area.setCreateTime(new Date());
-        area.setOperator(RequestHolder.getCurrentUser().getUsername());
-        area.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
-        area.setOperateTime(new Date());
-
-        areaRepository.save(area);
+        areaRepository.save(areaList);
     }
 
-    private boolean checkAreaCodeExist(Integer areaCode, Integer id) {
+    private boolean checkAreaNameExist(String areaName, Zone zone, Integer id) {
         if (id != null) {
-            return areaRepository.countByAreaCodeAndIdNot(areaCode, id) > 0;
-        }
-        return areaRepository.countByAreaCode(areaCode) > 0;
-    }
-
-    private boolean checkAreaNameExist(String areaName, Integer id) {
-        if (id != null) {
+            if (zone != null) {
+                return areaRepository.countByAreaNameAndZoneAndIdNot(areaName, zone, id) > 0;
+            }
             return areaRepository.countByAreaNameAndIdNot(areaName, id) > 0;
+        } else {
+            if (zone != null) {
+                return areaRepository.countByAreaNameAndZone(areaName, zone) > 0;
+            }
+            return areaRepository.countByAreaName(areaName) > 0;
         }
-        return areaRepository.countByAreaName(areaName) > 0;
     }
 
     @Transactional
@@ -97,16 +105,12 @@ public class AreaService {
 
     @Transactional
     public Area update(AreaParam param) {
-        Area area = this.findById(param.getId());
         BeanValidator.check(param);
-        if (checkAreaCodeExist(param.getAreaCode(), param.getId())) {
-            throw new ParamException("储区编号已经存在");
-        }
-        if (checkAreaNameExist(param.getAreaName(), param.getId())) {
+        Area area = this.findById(param.getId());
+        Zone zone = zoneService.findById(param.getPzoneId());
+        if (checkAreaNameExist(param.getAreaName(), zone, param.getId())) {
             throw new ParamException("储区名称已经存在");
         }
-
-        Zone zone = zoneService.findById(param.getZoneId());
 
         area.setAreaCode(param.getAreaCode());
         area.setAreaName(param.getAreaName());
@@ -122,6 +126,11 @@ public class AreaService {
     }
 
     public List<Area> findAll() {
+        HttpServletRequest request = RequestHolder.getCurrentRequest();
+        if (request != null && request.getParameter("pzoneId") != null) {
+            Zone zone = zoneService.findById(Integer.valueOf(request.getParameter("pzoneId")));
+            return areaRepository.findAllByZone(zone);
+        }
         return (List<Area>) areaRepository.findAll();
     }
 

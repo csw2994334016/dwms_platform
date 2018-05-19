@@ -22,8 +22,14 @@ public class Loc extends BaseEntity implements Serializable {
     @Column(length = 20, nullable = false)
     private String locName; //储位名称
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.DETACH)
     @JoinColumn(name = "area_id")
     private Area area; //储区
 
+    @Transient
+    private Integer locId;
+
+    public Integer getLocId() {
+        return getId();
+    }
 }

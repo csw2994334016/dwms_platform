@@ -20,4 +20,12 @@ public interface ZoneRepository extends PagingAndSortingRepository<Zone, Integer
     int countByZoneName(String zoneName);
 
     List<Zone> findAllByWarehouse(Warehouse warehouse);
+
+    int countByZoneCodeAndWarehouseAndIdNot(String zoneCode, Warehouse warehouse, Integer id);
+
+    int countByZoneCodeAndWarehouse(String zoneCode, Warehouse warehouse);
+
+    int countByZoneNameAndWarehouseAndIdNot(String zoneName, Warehouse warehouse, Integer id);
+
+    int countByZoneNameAndWarehouse(String zoneName, Warehouse warehouse);
 }

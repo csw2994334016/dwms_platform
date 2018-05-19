@@ -61,7 +61,7 @@ public class WarehouseService {
         Warehouse warehouse = Warehouse.builder().whCode(param.getWhCode()).whName(param.getWhName()).build();
 
         warehouse.setStatus(param.getStatus());
-        warehouse.setRemark(param.getRemark());
+        warehouse.setRemark(param.getWhRemark());
         warehouse.setCreator(RequestHolder.getCurrentUser().getUsername());
         warehouse.setCreateTime(new Date());
         warehouse.setOperator(RequestHolder.getCurrentUser().getUsername());
@@ -121,7 +121,7 @@ public class WarehouseService {
         warehouse.setWhName(param.getWhName());
 
         warehouse.setStatus(param.getStatus());
-        warehouse.setRemark(param.getRemark());
+        warehouse.setRemark(param.getWhRemark());
         warehouse.setOperator(RequestHolder.getCurrentUser().getUsername());
         warehouse.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
         warehouse.setOperateTime(new Date());
@@ -136,25 +136,36 @@ public class WarehouseService {
     public List<WarehouseTree> findAllByTree() {
         List<WarehouseTree> warehouseTreeList = Lists.newArrayList();
         List<Warehouse> warehouseList = (List<Warehouse>) warehouseRepository.findAll();
+        WarehouseTree root = WarehouseTree.builder().id(0).text(WhTypeCode.ROOT.getDesc()).type(WhTypeCode.ROOT.getCode()).nodes(Lists.newArrayList()).build();
         for (Warehouse warehouse : warehouseList) {
-            WarehouseTree warehouseTree1 = WarehouseTree.builder().id(warehouse.getId()).text(warehouse.getWhName()).type(WhTypeCode.WAREHOUSE.getCode()).nodes(Lists.newArrayList()).build();
+            WarehouseTree warehouseTree1 = WarehouseTree.builder().id(warehouse.getId()).text(warehouse.getWhName()).type(WhTypeCode.WAREHOUSE.getCode()).build();
             List<Zone> zoneList = zoneRepository.findAllByWarehouse(warehouse);
+            if (zoneList.size() > 0) {
+                warehouseTree1.setNodes(Lists.newArrayList());
+            }
             for (Zone zone : zoneList) {
-                WarehouseTree warehouseTree2 = WarehouseTree.builder().id(zone.getId()).text(zone.getZoneName()).type(WhTypeCode.ZONE.getCode()).nodes(Lists.newArrayList()).build();
+                WarehouseTree warehouseTree2 = WarehouseTree.builder().id(zone.getId()).text(zone.getZoneName()).type(WhTypeCode.ZONE.getCode()).build();
                 List<Area> areaList = areaRepository.findAllByZone(zone);
+                if (areaList.size() > 0) {
+                    warehouseTree2.setNodes(Lists.newArrayList());
+                }
                 for (Area area : areaList) {
-                    WarehouseTree warehouseTree3 = WarehouseTree.builder().id(area.getId()).text(area.getAreaName()).type(WhTypeCode.AREA.getCode()).nodes(Lists.newArrayList()).build();
+                    WarehouseTree warehouseTree3 = WarehouseTree.builder().id(area.getId()).text(area.getAreaName()).type(WhTypeCode.AREA.getCode()).build();
                     List<Loc> locList = locRepository.findAllByArea(area);
-                    for (Loc loc : locList) {
-                        WarehouseTree warehouseTree4 = WarehouseTree.builder().id(loc.getId()).text(loc.getLocName()).type(WhTypeCode.LOC.getCode()).nodes(Lists.newArrayList()).build();
-                        warehouseTree3.getNodes().add(warehouseTree4);
+                    if (locList.size() > 0) {
+                        warehouseTree3.setNodes(Lists.newArrayList());
                     }
+//                    for (Loc loc : locList) {
+//                        WarehouseTree warehouseTree4 = WarehouseTree.builder().id(loc.getId()).text(loc.getLocName()).type(WhTypeCode.LOC.getCode()).build();
+//                        warehouseTree3.getNodes().add(warehouseTree4);
+//                    }
                     warehouseTree2.getNodes().add(warehouseTree3);
                 }
                 warehouseTree1.getNodes().add(warehouseTree2);
             }
-            warehouseTreeList.add(warehouseTree1);
+            root.getNodes().add(warehouseTree1);
         }
+        warehouseTreeList.add(root);
         return warehouseTreeList;
     }
 
