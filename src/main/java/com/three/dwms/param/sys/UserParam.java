@@ -1,5 +1,6 @@
 package com.three.dwms.param.sys;
 
+import com.three.dwms.constant.StateCode;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
@@ -51,7 +52,7 @@ public class UserParam {
     @NotNull(message = "必须指定用户的状态")
     @Min(value = 0, message = "用户状态不合法")
     @Max(value = 2, message = "用户状态不合法")
-    private Integer status; //1:可用；0：不可用
+    private Integer status = StateCode.NORMAL.getCode(); //1:可用；0：不可用
 
     @Length(min = 0, max = 200, message = "备注长度需要在200个字以内")
     private String remark; //备注
