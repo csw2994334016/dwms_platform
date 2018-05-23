@@ -14,6 +14,9 @@ import java.util.List;
 @Slf4j
 public class StringUtil {
 
+    public static final String excel2003 = ".xls";
+    public static final String excel2007 = ".xlsx";
+
     public static List<Integer> splitToIntListByReg(String userIds, String reg) {
         List<Integer> userIdList = new ArrayList<>();
         try {
@@ -26,4 +29,15 @@ public class StringUtil {
         }
         return userIdList;
     }
+
+    // 是否是2003的excel，返回true是2003
+    public static boolean isExcel2003(String filePath) {
+        return filePath.matches("^.+\\.(?i)(xls)$");
+    }
+
+    //是否是2007的excel，返回true是2007
+    public static boolean isExcel2007(String filePath) {
+        return filePath.matches("^.+\\.(?i)(xlsx)$");
+    }
+
 }

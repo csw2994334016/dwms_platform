@@ -25,6 +25,8 @@ public class Product extends BaseEntity implements Serializable {
     @Column(length = 20)
     private String spec; //物料规格/品牌/型号
 
+    private Integer safeNumber; //物料安全数量
+
     @OneToOne(cascade = CascadeType.REFRESH)
     @JoinColumn(name="category_id", nullable = false)
     private Category category; //物料分类号
