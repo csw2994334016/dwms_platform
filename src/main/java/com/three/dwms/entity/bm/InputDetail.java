@@ -57,7 +57,7 @@ public class InputDetail implements Serializable {
     private String supplierName; //供应商
 
     @Column(length = 20, nullable = false)
-    private Integer state; //物料状态，入库、未入库
+    private Integer state; //物料状态，入库、未入库，转移
 
     private String whCode; //仓库编号
 
