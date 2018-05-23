@@ -48,7 +48,7 @@ public class ProductService {
 
         Category category = categoryService.findById(param.getCategoryId());
 
-        Product product = Product.builder().sku(param.getSku()).skuDesc(param.getSkuDesc()).category(category).build();
+        Product product = Product.builder().sku(param.getSku()).skuDesc(param.getSkuDesc()).category(category).safeNumber(param.getSafeNumber()).build();
 
         product.setStatus(param.getStatus());
         product.setRemark(param.getRemark());
@@ -108,6 +108,7 @@ public class ProductService {
         product.setSkuDesc(param.getSkuDesc());
         product.setSpec(param.getSpec());
         product.setCategory(category);
+        product.setSafeNumber(param.getSafeNumber());
 
         product.setStatus(param.getStatus());
         product.setRemark(param.getRemark());

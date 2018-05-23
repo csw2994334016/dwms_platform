@@ -51,6 +51,10 @@ public class WarehouseService {
     @Transactional
     public void create(WarehouseParam param) {
         BeanValidator.check(param);
+        long whCount = warehouseRepository.count();
+        if (whCount >= 2) {
+            throw new ParamException("系统最多支持创建量仓库");
+        }
         if (checkWhCodeExist(param.getWhCode(), param.getId())) {
             throw new ParamException("仓库编号已经存在");
         }

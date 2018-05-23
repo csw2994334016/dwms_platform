@@ -36,6 +36,7 @@ public class ProductParam {
 
     private String spec; //物料规格/品牌/型号
 
+    private Integer safeNumber; //物料安全数量
 
     @Min(value = 0, message = "状态不合法")
     @Max(value = 2, message = "状态不合法")
