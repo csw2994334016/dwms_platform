@@ -90,6 +90,13 @@ public class SysUserController {
         return JsonData.success(sysUser);
     }
 
+    @RequestMapping(value = "/currentUser", method = RequestMethod.GET)
+    public JsonData findCurrentUser() {
+        SysUser sysUser = sysUserService.findCurrentUser();
+        sysUser = sysUserService.createUserAndRoleAndAcl(sysUser);
+        return JsonData.success(sysUser);
+    }
+
     @RequestMapping(value = "/fuzzySearch", method = RequestMethod.POST)
     public JsonData fuzzySearch(@RequestBody UserParam userParam) {
         List<SysUser> sysUserList = sysUserService.fuzzySearch(userParam.getKeyword());

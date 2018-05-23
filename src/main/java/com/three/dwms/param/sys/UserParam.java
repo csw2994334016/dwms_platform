@@ -8,6 +8,7 @@ import org.hibernate.validator.constraints.NotBlank;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * Created by csw on 2018/5/6.
@@ -48,6 +49,8 @@ public class UserParam {
 //    @NotBlank(message = "电话不可以为空")
     @Length(min = 0, max = 13, message = "电话长度需要在13个字以内")
     private String tel;
+
+    private List<String> whCodes; //用户能查看的仓库code：["wh1","wh2","wh3"]
 
     @NotNull(message = "必须指定用户的状态")
     @Min(value = 0, message = "用户状态不合法")

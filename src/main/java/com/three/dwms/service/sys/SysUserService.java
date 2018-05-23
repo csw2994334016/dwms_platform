@@ -37,9 +37,6 @@ import java.util.List;
 @Slf4j
 public class SysUserService {
 
-    @Value("#{props['init.username']}")
-    private String username;
-
     @Value("#{props['init.defaultPassword']}")
     private String defaultPassword;
 
@@ -81,7 +78,9 @@ public class SysUserService {
         String password = StringUtils.isBlank(param.getPassword()) ? defaultPassword : param.getPassword();
         password = MD5Util.encrypt(password);
 
-        SysUser sysUser = SysUser.builder().username(param.getUsername()).realName(param.getRealName()).password(password).sysRole(sysRole).tel(param.getTel()).email(param.getEmail()).sex(param.getSex()).build();
+        String whCodes = StringUtils.join(param.getWhCodes(), ",");
+
+        SysUser sysUser = SysUser.builder().username(param.getUsername()).realName(param.getRealName()).password(password).sysRole(sysRole).whCodes(whCodes).tel(param.getTel()).email(param.getEmail()).sex(param.getSex()).build();
 
         if (RequestHolder.getCurrentUser() != null) { //SYSTEM_ADMIN
             sysUser.setCreator(RequestHolder.getCurrentUser().getUsername());
@@ -162,8 +161,9 @@ public class SysUserService {
 
         //查找角色
         SysRole sysRole = sysRoleService.findById(param.getRoleId());
+        String whCodes = StringUtils.join(param.getWhCodes(), ",");
 
-        SysUser after = SysUser.builder().username(param.getUsername()).realName(param.getRealName()).password(before.getPassword()).tel(param.getTel()).email(param.getEmail()).sex(param.getSex()).sysRole(sysRole).build();
+        SysUser after = SysUser.builder().username(param.getUsername()).realName(param.getRealName()).password(before.getPassword()).tel(param.getTel()).email(param.getEmail()).sex(param.getSex()).sysRole(sysRole).whCodes(whCodes).build();
         after.setId(param.getId());
 
         after.setStatus(param.getStatus());
@@ -235,6 +235,11 @@ public class SysUserService {
         SysUser sysUser = sysUserRepository.findOne(id);
         Preconditions.checkNotNull(sysUser, "用户(id:" + id + ")不存在");
         return sysUser;
+    }
+
+    public SysUser findCurrentUser() {
+        Integer id = RequestHolder.getCurrentUser().getId();
+        return this.findById(id);
     }
 
     public SysUser findByKeyword(String keyword) {
