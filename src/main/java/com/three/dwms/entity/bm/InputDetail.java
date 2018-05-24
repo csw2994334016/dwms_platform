@@ -14,7 +14,7 @@ import java.util.Date;
 @Setter
 @ToString
 @Entity
-@Table(name = "bm_inputDetail")
+@Table(name = "bm_input_detail")
 public class InputDetail implements Serializable {
 
     @Id
