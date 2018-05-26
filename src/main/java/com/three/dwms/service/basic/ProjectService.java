@@ -13,6 +13,7 @@ import com.three.dwms.param.basic.ProjectParam;
 import com.three.dwms.repository.basic.ProjectRepository;
 import com.three.dwms.utils.BeanValidator;
 import com.three.dwms.utils.IpUtil;
+import com.three.dwms.utils.StringUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -36,14 +37,14 @@ public class ProjectService {
     @Transactional
     public void create(ProjectParam param) {
         BeanValidator.check(param);
-        if (checkProjectCodeExist(param.getProjectCode(), param.getId())) {
-            throw new ParamException("项目编号已经存在");
-        }
         if (checkProjectNameExist(param.getProjectName(), param.getId())) {
             throw new ParamException("项目名称已经存在");
         }
 
-        Project project = Project.builder().projectCode(param.getProjectCode()).projectName(param.getProjectName()).build();
+        String maxCode = projectRepository.findMaxProjectCode();
+        String projectCode = StringUtil.getCurCode("P", maxCode);
+
+        Project project = Project.builder().projectCode(projectCode).projectName(param.getProjectName()).build();
 
         project.setStatus(param.getStatus());
         project.setRemark(param.getRemark());
@@ -92,14 +93,10 @@ public class ProjectService {
     public Project update(ProjectParam param) {
         Project project = this.findById(param.getId());
         BeanValidator.check(param);
-        if (checkProjectCodeExist(param.getProjectCode(), param.getId())) {
-            throw new ParamException("项目编号已经存在");
-        }
         if (checkProjectNameExist(param.getProjectName(), param.getId())) {
             throw new ParamException("项目名称已经存在");
         }
 
-        project.setProjectCode(param.getProjectCode());
         project.setProjectName(param.getProjectName());
 
         project.setStatus(param.getStatus());

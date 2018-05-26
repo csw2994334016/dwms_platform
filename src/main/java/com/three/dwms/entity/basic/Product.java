@@ -16,7 +16,7 @@ import java.io.Serializable;
 @Table(name = "basic_product")
 public class Product extends BaseEntity implements Serializable {
 
-    @Column(length = 20, unique = true, nullable = false)
+    @Column(length = 7, unique = true, nullable = false)
     private String sku; //物料编号
 
     @Column(length = 20, nullable = false)

@@ -161,4 +161,10 @@ public class LocService {
         Preconditions.checkNotNull(loc, "储位信息不存在");
         return loc;
     }
+
+    public Loc findByLocNameAndWarehouse(String locName, Warehouse warehouse) {
+        Loc loc = locRepository.findByLocNameAndWarehouse(locName, warehouse);
+        Preconditions.checkNotNull(loc, "储位信息不存在");
+        return loc;
+    }
 }

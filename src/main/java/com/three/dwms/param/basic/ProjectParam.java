@@ -23,8 +23,6 @@ public class ProjectParam {
 
     private Integer id;
 
-    @NotBlank(message = "项目编号不可以为空")
-    @Length(min = 1, max = 20, message = "项目编号长度需要在1-20个字之间")
     private String projectCode; //项目编号
 
     @NotBlank(message = "项目名称不可以为空")

@@ -11,6 +11,7 @@ import com.three.dwms.param.basic.BanJiParam;
 import com.three.dwms.repository.basic.BanJIRepository;
 import com.three.dwms.utils.BeanValidator;
 import com.three.dwms.utils.IpUtil;
+import com.three.dwms.utils.StringUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -34,14 +35,14 @@ public class BanJiService {
     @Transactional
     public void create(BanJiParam param) {
         BeanValidator.check(param);
-        if (checkBanJiCodeExist(param.getBanJiCode(), param.getId())) {
-            throw new ParamException("班级编号已经存在");
-        }
         if (checkBanJiNameExist(param.getBanJiName(), param.getId())) {
             throw new ParamException("班级名称已经存在");
         }
 
-        BanJi banJi = BanJi.builder().banJiCode(param.getBanJiCode()).banJiName(param.getBanJiName()).build();
+        String maxCode = banJIRepository.findMaxBanJiCode();
+        String banJICode = StringUtil.getCurCode("B", maxCode);
+
+        BanJi banJi = BanJi.builder().banJiCode(banJICode).banJiName(param.getBanJiName()).build();
 
         banJi.setStatus(param.getStatus());
         banJi.setRemark(param.getRemark());
@@ -90,14 +91,10 @@ public class BanJiService {
     public BanJi update(BanJiParam param) {
         BanJi banJi = this.findById(param.getId());
         BeanValidator.check(param);
-        if (checkBanJiCodeExist(param.getBanJiCode(), param.getId())) {
-            throw new ParamException("班级编号已经存在");
-        }
         if (checkBanJiNameExist(param.getBanJiName(), param.getId())) {
             throw new ParamException("班级名称已经存在");
         }
 
-        banJi.setBanJiCode(param.getBanJiCode());
         banJi.setBanJiName(param.getBanJiName());
 
         banJi.setStatus(param.getStatus());

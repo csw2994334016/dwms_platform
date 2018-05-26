@@ -11,6 +11,7 @@ import com.three.dwms.param.basic.UnitParam;
 import com.three.dwms.repository.basic.UnitRepository;
 import com.three.dwms.utils.BeanValidator;
 import com.three.dwms.utils.IpUtil;
+import com.three.dwms.utils.StringUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -34,14 +35,14 @@ public class UnitService {
     @Transactional
     public void create(UnitParam param) {
         BeanValidator.check(param);
-        if (checkUnitCodeExist(param.getUnitCode(), param.getId())) {
-            throw new ParamException("单位编号已经存在");
-        }
         if (checkUnitNameExist(param.getUnitName(), param.getId())) {
             throw new ParamException("单位名称已经存在");
         }
 
-        Unit unit = Unit.builder().unitCode(param.getUnitCode()).unitName(param.getUnitName()).build();
+        String maxCode = unitRepository.findMaxUnitCode();
+        String unitCode = StringUtil.getCurCode("U", maxCode);
+
+        Unit unit = Unit.builder().unitCode(unitCode).unitName(param.getUnitName()).build();
 
         unit.setStatus(param.getStatus());
         unit.setRemark(param.getRemark());
@@ -52,13 +53,6 @@ public class UnitService {
         unit.setOperateTime(new Date());
 
         unitRepository.save(unit);
-    }
-
-    private boolean checkUnitCodeExist(String unitCode, Integer id) {
-        if (id != null) {
-            return unitRepository.countByUnitCodeAndIdNot(unitCode, id) > 0;
-        }
-        return unitRepository.countByUnitCode(unitCode) > 0;
     }
 
     private boolean checkUnitNameExist(String unitName, Integer id) {
@@ -90,14 +84,10 @@ public class UnitService {
     public Unit update(UnitParam param) {
         Unit unit = this.findById(param.getId());
         BeanValidator.check(param);
-        if (checkUnitCodeExist(param.getUnitCode(), param.getId())) {
-            throw new ParamException("单位编号已经存在");
-        }
         if (checkUnitNameExist(param.getUnitName(), param.getId())) {
             throw new ParamException("单位名称已经存在");
         }
 
-        unit.setUnitCode(param.getUnitCode());
         unit.setUnitName(param.getUnitName());
 
         unit.setStatus(param.getStatus());

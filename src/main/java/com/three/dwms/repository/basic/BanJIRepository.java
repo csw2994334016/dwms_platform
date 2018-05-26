@@ -1,6 +1,7 @@
 package com.three.dwms.repository.basic;
 
 import com.three.dwms.entity.basic.BanJi;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 /**
@@ -15,4 +16,7 @@ public interface BanJIRepository extends PagingAndSortingRepository<BanJi, Integ
     int countByBanJiNameAndIdNot(String banJiName, Integer id);
 
     int countByBanJiName(String banJiName);
+
+    @Query("select max(b.banJiCode) from BanJi b")
+    String findMaxBanJiCode();
 }

@@ -15,4 +15,6 @@ public interface SupplierRepository extends PagingAndSortingRepository<Supplier,
     int countBySupplierNameAndIdNot(String supplierName, Integer id);
 
     int countBySupplierName(String supplierName);
+
+    Supplier findBySupplierName(String supplierName);
 }

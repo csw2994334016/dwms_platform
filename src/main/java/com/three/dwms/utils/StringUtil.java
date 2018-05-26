@@ -45,6 +45,6 @@ public class StringUtil {
         if (maxCode != null) {
             max = Integer.valueOf(maxCode.substring(1)) + 1;
         }
-        return  pre + String.format("%05d", max);
+        return  pre + String.format("%06d", max);
     }
 }

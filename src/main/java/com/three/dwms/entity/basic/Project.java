@@ -18,7 +18,7 @@ import java.io.Serializable;
 @Table(name = "basic_project")
 public class Project extends BaseEntity implements Serializable {
 
-    @Column(length = 20, unique = true, nullable = false)
+    @Column(length = 7, unique = true, nullable = false)
     private String projectCode; //项目编号
 
     @Column(length = 20, unique = true, nullable = false)

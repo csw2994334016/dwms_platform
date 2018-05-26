@@ -29,4 +29,7 @@ public interface LocRepository extends PagingAndSortingRepository<Loc, Integer> 
 
     @Query("select l from Loc l where l.area.zone.warehouse = :warehouse")
     List<Loc> findAllByWarehouse(@Param("warehouse") Warehouse warehouse);
+
+    @Query("select l from Loc l where l.locName = :locName and l.area.zone.warehouse = :warehouse")
+    Loc findByLocNameAndWarehouse(@Param("locName") String locName, @Param("warehouse") Warehouse warehouse);
 }

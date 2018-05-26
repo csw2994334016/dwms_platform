@@ -23,8 +23,6 @@ public class BanJiParam {
 
     private Integer id;
 
-    @NotBlank(message = "班级编号不可以为空")
-    @Length(min = 1, max = 20, message = "班级编号长度需要在1-20个字之间")
     private String banJiCode; //班级编号
 
     @NotBlank(message = "班级名称不可以为空")

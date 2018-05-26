@@ -23,8 +23,6 @@ public class UnitParam {
 
     private Integer id;
 
-    @NotBlank(message = "单位编号不可以为空")
-    @Length(min = 1, max = 20, message = "单位编号长度需要在1-20个字之间")
     private String unitCode; //单位编号
 
     @NotBlank(message = "单位名称不可以为空")

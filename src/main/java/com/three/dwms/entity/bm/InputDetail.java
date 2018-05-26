@@ -71,6 +71,9 @@ public class InputDetail implements Serializable {
     private String whName; //库房名称
 
     @Column(nullable = false)
+    private String locName; //储位名称，仓区、储区、储位编号拼接而来，6位
+
+    @Column(nullable = false)
     private String whCode; //仓库编号
 
     @Column(nullable = false)
@@ -81,9 +84,6 @@ public class InputDetail implements Serializable {
 
     @Column(nullable = false)
     private Integer locCode; //储位编号
-
-    @Column(nullable = false)
-    private String locName; //储位名称，仓区、储区、储位编号拼接而来，6位
 
     @Column(nullable = false)
     private Integer status; //状态：1：可用，0：禁用，2：删除

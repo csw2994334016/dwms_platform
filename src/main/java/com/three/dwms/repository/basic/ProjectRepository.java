@@ -1,6 +1,7 @@
 package com.three.dwms.repository.basic;
 
 import com.three.dwms.entity.basic.Project;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 /**
@@ -15,4 +16,7 @@ public interface ProjectRepository extends PagingAndSortingRepository<Project, I
     int countByProjectNameAndIdNot(String projectName, Integer id);
 
     int countByProjectName(String projectName);
+
+    @Query("select max(p.projectCode) from Project p")
+    String findMaxProjectCode();
 }

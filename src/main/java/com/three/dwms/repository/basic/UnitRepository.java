@@ -1,7 +1,7 @@
 package com.three.dwms.repository.basic;
 
-import com.three.dwms.entity.basic.Category;
 import com.three.dwms.entity.basic.Unit;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 /**
@@ -14,7 +14,8 @@ public interface UnitRepository extends PagingAndSortingRepository<Unit, Integer
 
     int countByUnitName(String unitName);
 
-    int countByUnitCodeAndIdNot(String unitCode, Integer id);
+    @Query("select max(u.unitCode) from Unit u")
+    String findMaxUnitCode();
 
-    int countByUnitCode(String unitCode);
+    Unit findByUnitName(String unitName);
 }

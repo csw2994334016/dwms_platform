@@ -18,7 +18,7 @@ import java.io.Serializable;
 @Table(name = "basic_banJi")
 public class BanJi extends BaseEntity implements Serializable {
 
-    @Column(length = 20, unique = true, nullable = false)
+    @Column(length = 7, unique = true, nullable = false)
     private String banJiCode; //班级编号
 
     @Column(length = 20, unique = true, nullable = false)
