@@ -34,6 +34,8 @@ public class ProductParam {
     @NotNull(message = "物料分类号不可以为空")
     private Integer categoryId; //物料分类号
 
+    @NotBlank(message = "物料规格/品牌/型号不可以为空")
+    @Length(min = 1, max = 20, message = "/品牌/型号长度需要在1-20个字之间")
     private String spec; //物料规格/品牌/型号
 
     private Integer safeNumber; //物料安全数量
