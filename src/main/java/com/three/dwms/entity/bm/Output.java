@@ -5,9 +5,7 @@ import com.three.dwms.entity.basic.BanJi;
 import com.three.dwms.entity.basic.Project;
 import lombok.*;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.io.Serializable;
 
 /**
@@ -28,15 +26,17 @@ public class Output extends BaseEntity implements Serializable {
     private String outputNo; //出库单号，自动生成
 
     @Column(length = 20, nullable = false)
-    private String whCode; //仓库编号
+    private String whName; //仓库名称
 
     private String proposer; //申请人
 
     private String approver; //审批人
 
-    private BanJi banJi; //班级
+    @Column(length = 20, nullable = false)
+    private String banJiName; //班级名称
 
-    private Project project; //项目
+    @Column(length = 20, nullable = false)
+    private String projectName; //项目名称
 
     @Column(nullable = false)
     private Integer state; //出库单状态

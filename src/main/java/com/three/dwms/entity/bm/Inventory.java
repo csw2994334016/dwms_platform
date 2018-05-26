@@ -21,9 +21,20 @@ import java.io.Serializable;
 @Table(name = "bm_inventory")
 public class Inventory extends BaseEntity implements Serializable {
 
-    @OneToOne(cascade = CascadeType.REFRESH)
-    @JoinColumn(name="product_id", nullable = false)
-    private Product product; //物料信息
+    @Column(length = 20, nullable = false)
+    private String whCode;
+
+    @Column(length = 20, nullable = false)
+    private String whName;
+
+    @Column(length = 20, nullable = false)
+    private String sku; //物料编号
+
+    @Column(length = 20, nullable = false)
+    private String skuDesc; //物料名称
+
+    @Column(length = 20)
+    private String spec; //物料规格/品牌/型号
 
     private Double skuAmount; //物料汇总数量，进出库时对该数量进行更新
 

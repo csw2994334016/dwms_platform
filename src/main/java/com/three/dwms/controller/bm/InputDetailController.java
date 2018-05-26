@@ -2,11 +2,10 @@ package com.three.dwms.controller.bm;
 
 import com.three.dwms.beans.JsonData;
 import com.three.dwms.entity.bm.InputDetail;
+import com.three.dwms.param.bm.InputDetailParam;
 import com.three.dwms.service.bm.InputDetailService;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -18,25 +17,38 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(value = "/api/bm/inputDetails")
+@Slf4j
 public class InputDetailController {
 
     @Resource
     private InputDetailService inputDetailService;
 
-    @RequestMapping(value = "/upload")
+    @RequestMapping(value = "/upload", method = RequestMethod.POST)
     public JsonData batchImport(@RequestParam(value = "filename") MultipartFile file) {
         //判断文件是否为空
         if (file == null)
-            return JsonData.fail();
+            return JsonData.fail("上传的文件为空");
         //获取文件名
         String filename = file.getOriginalFilename();
         //进一步判断文件是否为空（即判断其大小是否为0或其名称是否为null）
         long size = file.getSize();
         if (filename == null || ("").equals(filename) && size == 0)
-            return JsonData.fail();
+            return JsonData.fail("上传的文件为空");
 
-        boolean leadInOk = inputDetailService.batchImport(filename, file);
+        List<InputDetail> inputDetailList = inputDetailService.batchImport(filename, file);
+        log.info("上传文件信息，文件名：{}，解析记录数：{}", filename, inputDetailList.size());
+        return JsonData.success(inputDetailList);
+    }
 
+    @RequestMapping(method = RequestMethod.POST)
+    public JsonData create(@RequestBody List<InputDetailParam> paramList) {
+        inputDetailService.create(paramList);
+        return JsonData.success();
+    }
+
+    @RequestMapping(method = RequestMethod.GET)
+    public JsonData findAll() {
+        List<InputDetail> inputDetailList = inputDetailService.findAll();
         return JsonData.success();
     }
 

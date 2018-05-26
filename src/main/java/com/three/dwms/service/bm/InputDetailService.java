@@ -3,17 +3,18 @@ package com.three.dwms.service.bm;
 import com.google.common.collect.Lists;
 import com.three.dwms.common.RequestHolder;
 import com.three.dwms.entity.bm.InputDetail;
+import com.three.dwms.param.bm.InputDetailParam;
 import com.three.dwms.repository.bm.InputDetailRepository;
+import com.three.dwms.utils.BeanValidator;
 import com.three.dwms.utils.ImportExcel;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.List;
@@ -28,22 +29,27 @@ public class InputDetailService {
     @Resource
     private InputDetailRepository inputDetailRepository;
 
-    public boolean batchImport(String filename, MultipartFile file) {
-        boolean leadInOk = false;
+    public List<InputDetail> batchImport(String filename, MultipartFile file) {
         //创建处理EXCEL
         ImportExcel<InputDetail> importExcel = new ImportExcel<>();
         //解析excel，获取客户信息集合
-        String[] str = {"inputDate", "whName", "skuDesc", "spec", "unit", "unitPrice", "amount", "totalPrice", "purchaseDept", "purchaser", "receiver", "supplierName", "remark"};
+        String[] str = {"inputDate", "whName", "skuDesc", "spec", "unitName", "unitPrice", "amount", "totalPrice", "purchaseDept", "purchaser", "receiver", "supplierName", "remark"};
         List<String> attributes = Arrays.asList(str);
         List<InputDetail> inputDetailList = importExcel.leadInExcel(filename, file, InputDetail.class, attributes);
 
-        if (inputDetailList != null) {
-            leadInOk = true;
+        if (CollectionUtils.isNotEmpty(inputDetailList)) {
+            return inputDetailList;
         }
+        return Lists.newArrayList();
+    }
 
-        //存入数据库
+    @Transactional
+    public void create(List<InputDetailParam> paramList) {
+        List<InputDetail> inputDetailList = Lists.newArrayList();
+        for (InputDetailParam param : paramList) {
+            BeanValidator.check(param);
 
-        return leadInOk;
+        }
     }
 
     public List<InputDetail> stockQuery() {
@@ -69,5 +75,9 @@ public class InputDetailService {
             inputDetailList = inputDetailRepository.findAll(specification);
         }
         return inputDetailList;
+    }
+
+    public List<InputDetail> findAll() {
+        return null;
     }
 }
