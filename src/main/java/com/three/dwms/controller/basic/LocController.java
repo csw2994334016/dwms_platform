@@ -60,6 +60,12 @@ public class LocController {
         return JsonData.success(locList);
     }
 
+    @RequestMapping(value = "/warehouse", method = RequestMethod.POST)
+    public JsonData findAllByWarehouse(@RequestBody LocParam param) {
+        List<Loc> locList = locService.findAllByWarehouse(param);
+        return JsonData.success(locList);
+    }
+
     @RequestMapping(value = "/page", method = RequestMethod.POST)
     public JsonData findAll(@RequestBody PageQuery pageQuery) {
         Page<Loc> page = locService.findAllByPage(pageQuery);

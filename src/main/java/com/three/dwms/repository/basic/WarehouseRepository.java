@@ -15,4 +15,6 @@ public interface WarehouseRepository extends PagingAndSortingRepository<Warehous
     int countByWhCodeAndIdNot(String whCode, Integer id);
 
     int countByWhCode(String whCode);
+
+    Warehouse findByWhName(String whName);
 }

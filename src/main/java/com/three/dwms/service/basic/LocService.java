@@ -7,13 +7,16 @@ import com.three.dwms.common.RequestHolder;
 import com.three.dwms.constant.StateCode;
 import com.three.dwms.entity.basic.Area;
 import com.three.dwms.entity.basic.Loc;
+import com.three.dwms.entity.basic.Warehouse;
 import com.three.dwms.entity.basic.Zone;
 import com.three.dwms.exception.ParamException;
 import com.three.dwms.param.basic.AreaParam;
 import com.three.dwms.param.basic.LocParam;
 import com.three.dwms.repository.basic.LocRepository;
+import com.three.dwms.repository.basic.WarehouseRepository;
 import com.three.dwms.utils.BeanValidator;
 import com.three.dwms.utils.IpUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +40,9 @@ public class LocService {
 
     @Resource
     private LocRepository locRepository;
+
+    @Resource
+    private WarehouseRepository warehouseRepository;
 
     @Transactional
     public void create(LocParam param) {
@@ -134,6 +140,14 @@ public class LocService {
             return locRepository.findAllByArea(area);
         }
         return (List<Loc>) locRepository.findAll();
+    }
+
+    public List<Loc> findAllByWarehouse(LocParam param) {
+        if (StringUtils.isBlank(param.getWhName())) {
+            throw new ParamException("仓库编号或者名称不可以为空");
+        }
+        Warehouse warehouse = warehouseRepository.findByWhName(param.getWhName());
+        return locRepository.findAllByWarehouse(warehouse);
     }
 
     public Page<Loc> findAllByPage(PageQuery pageQuery) {
