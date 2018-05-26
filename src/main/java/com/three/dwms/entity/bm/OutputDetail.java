@@ -24,11 +24,14 @@ public class OutputDetail extends BaseEntity implements Serializable {
     @JoinColumn(name = "output_id", nullable = false)
     private Output output; //出库单号
 
-    @Column(length = 20, unique = true, nullable = false)
+    @Column(length = 20, nullable = false)
     private String sku; //物料编号
 
-    @Column(length = 20, unique = true, nullable = false)
+    @Column(length = 20, nullable = false)
     private String skuDesc; //物料名称
+
+    @Column(length = 20, nullable = false)
+    private String spec; //物料规格/品牌/型号
 
     @Column(nullable = false)
     private Double outNumber; //出库数量

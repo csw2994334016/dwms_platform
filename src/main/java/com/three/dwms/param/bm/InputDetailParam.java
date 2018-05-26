@@ -22,6 +22,10 @@ public class InputDetailParam {
 
     private Integer id;
 
+    @NotBlank(message = "物料编号不可以为空")
+    @Length(min = 1, max = 20, message = "物料编号长度需要在1-20个字之间")
+    private String sku; //物料编号
+
     @NotBlank(message = "物料名称不可以为空")
     @Length(min = 1, max = 20, message = "物料名称长度需要在1-20个字之间")
     private String skuDesc; //物料名称

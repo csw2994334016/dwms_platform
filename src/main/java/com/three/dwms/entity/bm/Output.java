@@ -28,8 +28,10 @@ public class Output extends BaseEntity implements Serializable {
     @Column(length = 20, nullable = false)
     private String whName; //仓库名称
 
+    @Column(length = 20, nullable = false)
     private String proposer; //申请人
 
+    @Column(length = 20, nullable = false)
     private String approver; //审批人
 
     @Column(length = 20, nullable = false)
