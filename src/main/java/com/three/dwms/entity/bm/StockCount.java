@@ -23,9 +23,14 @@ public class StockCount extends BaseEntity implements Serializable {
 
     private String stockCode; //盘点单号，自动生成，规则：SC000001
 
-    @OneToOne(cascade = CascadeType.REFRESH)
-    @JoinColumn(name="product_id", nullable = false)
-    private Product product; //盘点的物料信息
+    @Column(length = 20, nullable = false)
+    private String sku; //物料编号
+
+    @Column(length = 20, nullable = false)
+    private String skuDesc; //物料名称
+
+    @Column(length = 20, nullable = false)
+    private String spec; //物料规格/品牌/型号
 
     private Double recordAmount; //系统记录的数量
 

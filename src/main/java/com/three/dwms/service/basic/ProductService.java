@@ -12,6 +12,7 @@ import com.three.dwms.param.basic.ProductParam;
 import com.three.dwms.repository.basic.ProductRepository;
 import com.three.dwms.utils.BeanValidator;
 import com.three.dwms.utils.IpUtil;
+import com.three.dwms.utils.StringUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -39,16 +40,16 @@ public class ProductService {
     @Transactional
     public void create(ProductParam param) {
         BeanValidator.check(param);
-        if (checkSkuExist(param.getSku(), param.getId())) {
-            throw new ParamException("物料编号已经存在");
+        if (checkSkuDescExist(param.getSkuDesc(), param.getSpec(), param.getId())) {
+            throw new ParamException("物料名称-规格/品牌/型号已经存在");
         }
-        if (checkSkuDescExist(param.getSkuDesc(), param.getId())) {
-            throw new ParamException("物料名称已经存在");
-        }
+
+        String maxCode = productRepository.findMaxSku();
+        String sku = StringUtil.getCurCode("P", maxCode);
 
         Category category = categoryService.findById(param.getCategoryId());
 
-        Product product = Product.builder().sku(param.getSku()).skuDesc(param.getSkuDesc()).category(category).safeNumber(param.getSafeNumber()).build();
+        Product product = Product.builder().sku(sku).skuDesc(param.getSkuDesc()).spec(param.getSpec()).category(category).safeNumber(param.getSafeNumber()).build();
 
         product.setStatus(param.getStatus());
         product.setRemark(param.getRemark());
@@ -61,11 +62,11 @@ public class ProductService {
         productRepository.save(product);
     }
 
-    private boolean checkSkuDescExist(String skuDesc, Integer id) {
+    private boolean checkSkuDescExist(String skuDesc, String spec, Integer id) {
         if (id != null) {
-            return productRepository.countBySkuDescAndIdNot(skuDesc, id) > 0;
+            return productRepository.countBySkuDescAndSpecAndIdNot(skuDesc, spec, id) > 0;
         }
-        return productRepository.countBySkuDesc(skuDesc) > 0;
+        return productRepository.countBySkuDescAndSpec(skuDesc, spec) > 0;
     }
 
     private boolean checkSkuExist(String sku, Integer id) {
@@ -95,16 +96,12 @@ public class ProductService {
     public Product update(ProductParam param) {
         Product product = this.findById(param.getId());
         BeanValidator.check(param);
-        if (checkSkuExist(param.getSku(), param.getId())) {
-            throw new ParamException("物料编号已经存在");
-        }
-        if (checkSkuDescExist(param.getSkuDesc(), param.getId())) {
-            throw new ParamException("物料名称已经存在");
+        if (checkSkuDescExist(param.getSkuDesc(), param.getSpec(), param.getId())) {
+            throw new ParamException("物料名称-规格/品牌/型号已经存在");
         }
 
         Category category = categoryService.findById(param.getCategoryId());
 
-        product.setSku(param.getSku());
         product.setSkuDesc(param.getSkuDesc());
         product.setSpec(param.getSpec());
         product.setCategory(category);

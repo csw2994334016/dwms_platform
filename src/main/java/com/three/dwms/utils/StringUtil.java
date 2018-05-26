@@ -40,4 +40,11 @@ public class StringUtil {
         return filePath.matches("^.+\\.(?i)(xlsx)$");
     }
 
+    public static String getCurCode(String pre, String maxCode) {
+        int max = 1;
+        if (maxCode != null) {
+            max = Integer.valueOf(maxCode.substring(1)) + 1;
+        }
+        return  pre + String.format("%05d", max);
+    }
 }

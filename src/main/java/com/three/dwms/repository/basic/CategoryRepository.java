@@ -11,4 +11,6 @@ public interface CategoryRepository extends PagingAndSortingRepository<Category,
     int countByNameAndIdNot(String categoryName, Integer id);
 
     int countByName(String categoryName);
+
+    Category findByName(String categoryName);
 }

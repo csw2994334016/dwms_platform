@@ -1,7 +1,6 @@
 package com.three.dwms.entity.bm;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.three.dwms.entity.base.BaseEntity;
 import lombok.*;
 
 import javax.persistence.*;
@@ -16,7 +15,12 @@ import java.util.Date;
 @ToString
 @Entity
 @Table(name = "bm_input_detail")
-public class InputDetail extends BaseEntity implements Serializable {
+public class InputDetail implements Serializable {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(unique = true, nullable = false)
+    private Integer id; //主键
 
     @Column(length = 20, nullable = false)
     private String inputNo; //入库单编号
@@ -30,13 +34,18 @@ public class InputDetail extends BaseEntity implements Serializable {
     @Column(length = 20, nullable = false)
     private String spec; //物料规格/品牌/型号
 
+    @Transient
+    private String categoryName;
+
     @Column(length = 20, nullable = false)
     private String unitName; //物料单位
 
     private Double unitPrice; //物料单价
 
     @Column(nullable = false)
-    private Double amount; //物料数量
+    private Double amount; //物料数量，入库数量
+
+    private Double currentAmount; //物料数量，库存当前剩余数量
 
     private Double totalPrice; //物料总价
 
@@ -75,5 +84,25 @@ public class InputDetail extends BaseEntity implements Serializable {
 
     @Column(nullable = false)
     private String locName; //储位名称，仓区、储区、储位编号拼接而来，6位
+
+    @Column(nullable = false)
+    private Integer status; //状态：1：可用，0：禁用，2：删除
+
+    private String remark; //备注
+
+    @JsonIgnore
+    private String creator; //创建者
+
+    @JsonIgnore
+    private Date createTime; //创建时间
+
+    @JsonIgnore
+    private String operator; //最后一次操作者
+
+    @JsonIgnore
+    private Date operateTime; //最后一次操作时间
+
+    @JsonIgnore
+    private String operateIp; //最后一次操作的ip地址
 
 }
