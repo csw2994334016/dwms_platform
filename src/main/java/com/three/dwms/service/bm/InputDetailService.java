@@ -163,13 +163,11 @@ public class InputDetailService {
             inputDetail.setWhCode(warehouse.getWhCode());
             inputDetail.setWhName(warehouse.getWhName());
             //储位代码
-            if (StringUtils.isNotBlank(param.getLocName())) {
-                Loc loc = locService.findByLocNameAndWarehouse(param.getLocName(), warehouse);
-                inputDetail.setLocCode(loc.getLocCode());
-                inputDetail.setLocName(loc.getLocName());
-                inputDetail.setAreaCode(loc.getArea().getAreaCode());
-                inputDetail.setZoneCode(loc.getArea().getZone().getZoneCode());
-            }
+            Loc loc = locService.findByLocNameAndWarehouse(param.getLocName(), warehouse);
+            inputDetail.setLocCode(loc.getLocCode());
+            inputDetail.setLocName(loc.getLocName());
+            inputDetail.setAreaCode(loc.getArea().getAreaCode());
+            inputDetail.setZoneCode(loc.getArea().getZone().getZoneCode());
             inputDetail.setRemark(param.getRemark());
             inputDetail.setStatus(StateCode.NORMAL.getCode());
             inputDetail.setCreator(RequestHolder.getCurrentUser().getUsername());
@@ -178,9 +176,9 @@ public class InputDetailService {
             inputDetail.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
             inputDetail.setOperateTime(new Date());
             //inventory表的操作
-            Inventory inventory = inventoryRepository.findBySkuAndWhCode(product.getSku(), warehouse.getWhCode());
+            Inventory inventory = inventoryRepository.findBySkuAndWhCodeAndLocName(product.getSku(), warehouse.getWhCode(), inputDetail.getLocName());
             if (inventory == null) {
-                Inventory inventory1 = Inventory.builder().sku(product.getSku()).whCode(warehouse.getWhCode()).skuDesc(product.getSkuDesc()).spec(product.getSpec()).whName(warehouse.getWhName()).skuAmount(inputDetail.getAmount()).build();
+                Inventory inventory1 = Inventory.builder().sku(product.getSku()).whCode(warehouse.getWhCode()).locName(inputDetail.getLocName()).skuDesc(product.getSkuDesc()).spec(product.getSpec()).whName(warehouse.getWhName()).skuAmount(inputDetail.getAmount()).build();
                 inventory1.setRemark("导入入库自动生成");
                 inventory1.setStatus(StateCode.NORMAL.getCode());
                 inventory1.setCreator(RequestHolder.getCurrentUser().getUsername());

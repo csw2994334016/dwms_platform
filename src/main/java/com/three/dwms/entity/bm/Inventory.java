@@ -28,6 +28,9 @@ public class Inventory extends BaseEntity implements Serializable {
     private String whName;
 
     @Column(length = 20, nullable = false)
+    private String locName;
+
+    @Column(length = 20, nullable = false)
     private String sku; //物料编号
 
     @Column(length = 20, nullable = false)
