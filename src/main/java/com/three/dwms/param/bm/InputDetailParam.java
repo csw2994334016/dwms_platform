@@ -8,6 +8,7 @@ import org.hibernate.validator.constraints.NotBlank;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import java.util.Date;
 
 /**
  * Created by csw on 2018/5/25.
@@ -58,6 +59,8 @@ public class InputDetailParam {
     @Length(min = 1, max = 20, message = "库房名称长度需要在1-20个字之间")
     private String whName; //库房名称
 
+    @NotBlank(message = "储位代码不可以为空")
+    @Length(min = 6, max = 6, message = "储位代码长度必须为6位")
     private String locName; //储位代码
 
     @Min(value = 0, message = "状态不合法")

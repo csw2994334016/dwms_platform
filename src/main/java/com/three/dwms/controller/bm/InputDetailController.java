@@ -1,5 +1,6 @@
 package com.three.dwms.controller.bm;
 
+import com.google.common.collect.Lists;
 import com.three.dwms.beans.JsonData;
 import com.three.dwms.entity.bm.InputDetail;
 import com.three.dwms.param.bm.InputDetailParam;
@@ -49,6 +50,18 @@ public class InputDetailController {
     @RequestMapping(method = RequestMethod.GET)
     public JsonData findAll() {
         List<InputDetail> inputDetailList = inputDetailService.findAll();
+        return JsonData.success(inputDetailList);
+    }
+
+    @RequestMapping(value = "/batch", method = RequestMethod.DELETE)
+    public JsonData deleteBatch(@RequestBody List<InputDetailParam> paramList) {
+        List<Integer> ids = Lists.newArrayList();
+        for (InputDetailParam projectParam : paramList) {
+            if (projectParam.getId() != null) {
+                ids.add(projectParam.getId());
+            }
+        }
+        inputDetailService.deleteByIds(ids);
         return JsonData.success();
     }
 

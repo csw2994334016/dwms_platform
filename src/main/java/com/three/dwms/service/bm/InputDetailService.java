@@ -3,12 +3,15 @@ package com.three.dwms.service.bm;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.three.dwms.common.RequestHolder;
+import com.three.dwms.constant.InputStateCode;
 import com.three.dwms.constant.StateCode;
 import com.three.dwms.entity.basic.*;
 import com.three.dwms.entity.bm.InputDetail;
+import com.three.dwms.entity.bm.Inventory;
 import com.three.dwms.param.bm.InputDetailParam;
 import com.three.dwms.repository.basic.*;
 import com.three.dwms.repository.bm.InputDetailRepository;
+import com.three.dwms.repository.bm.InventoryRepository;
 import com.three.dwms.service.basic.LocService;
 import com.three.dwms.service.basic.WarehouseService;
 import com.three.dwms.utils.BeanValidator;
@@ -57,11 +60,14 @@ public class InputDetailService {
     @Resource
     private LocService locService;
 
+    @Resource
+    private InventoryRepository inventoryRepository;
+
     public List<InputDetail> batchImport(String filename, MultipartFile file) {
         //创建处理EXCEL
         ImportExcel<InputDetail> importExcel = new ImportExcel<>();
         //解析excel，获取客户信息集合
-        String[] str = {"inputDate", "whName", "skuDesc", "spec", "categoryName", "unitName", "unitPrice", "amount", "totalPrice", "purchaseDept", "purchaser", "receiver", "supplierName", "remark"};
+        String[] str = {"whName","locName", "skuDesc", "spec", "categoryName", "unitName", "unitPrice", "amount", "totalPrice", "purchaseDept", "purchaser", "receiver", "supplierName", "remark"};
         List<String> attributes = Arrays.asList(str);
         List<InputDetail> inputDetailList = importExcel.leadInExcel(filename, file, InputDetail.class, attributes);
 
@@ -74,9 +80,13 @@ public class InputDetailService {
     @Transactional
     public void create(List<InputDetailParam> paramList) {
         List<InputDetail> inputDetailList = Lists.newArrayList();
+        String maxNo = inputDetailRepository.findMaxInputNo();
+        String inputNo = StringUtil.getCurCode("I", maxNo);
         for (InputDetailParam param : paramList) {
             BeanValidator.check(param);
             InputDetail inputDetail = InputDetail.builder().build();
+            //自动生成入库单编号
+            inputDetail.setInputNo(inputNo);
             //物料信息
             Product product = productRepository.findBySkuDescAndSpec(param.getSkuDesc(), param.getSpec());
             if (product == null) {
@@ -84,7 +94,7 @@ public class InputDetailService {
                 Category category = categoryRepository.findByName(categoryName);
                 if (category == null) {
                     Category category1 = Category.builder().name(param.getCategoryName()).build();
-                    category1.setRemark("导入入库单自动生成物料类别");
+                    category1.setRemark("导入入库自动生成");
                     category1.setStatus(StateCode.NORMAL.getCode());
                     category1.setCreator(RequestHolder.getCurrentUser().getUsername());
                     category1.setCreateTime(new Date());
@@ -96,7 +106,7 @@ public class InputDetailService {
                 String maxCode = productRepository.findMaxSku();
                 String sku = StringUtil.getCurCode("P", maxCode);
                 Product product1 = Product.builder().sku(sku).skuDesc(param.getSkuDesc()).spec(param.getSpec()).category(category).build();
-                product1.setRemark("导入入库单自动生成物料信息");
+                product1.setRemark("导入入库自动生成物");
                 product1.setStatus(StateCode.NORMAL.getCode());
                 product1.setCreator(RequestHolder.getCurrentUser().getUsername());
                 product1.setCreateTime(new Date());
@@ -114,7 +124,7 @@ public class InputDetailService {
                 String maxCode = unitRepository.findMaxUnitCode();
                 String unitCode = StringUtil.getCurCode("U", maxCode);
                 Unit unit1 = Unit.builder().unitCode(unitCode).unitName(param.getUnitName()).build();
-                unit1.setRemark("导入入库单自动生成单位");
+                unit1.setRemark("导入入库自动生成");
                 unit1.setStatus(StateCode.NORMAL.getCode());
                 unit1.setCreator(RequestHolder.getCurrentUser().getUsername());
                 unit1.setCreateTime(new Date());
@@ -136,7 +146,7 @@ public class InputDetailService {
                 Supplier supplier = supplierRepository.findBySupplierName(param.getSupplierName());
                 if (supplier == null) {
                     Supplier supplier1 = Supplier.builder().supplierCode(param.getSupplierName()).supplierName(param.getSupplierName()).build();
-                    supplier1.setRemark("导入入库单自动生成供应商");
+                    supplier1.setRemark("导入入库自动生成");
                     supplier1.setStatus(StateCode.NORMAL.getCode());
                     supplier1.setCreator(RequestHolder.getCurrentUser().getUsername());
                     supplier1.setCreateTime(new Date());
@@ -167,11 +177,27 @@ public class InputDetailService {
             inputDetail.setOperator(RequestHolder.getCurrentUser().getUsername());
             inputDetail.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
             inputDetail.setOperateTime(new Date());
-            inputDetailRepository.save(inputDetail);
             //inventory表的操作
-
-
+            Inventory inventory = inventoryRepository.findBySkuAndWhCode(product.getSku(), warehouse.getWhCode());
+            if (inventory == null) {
+                Inventory inventory1 = Inventory.builder().sku(product.getSku()).whCode(warehouse.getWhCode()).skuDesc(product.getSkuDesc()).spec(product.getSpec()).whName(warehouse.getWhName()).skuAmount(inputDetail.getAmount()).build();
+                inventory1.setRemark("导入入库自动生成");
+                inventory1.setStatus(StateCode.NORMAL.getCode());
+                inventory1.setCreator(RequestHolder.getCurrentUser().getUsername());
+                inventory1.setCreateTime(new Date());
+                inventory1.setOperator(RequestHolder.getCurrentUser().getUsername());
+                inventory1.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
+                inventory1.setOperateTime(new Date());
+                inventoryRepository.save(inventory1);
+            } else {
+                inventory.setSkuAmount(inventory.getSkuAmount() + inputDetail.getAmount());
+                inventoryRepository.save(inventory);
+            }
+            //状态
+            inputDetail.setState(InputStateCode.NOT_INPUT.getCode());
+            inputDetailList.add(inputDetail);
         }
+        inputDetailRepository.save(inputDetailList);
     }
 
     public List<InputDetail> stockQuery() {
@@ -200,6 +226,30 @@ public class InputDetailService {
     }
 
     public List<InputDetail> findAll() {
-        return null;
+        return (List<InputDetail>) inputDetailRepository.findAll();
+    }
+
+    @Transactional
+    public void deleteByIds(List<Integer> ids) {
+        List<InputDetail> inputDetails = Lists.newArrayList();
+        List<Inventory> inventories = Lists.newArrayList();
+        for (Integer id : ids) {
+            InputDetail inputDetail = this.findById(id);
+            inputDetails.add(inputDetail);
+            Inventory inventory = inventoryRepository.findBySkuAndWhCode(inputDetail.getSku(), inputDetail.getWhCode());
+            if (inventory != null) {
+                inventory.setSkuAmount(inventory.getSkuAmount() - inputDetail.getAmount());
+                inventories.add(inventory);
+            }
+        }
+        inputDetailRepository.delete(inputDetails);
+        //删除Inventory表中相应的数量
+        inventoryRepository.save(inventories);
+    }
+
+    private InputDetail findById(Integer id) {
+        InputDetail inputDetail = inputDetailRepository.findOne(id);
+        Preconditions.checkNotNull(inputDetail, "入库单详情不存在");
+        return inputDetail;
     }
 }

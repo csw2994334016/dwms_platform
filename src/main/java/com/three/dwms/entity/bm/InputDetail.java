@@ -65,9 +65,6 @@ public class InputDetail implements Serializable {
     private Integer state; //物料状态，入库、未入库，转移
 
     @Column(nullable = false)
-    private Date inputDate; //入库日期
-
-    @Column(nullable = false)
     private String whName; //库房名称
 
     @Column(nullable = false)
@@ -90,16 +87,12 @@ public class InputDetail implements Serializable {
 
     private String remark; //备注
 
-    @JsonIgnore
     private String creator; //创建者
 
-    @JsonIgnore
     private Date createTime; //创建时间
 
-    @JsonIgnore
     private String operator; //最后一次操作者
 
-    @JsonIgnore
     private Date operateTime; //最后一次操作时间
 
     @JsonIgnore

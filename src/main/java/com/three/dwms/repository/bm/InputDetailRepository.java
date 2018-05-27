@@ -2,6 +2,7 @@ package com.three.dwms.repository.bm;
 
 import com.three.dwms.entity.bm.InputDetail;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 /**
@@ -9,4 +10,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
  * Description:
  */
 public interface InputDetailRepository extends PagingAndSortingRepository<InputDetail, Integer>, JpaSpecificationExecutor<InputDetail> {
+
+    @Query("select max(i.inputNo) from InputDetail i")
+    String findMaxInputNo();
 }

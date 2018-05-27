@@ -25,10 +25,10 @@ public class Inventory extends BaseEntity implements Serializable {
     private String whCode;
 
     @Column(length = 20, nullable = false)
-    private String whName;
+    private String sku; //物料编号
 
     @Column(length = 20, nullable = false)
-    private String sku; //物料编号
+    private String whName;
 
     @Column(length = 20, nullable = false)
     private String skuDesc; //物料名称
