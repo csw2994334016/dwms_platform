@@ -1,8 +1,6 @@
 package com.three.dwms.entity.bm;
 
 import com.three.dwms.entity.base.BaseEntity;
-import com.three.dwms.entity.basic.BanJi;
-import com.three.dwms.entity.basic.Project;
 import lombok.*;
 
 import javax.persistence.*;

@@ -3,6 +3,8 @@ package com.three.dwms.repository.bm;
 import com.three.dwms.entity.bm.Inventory;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
+import java.util.List;
+
 /**
  * Created by csw on 2018/5/27.
  * Description:
@@ -10,4 +12,6 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 public interface InventoryRepository extends PagingAndSortingRepository<Inventory, Integer> {
 
     Inventory findBySkuAndWhCode(String sku, String whCode);
+
+    List<Inventory> findAllByWhName(String whName);
 }
