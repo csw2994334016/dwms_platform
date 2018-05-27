@@ -1,8 +1,10 @@
 package com.three.dwms.repository.bm;
 
+import com.google.common.collect.Lists;
 import com.three.dwms.entity.bm.Inventory;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -14,8 +16,8 @@ public interface InventoryRepository extends PagingAndSortingRepository<Inventor
 
     Inventory findBySkuAndWhCode(String sku, String whCode);
 
-    @Query("select i from Inventory i ")
-    List<Inventory> findAllByWhName(String whName);
+    @Query("select i.whName, i.sku, i.skuDesc, i.spec, sum(i.skuAmount) from Inventory i where i.whName = :whName group by i.whName, i.sku, i.skuDesc, i.spec")
+    List<Object[]> findAllByWhName(@Param("whName") String whName);
 
     Inventory findBySkuAndWhCodeAndLocName(String sku, String whCode, String locName);
 }

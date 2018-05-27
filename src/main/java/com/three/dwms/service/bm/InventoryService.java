@@ -1,8 +1,10 @@
 package com.three.dwms.service.bm;
 
+import com.google.common.collect.Lists;
 import com.three.dwms.entity.bm.Inventory;
 import com.three.dwms.param.bm.InventoryParam;
 import com.three.dwms.repository.bm.InventoryRepository;
+import com.three.dwms.repository.bm.InventoryResult;
 import com.three.dwms.utils.BeanValidator;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,12 @@ public class InventoryService {
 
     public List<Inventory> findByWhName(InventoryParam param) {
         BeanValidator.check(param);
-        return inventoryRepository.findAllByWhName(param.getWhName());
+        List<Object[]> objectList = inventoryRepository.findAllByWhName(param.getWhName());
+        List<Inventory> inventoryList = Lists.newArrayList();
+        for (Object[] o : objectList) {
+            Inventory inventory = Inventory.builder().whName((String) o[0]).sku((String) o[1]).skuDesc((String) o[2]).spec((String) o[3]).skuAmount((Double) o[4]).build();
+            inventoryList.add(inventory);
+        }
+        return inventoryList;
     }
 }
