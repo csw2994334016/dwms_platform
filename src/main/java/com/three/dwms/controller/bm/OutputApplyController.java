@@ -6,10 +6,7 @@ import com.three.dwms.entity.bm.Output;
 import com.three.dwms.entity.bm.OutputDetail;
 import com.three.dwms.param.bm.OutputParam;
 import com.three.dwms.service.bm.OutputApplyService;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -28,44 +25,57 @@ public class OutputApplyController {
         return JsonData.success();
     }
 
+    @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
+    public JsonData update(@PathVariable Integer id, @RequestBody OutputParam param) {
+        param.setId(id);
+        outputApplyService.update(param);
+        return JsonData.success();
+    }
+
+    //查找所有申请单
     @RequestMapping(method = RequestMethod.GET)
     public JsonData findAll() {
         List<Output> outputList = outputApplyService.findAll();
         return JsonData.success(outputList);
     }
 
-//    //更新
-//    @RequestMapping(method = RequestMethod.PUT)
-//    public JsonData update(@RequestBody List<OutputParam> paramList) {
-//        outputApplyService.update(paramList);
-//        return JsonData.success();
-//    }
-//
-//    //作废
-//    @RequestMapping(method = RequestMethod.PUT)
-//    public JsonData cancel(@RequestBody List<OutputParam> paramList) {
-//        outputApplyService.cancle(paramList);
-//        return JsonData.success();
-//    }
-//
-//    //提交申请
-//    @RequestMapping(method = RequestMethod.PUT)
-//    public JsonData submit(@RequestBody List<OutputParam> paramList) {
-//        outputApplyService.submit(paramList);
-//        return JsonData.success();
-//    }
-//
-//    //OutputDetail详情
-//    @RequestMapping(method = RequestMethod.PUT)
-//    public JsonData findAll(@RequestBody Integer id) {
-//        OutputDetail outputDetail = outputApplyService.findAll(id);
-//        return JsonData.success(outputDetail);
-//    }
-//
-//    //加载个人申请单
-//    @RequestMapping(method = RequestMethod.GET)
-//    public JsonData load() {
-//        List<Output> outputList = outputApplyService.load();
-//        return JsonData.success(outputList);
-//    }
+    //申请作废
+    @RequestMapping(value = "/batch", method = RequestMethod.DELETE)
+    public JsonData cancel(@RequestBody List<OutputParam> paramList) {
+        List<Integer> ids = Lists.newArrayList();
+        for (OutputParam param : paramList) {
+            if (param.getId() != null) {
+                ids.add(param.getId());
+            }
+        }
+        outputApplyService.cancelByIds(ids);
+        return JsonData.success();
+    }
+
+    //提交申请
+    @RequestMapping(value = "/submit", method = RequestMethod.POST)
+    public JsonData submit(@RequestBody List<OutputParam> paramList) {
+        List<Integer> ids = Lists.newArrayList();
+        for (OutputParam param : paramList) {
+            if (param.getId() != null) {
+                ids.add(param.getId());
+            }
+        }
+        outputApplyService.submitByIds(ids);
+        return JsonData.success();
+    }
+
+    //OutputDetail详情
+    @RequestMapping(value = "/details", method = RequestMethod.GET)
+    public JsonData findOutputDetails() {
+        List<OutputDetail> outputDetailList = outputApplyService.findOutputDetails();
+        return JsonData.success(outputDetailList);
+    }
+
+    //加载个人申请单
+    @RequestMapping(value = "/currentOutputApplies", method = RequestMethod.GET)
+    public JsonData findCurrentOutputApplies() {
+        List<Output> outputList = outputApplyService.findCurrentOutputApplies();
+        return JsonData.success(outputList);
+    }
 }

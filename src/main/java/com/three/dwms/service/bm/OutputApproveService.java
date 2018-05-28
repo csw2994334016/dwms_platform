@@ -107,10 +107,10 @@ public class OutputApproveService {
     //审批单加载
     public List<Output> load() {
         List<Output> outputList = Lists.newArrayList();
-        Output output = outputRepository.findAllByApprover(RequestHolder.getCurrentUser().getUsername());
-        if (output != null) {
-            outputList.add(output);
-        }
+//        Output output = outputRepository.findAllByApprover(RequestHolder.getCurrentUser().getUsername());
+//        if (output != null) {
+//            outputList.add(output);
+//        }
         return outputList;
     }
 }

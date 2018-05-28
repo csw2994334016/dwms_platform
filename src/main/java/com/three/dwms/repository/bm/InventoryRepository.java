@@ -1,6 +1,5 @@
 package com.three.dwms.repository.bm;
 
-import com.google.common.collect.Lists;
 import com.three.dwms.entity.bm.Inventory;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
