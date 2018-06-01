@@ -12,7 +12,10 @@ import com.three.dwms.param.bm.InputDetailParam;
 import com.three.dwms.repository.basic.*;
 import com.three.dwms.repository.bm.InputDetailRepository;
 import com.three.dwms.repository.bm.InventoryRepository;
+import com.three.dwms.service.basic.AreaService;
 import com.three.dwms.service.basic.LocService;
+import com.three.dwms.service.basic.WarehouseService;
+import com.three.dwms.service.basic.ZoneService;
 import com.three.dwms.utils.BeanValidator;
 import com.three.dwms.utils.ImportExcel;
 import com.three.dwms.utils.IpUtil;
@@ -57,16 +60,25 @@ public class InputDetailService {
     private WarehouseRepository warehouseRepository;
 
     @Resource
+    private WarehouseService warehouseService;
+
+    @Resource
     private LocService locService;
 
     @Resource
     private InventoryRepository inventoryRepository;
 
+    @Resource
+    private ZoneService zoneService;
+
+    @Resource
+    private AreaService areaService;
+
     public List<InputDetail> batchImport(String filename, MultipartFile file) {
         //创建处理EXCEL
         ImportExcel<InputDetail> importExcel = new ImportExcel<>();
         //解析excel，获取客户信息集合
-        String[] str = {"whName","locName", "skuDesc", "spec", "categoryName", "unitName", "unitPrice", "amount", "totalPrice", "purchaseDept", "purchaser", "receiver", "supplierName", "remark"};
+        String[] str = {"whName", "locName", "skuDesc", "spec", "categoryName", "unitName", "unitPrice", "amount", "totalPrice", "purchaseDept", "purchaser", "receiver", "supplierName", "remark"};
         List<String> attributes = Arrays.asList(str);
         List<InputDetail> inputDetailList = importExcel.leadInExcel(filename, file, InputDetail.class, attributes);
 
@@ -203,17 +215,27 @@ public class InputDetailService {
         if (request != null) {
             Specification<InputDetail> specification = (root, criteriaQuery, criteriaBuilder) -> {
                 List<Predicate> predicateList = Lists.newArrayList();
-                if (request.getParameter("zoneCode") != null) {
-                    predicateList.add(criteriaBuilder.equal(root.get("zoneCode"), request.getParameter("zoneCode")));
+                if (StringUtils.isNotBlank(request.getParameter("whId"))) {
+                    Warehouse warehouse = warehouseService.findById(Integer.valueOf(request.getParameter("whId")));
+                    predicateList.add(criteriaBuilder.equal(root.get("whCode"), warehouse.getWhCode()));
                 }
-                if (request.getParameter("areaCode") != null) {
-                    predicateList.add(criteriaBuilder.equal(root.get("areaCode"), request.getParameter("areaCode")));
+                if (StringUtils.isNotBlank(request.getParameter("zoneId"))) {
+                    Zone zone = zoneService.findById(Integer.valueOf(request.getParameter("zoneId")));
+                    predicateList.add(criteriaBuilder.equal(root.get("zoneCode"), zone.getZoneCode()));
                 }
-                if (request.getParameter("locCode") != null) {
-                    predicateList.add(criteriaBuilder.equal(root.get("locCode"), request.getParameter("locCode")));
+                if (StringUtils.isNotBlank(request.getParameter("areaId"))) {
+                    Area area = areaService.findById(Integer.valueOf(request.getParameter("areaId")));
+                    predicateList.add(criteriaBuilder.equal(root.get("areaCode"), area.getAreaCode()));
                 }
-                if (request.getParameter("sku") != null) {
+                if (StringUtils.isNotBlank(request.getParameter("locId"))) {
+                    Loc loc = locService.findById(Integer.valueOf(request.getParameter("locId")));
+                    predicateList.add(criteriaBuilder.equal(root.get("locName"), loc.getLocName()));
+                }
+                if (StringUtils.isNotBlank(request.getParameter("sku"))) {
                     predicateList.add(criteriaBuilder.equal(root.get("sku"), request.getParameter("sku")));
+                }
+                if (StringUtils.isNotBlank(request.getParameter("purchaseDept"))) {
+                    predicateList.add(criteriaBuilder.equal(root.get("purchaseDept"), request.getParameter("purchaseDept")));
                 }
                 return criteriaBuilder.and(predicateList.toArray(new Predicate[0]));
             };

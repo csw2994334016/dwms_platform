@@ -145,4 +145,12 @@ public class AreaService {
         Preconditions.checkNotNull(area, "储区信息不存在");
         return area;
     }
+
+    public List<Area> findAllByZoneId(Integer zoneId) {
+        if (zoneId != null) {
+            Zone zone = zoneService.findById(zoneId);
+            return areaRepository.findAllByZone(zone);
+        }
+        return Lists.newArrayList();
+    }
 }

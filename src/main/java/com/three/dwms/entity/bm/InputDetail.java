@@ -1,5 +1,6 @@
 package com.three.dwms.entity.bm;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
@@ -89,6 +90,7 @@ public class InputDetail implements Serializable {
 
     private String creator; //创建者
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime; //创建时间
 
     private String operator; //最后一次操作者

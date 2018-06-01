@@ -165,4 +165,12 @@ public class LocService {
         Preconditions.checkNotNull(loc, "储位信息不存在");
         return loc;
     }
+
+    public List<Loc> findAllByAreaId(Integer areaId) {
+        if (areaId != null) {
+            Area area = areaService.findById(areaId);
+            return locRepository.findAllByArea(area);
+        }
+        return Lists.newArrayList();
+    }
 }

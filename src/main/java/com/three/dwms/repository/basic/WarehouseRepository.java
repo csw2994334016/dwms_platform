@@ -21,4 +21,6 @@ public interface WarehouseRepository extends PagingAndSortingRepository<Warehous
     Warehouse findByWhName(String whName);
 
     List<Warehouse> findAllByWhCodeIn(List<String> whCodeList);
+
+    Warehouse findByWhCode(String whCode);
 }

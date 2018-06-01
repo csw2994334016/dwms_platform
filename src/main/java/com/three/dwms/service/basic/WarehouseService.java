@@ -198,4 +198,10 @@ public class WarehouseService {
         Preconditions.checkNotNull(warehouse, "仓库(whName:" + whName + ")信息不存在");
         return warehouse;
     }
+
+    public Warehouse findByWhCode(String whCode) {
+        Warehouse warehouse = warehouseRepository.findByWhCode(whCode);
+        Preconditions.checkNotNull(warehouse, "仓库(whCode:" + whCode + ")信息不存在");
+        return warehouse;
+    }
 }

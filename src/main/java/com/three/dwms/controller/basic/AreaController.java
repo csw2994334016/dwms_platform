@@ -60,6 +60,12 @@ public class AreaController {
         return JsonData.success(zoneList);
     }
 
+    @RequestMapping(value = "/zone", method = RequestMethod.POST)
+    public JsonData findAllByZone(@RequestBody AreaParam param) {
+        List<Area> zoneList = areaService.findAllByZoneId(param.getPzoneId());
+        return JsonData.success(zoneList);
+    }
+
     @RequestMapping(value = "/page", method = RequestMethod.POST)
     public JsonData findAll(@RequestBody PageQuery pageQuery) {
         Page<Area> page = areaService.findAllByPage(pageQuery);

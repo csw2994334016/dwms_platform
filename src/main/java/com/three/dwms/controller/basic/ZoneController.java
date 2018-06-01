@@ -60,6 +60,12 @@ public class ZoneController {
         return JsonData.success(zoneList);
     }
 
+    @RequestMapping(value = "/warehouse", method = RequestMethod.POST)
+    public JsonData findByWarehouse(@RequestBody ZoneParam param) {
+        List<Zone> zoneList = zoneService.findByWarehouseId(param.getPwhId());
+        return JsonData.success(zoneList);
+    }
+
     @RequestMapping(value = "/page", method = RequestMethod.POST)
     public JsonData findAll(@RequestBody PageQuery pageQuery) {
         Page<Zone> page = zoneService.findAllByPage(pageQuery);
