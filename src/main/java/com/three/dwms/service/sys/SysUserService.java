@@ -5,7 +5,7 @@ import com.google.common.collect.Lists;
 import com.three.dwms.beans.PageQuery;
 import com.three.dwms.common.RequestHolder;
 import com.three.dwms.constant.LogTypeCode;
-import com.three.dwms.constant.StateCode;
+import com.three.dwms.constant.StatusCode;
 import com.three.dwms.entity.sys.*;
 import com.three.dwms.exception.ParamException;
 import com.three.dwms.param.sys.User;
@@ -104,10 +104,10 @@ public class SysUserService {
     }
 
     @Transactional
-    public void updateStateById(int id, StateCode stateCode) {
+    public void updateStateById(int id, StatusCode statusCode) {
         SysUser sysUser = sysUserRepository.findOne(id);
         Preconditions.checkNotNull(sysUser, "用户(id:" + id + ")不存在");
-        sysUser.setStatus(stateCode.getCode());
+        sysUser.setStatus(statusCode.getCode());
         sysUserRepository.save(sysUser);
     }
 

@@ -3,7 +3,7 @@ package com.three.dwms.controller.basic;
 import com.google.common.collect.Lists;
 import com.three.dwms.beans.JsonData;
 import com.three.dwms.beans.PageQuery;
-import com.three.dwms.constant.StateCode;
+import com.three.dwms.constant.StatusCode;
 import com.three.dwms.entity.basic.Category;
 import com.three.dwms.param.basic.CategoryParam;
 import com.three.dwms.param.basic.CategoryTree;
@@ -33,7 +33,7 @@ public class CategoryController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public JsonData delete(@PathVariable int id) {
-        categoryService.updateStateById(id, StateCode.DELETE);
+        categoryService.updateStateById(id, StatusCode.DELETE);
         return JsonData.success();
     }
 

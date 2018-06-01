@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.three.dwms.common.RequestHolder;
 import com.three.dwms.constant.InputStateCode;
-import com.three.dwms.constant.StateCode;
+import com.three.dwms.constant.StatusCode;
 import com.three.dwms.entity.basic.*;
 import com.three.dwms.entity.bm.InputDetail;
 import com.three.dwms.entity.bm.Inventory;
@@ -13,7 +13,6 @@ import com.three.dwms.repository.basic.*;
 import com.three.dwms.repository.bm.InputDetailRepository;
 import com.three.dwms.repository.bm.InventoryRepository;
 import com.three.dwms.service.basic.LocService;
-import com.three.dwms.service.basic.WarehouseService;
 import com.three.dwms.utils.BeanValidator;
 import com.three.dwms.utils.ImportExcel;
 import com.three.dwms.utils.IpUtil;
@@ -95,7 +94,7 @@ public class InputDetailService {
                 if (category == null) {
                     Category category1 = Category.builder().name(param.getCategoryName()).build();
                     category1.setRemark("导入入库自动生成");
-                    category1.setStatus(StateCode.NORMAL.getCode());
+                    category1.setStatus(StatusCode.NORMAL.getCode());
                     category1.setCreator(RequestHolder.getCurrentUser().getUsername());
                     category1.setCreateTime(new Date());
                     category1.setOperator(RequestHolder.getCurrentUser().getUsername());
@@ -107,7 +106,7 @@ public class InputDetailService {
                 String sku = StringUtil.getCurCode("P", maxCode);
                 Product product1 = Product.builder().sku(sku).skuDesc(param.getSkuDesc()).spec(param.getSpec()).category(category).build();
                 product1.setRemark("导入入库自动生成物");
-                product1.setStatus(StateCode.NORMAL.getCode());
+                product1.setStatus(StatusCode.NORMAL.getCode());
                 product1.setCreator(RequestHolder.getCurrentUser().getUsername());
                 product1.setCreateTime(new Date());
                 product1.setOperator(RequestHolder.getCurrentUser().getUsername());
@@ -125,7 +124,7 @@ public class InputDetailService {
                 String unitCode = StringUtil.getCurCode("U", maxCode);
                 Unit unit1 = Unit.builder().unitCode(unitCode).unitName(param.getUnitName()).build();
                 unit1.setRemark("导入入库自动生成");
-                unit1.setStatus(StateCode.NORMAL.getCode());
+                unit1.setStatus(StatusCode.NORMAL.getCode());
                 unit1.setCreator(RequestHolder.getCurrentUser().getUsername());
                 unit1.setCreateTime(new Date());
                 unit1.setOperator(RequestHolder.getCurrentUser().getUsername());
@@ -147,7 +146,7 @@ public class InputDetailService {
                 if (supplier == null) {
                     Supplier supplier1 = Supplier.builder().supplierCode(param.getSupplierName()).supplierName(param.getSupplierName()).build();
                     supplier1.setRemark("导入入库自动生成");
-                    supplier1.setStatus(StateCode.NORMAL.getCode());
+                    supplier1.setStatus(StatusCode.NORMAL.getCode());
                     supplier1.setCreator(RequestHolder.getCurrentUser().getUsername());
                     supplier1.setCreateTime(new Date());
                     supplier1.setOperator(RequestHolder.getCurrentUser().getUsername());
@@ -169,7 +168,7 @@ public class InputDetailService {
             inputDetail.setAreaCode(loc.getArea().getAreaCode());
             inputDetail.setZoneCode(loc.getArea().getZone().getZoneCode());
             inputDetail.setRemark(param.getRemark());
-            inputDetail.setStatus(StateCode.NORMAL.getCode());
+            inputDetail.setStatus(StatusCode.NORMAL.getCode());
             inputDetail.setCreator(RequestHolder.getCurrentUser().getUsername());
             inputDetail.setCreateTime(new Date());
             inputDetail.setOperator(RequestHolder.getCurrentUser().getUsername());
@@ -180,7 +179,7 @@ public class InputDetailService {
             if (inventory == null) {
                 Inventory inventory1 = Inventory.builder().sku(product.getSku()).whCode(warehouse.getWhCode()).locName(inputDetail.getLocName()).skuDesc(product.getSkuDesc()).spec(product.getSpec()).whName(warehouse.getWhName()).skuAmount(inputDetail.getAmount()).build();
                 inventory1.setRemark("导入入库自动生成");
-                inventory1.setStatus(StateCode.NORMAL.getCode());
+                inventory1.setStatus(StatusCode.NORMAL.getCode());
                 inventory1.setCreator(RequestHolder.getCurrentUser().getUsername());
                 inventory1.setCreateTime(new Date());
                 inventory1.setOperator(RequestHolder.getCurrentUser().getUsername());

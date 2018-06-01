@@ -2,7 +2,7 @@ package com.three.dwms.controller.sys;
 
 import com.google.common.collect.Lists;
 import com.three.dwms.beans.JsonData;
-import com.three.dwms.constant.StateCode;
+import com.three.dwms.constant.StatusCode;
 import com.three.dwms.entity.sys.SysRole;
 import com.three.dwms.param.sys.RoleParam;
 import com.three.dwms.param.sys.RoleUserAclParam;
@@ -33,7 +33,7 @@ public class SysRoleController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public JsonData delete(@PathVariable int id) {
-        sysRoleService.updateStateById(id, StateCode.DELETE);
+        sysRoleService.updateStateById(id, StatusCode.DELETE);
         return JsonData.success();
     }
 

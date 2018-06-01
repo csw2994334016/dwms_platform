@@ -2,9 +2,8 @@ package com.three.dwms.controller.sys;
 
 import com.three.dwms.beans.JsonData;
 import com.three.dwms.constant.RoleTypeCode;
-import com.three.dwms.constant.StateCode;
+import com.three.dwms.constant.StatusCode;
 import com.three.dwms.entity.sys.SysUser;
-import com.three.dwms.param.sys.RoleParam;
 import com.three.dwms.param.sys.RoleUserAclParam;
 import com.three.dwms.param.sys.User;
 import com.three.dwms.param.sys.UserParam;
@@ -30,7 +29,7 @@ import java.io.IOException;
 @RequestMapping(value = "/auth")
 public class AuthController {
 
-    private Integer stateCode = StateCode.NORMAL.getCode();
+    private Integer stateCode = StatusCode.NORMAL.getCode();
 
     @Value("#{props['init.username']}")
     private String username;

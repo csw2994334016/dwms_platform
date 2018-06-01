@@ -5,7 +5,7 @@ import com.google.common.collect.Lists;
 import com.three.dwms.common.RequestHolder;
 import com.three.dwms.constant.RoleTypeCode;
 import com.three.dwms.constant.LogTypeCode;
-import com.three.dwms.constant.StateCode;
+import com.three.dwms.constant.StatusCode;
 import com.three.dwms.entity.sys.*;
 import com.three.dwms.exception.ParamException;
 import com.three.dwms.param.sys.RoleParam;
@@ -85,10 +85,10 @@ public class SysRoleService {
     }
 
     @Transactional
-    public void updateStateById(int id, StateCode stateCode) {
+    public void updateStateById(int id, StatusCode statusCode) {
         SysRole sysRole = sysRoleRepository.findOne(id);
         Preconditions.checkNotNull(sysRole, "角色(id:" + id + ")不存在");
-        sysRole.setStatus(stateCode.getCode());
+        sysRole.setStatus(statusCode.getCode());
         sysRoleRepository.save(sysRole);
     }
 
@@ -178,7 +178,7 @@ public class SysRoleService {
             for (Integer aclId : aclIdList) {
                 SysAcl sysAcl = sysAclService.findById(aclId); //权限是否存在
                 SysRoleAcl sysRoleAcl = SysRoleAcl.builder().roleId(sysRole.getId()).aclId(sysAcl.getId()).build();
-                sysRoleAcl.setStatus(StateCode.NORMAL.getCode());
+                sysRoleAcl.setStatus(StatusCode.NORMAL.getCode());
                 sysRoleAcl.setOperator(RequestHolder.getCurrentUser().getUsername());
                 sysRoleAcl.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
                 sysRoleAcl.setOperateTime(new Date());

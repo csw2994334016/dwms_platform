@@ -3,6 +3,8 @@ package com.three.dwms.repository.basic;
 import com.three.dwms.entity.basic.Warehouse;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
+import java.util.List;
+
 /**
  * Created by csw on 2018/5/17.
  * Description:
@@ -17,4 +19,6 @@ public interface WarehouseRepository extends PagingAndSortingRepository<Warehous
     int countByWhCode(String whCode);
 
     Warehouse findByWhName(String whName);
+
+    List<Warehouse> findAllByWhCodeIn(List<String> whCodeList);
 }

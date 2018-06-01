@@ -41,4 +41,13 @@ public class Inventory extends BaseEntity implements Serializable {
 
     private Double skuAmount; //物料汇总数量，进出库时对该数量进行更新
 
+    @Transient
+    private String outputNo; //出库单号
+
+    @Transient
+    private Double allocateAmount; //自动分配的出库量
+
+    @Transient
+    private Double outNumber; //该物料出库的总量
+
 }

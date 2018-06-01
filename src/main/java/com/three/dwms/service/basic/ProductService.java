@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.three.dwms.beans.PageQuery;
 import com.three.dwms.common.RequestHolder;
-import com.three.dwms.constant.StateCode;
+import com.three.dwms.constant.StatusCode;
 import com.three.dwms.entity.basic.Category;
 import com.three.dwms.entity.basic.Product;
 import com.three.dwms.exception.ParamException;
@@ -77,7 +77,7 @@ public class ProductService {
     }
 
     @Transactional
-    public void updateStateById(int id, StateCode delete) {
+    public void updateStateById(int id, StatusCode delete) {
         Product product = this.findById(id);
         product.setStatus(delete.getCode());
         productRepository.save(product);

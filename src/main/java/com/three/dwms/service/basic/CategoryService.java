@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.three.dwms.beans.PageQuery;
 import com.three.dwms.common.RequestHolder;
-import com.three.dwms.constant.StateCode;
+import com.three.dwms.constant.StatusCode;
 import com.three.dwms.entity.basic.Category;
 import com.three.dwms.exception.ParamException;
 import com.three.dwms.param.basic.CategoryParam;
@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 
@@ -69,14 +68,14 @@ public class CategoryService {
     }
 
     @Transactional
-    public void updateStateById(int id, StateCode stateCode) {
+    public void updateStateById(int id, StatusCode statusCode) {
         Category category = this.findById(id);
         int count = productRepository.countByCategoryId(id);
         if (count > 0) {
             throw new ParamException("待删除物料分类信息中存在物料信息，请先修改物料信息的分类");
         }
         //假删除
-        category.setStatus(stateCode.getCode());
+        category.setStatus(statusCode.getCode());
         categoryRepository.save(category);
     }
 

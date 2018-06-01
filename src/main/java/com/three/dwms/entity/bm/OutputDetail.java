@@ -34,8 +34,9 @@ public class OutputDetail extends BaseEntity implements Serializable {
     private String spec; //物料规格/品牌/型号
 
     @Column(nullable = false)
-    private Double outNumber; //出库数量，申请数量
+    private Double outNumber; //申请出库数量
 
+    @Column(nullable = false)
     private Double actualNumber; //出库数量，实际领用量
 
     private Double returnNumber; //归还数量

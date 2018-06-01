@@ -3,7 +3,7 @@ package com.three.dwms.controller.basic;
 import com.google.common.collect.Lists;
 import com.three.dwms.beans.JsonData;
 import com.three.dwms.beans.PageQuery;
-import com.three.dwms.constant.StateCode;
+import com.three.dwms.constant.StatusCode;
 import com.three.dwms.entity.basic.Warehouse;
 import com.three.dwms.param.basic.WarehouseParam;
 import com.three.dwms.param.basic.WarehouseTree;
@@ -33,7 +33,7 @@ public class WarehouseController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public JsonData delete(@PathVariable int id) {
-        warehouseService.updateStateById(id, StateCode.DELETE);
+        warehouseService.updateStateById(id, StatusCode.DELETE);
         return JsonData.success();
     }
 

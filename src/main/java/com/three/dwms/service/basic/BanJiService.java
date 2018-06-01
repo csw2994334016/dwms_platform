@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.three.dwms.beans.PageQuery;
 import com.three.dwms.common.RequestHolder;
-import com.three.dwms.constant.StateCode;
+import com.three.dwms.constant.StatusCode;
 import com.three.dwms.entity.basic.BanJi;
 import com.three.dwms.exception.ParamException;
 import com.three.dwms.param.basic.BanJiParam;
@@ -70,10 +70,10 @@ public class BanJiService {
     }
 
     @Transactional
-    public void updateStateById(int id, StateCode stateCode) {
+    public void updateStateById(int id, StatusCode statusCode) {
         BanJi banJi = this.findById(id);
         //假删除
-        banJi.setStatus(stateCode.getCode());
+        banJi.setStatus(statusCode.getCode());
         banJIRepository.save(banJi);
     }
 

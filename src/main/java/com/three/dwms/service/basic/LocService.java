@@ -4,13 +4,11 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.three.dwms.beans.PageQuery;
 import com.three.dwms.common.RequestHolder;
-import com.three.dwms.constant.StateCode;
+import com.three.dwms.constant.StatusCode;
 import com.three.dwms.entity.basic.Area;
 import com.three.dwms.entity.basic.Loc;
 import com.three.dwms.entity.basic.Warehouse;
-import com.three.dwms.entity.basic.Zone;
 import com.three.dwms.exception.ParamException;
-import com.three.dwms.param.basic.AreaParam;
 import com.three.dwms.param.basic.LocParam;
 import com.three.dwms.repository.basic.LocRepository;
 import com.three.dwms.repository.basic.WarehouseRepository;
@@ -88,10 +86,10 @@ public class LocService {
     }
 
     @Transactional
-    public void updateStateById(int id, StateCode stateCode) {
+    public void updateStateById(int id, StatusCode statusCode) {
         Loc loc = this.findById(id);
         //假删除
-        loc.setStatus(stateCode.getCode());
+        loc.setStatus(statusCode.getCode());
         locRepository.save(loc);
     }
 

@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.three.dwms.beans.PageQuery;
 import com.three.dwms.common.RequestHolder;
-import com.three.dwms.constant.StateCode;
+import com.three.dwms.constant.StatusCode;
 import com.three.dwms.entity.basic.Area;
 import com.three.dwms.entity.basic.Zone;
 import com.three.dwms.exception.ParamException;
@@ -83,10 +83,10 @@ public class AreaService {
     }
 
     @Transactional
-    public void updateStateById(int id, StateCode stateCode) {
+    public void updateStateById(int id, StatusCode statusCode) {
         Area area = this.findById(id);
         //假删除
-        area.setStatus(stateCode.getCode());
+        area.setStatus(statusCode.getCode());
         areaRepository.save(area);
     }
 

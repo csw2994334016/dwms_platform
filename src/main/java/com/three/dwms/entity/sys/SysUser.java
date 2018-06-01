@@ -36,7 +36,7 @@ public class SysUser extends BaseEntity implements Serializable {
     @Column(length = 13, unique = true)
     private String tel; //电话
 
-    private String whCodes; //用户能查看的仓库code："wh1.wh2.wh3"
+    private String whCodes; //用户能查看的仓库code："wh1,wh2,wh3"
 
 //    @Column(unique = true, nullable = false)
 //    private Integer roleId; //角色Id，唯一值

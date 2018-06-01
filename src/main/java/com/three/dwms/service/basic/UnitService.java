@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.three.dwms.beans.PageQuery;
 import com.three.dwms.common.RequestHolder;
-import com.three.dwms.constant.StateCode;
+import com.three.dwms.constant.StatusCode;
 import com.three.dwms.entity.basic.Unit;
 import com.three.dwms.exception.ParamException;
 import com.three.dwms.param.basic.UnitParam;
@@ -63,10 +63,10 @@ public class UnitService {
     }
 
     @Transactional
-    public void updateStateById(int id, StateCode stateCode) {
+    public void updateStateById(int id, StatusCode statusCode) {
         Unit unit = this.findById(id);
         //假删除
-        unit.setStatus(stateCode.getCode());
+        unit.setStatus(statusCode.getCode());
         unitRepository.save(unit);
     }
 

@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.three.dwms.beans.PageQuery;
 import com.three.dwms.common.RequestHolder;
-import com.three.dwms.constant.StateCode;
+import com.three.dwms.constant.StatusCode;
 import com.three.dwms.constant.WhTypeCode;
 import com.three.dwms.entity.basic.Area;
 import com.three.dwms.entity.basic.Loc;
@@ -19,6 +19,7 @@ import com.three.dwms.repository.basic.WarehouseRepository;
 import com.three.dwms.repository.basic.ZoneRepository;
 import com.three.dwms.utils.BeanValidator;
 import com.three.dwms.utils.IpUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -90,10 +92,10 @@ public class WarehouseService {
     }
 
     @Transactional
-    public void updateStateById(int id, StateCode stateCode) {
+    public void updateStateById(int id, StatusCode statusCode) {
         Warehouse warehouse = this.findById(id);
         //假删除
-        warehouse.setStatus(stateCode.getCode());
+        warehouse.setStatus(statusCode.getCode());
         warehouseRepository.save(warehouse);
     }
 
@@ -134,7 +136,13 @@ public class WarehouseService {
     }
 
     public List<Warehouse> findAll() {
-        return (List<Warehouse>) warehouseRepository.findAll();
+        if (RequestHolder.getCurrentUser() != null) {
+            String whCodes = RequestHolder.getCurrentUser().getWhCodes();
+            List<String> whCodeList = Arrays.asList(StringUtils.split(whCodes, ","));
+            return warehouseRepository.findAllByWhCodeIn(whCodeList);
+        } else {
+            return Lists.newArrayList();
+        }
     }
 
     public List<WarehouseTree> findAllByTree() {
@@ -181,7 +189,13 @@ public class WarehouseService {
 
     public Warehouse findById(int id) {
         Warehouse warehouse = warehouseRepository.findOne(id);
-        Preconditions.checkNotNull(warehouse, "仓库信息不存在");
+        Preconditions.checkNotNull(warehouse, "仓库(id:" + id + ")信息不存在");
+        return warehouse;
+    }
+
+    public Warehouse findByWhName(String whName) {
+        Warehouse warehouse = warehouseRepository.findByWhName(whName);
+        Preconditions.checkNotNull(warehouse, "仓库(whName:" + whName + ")信息不存在");
         return warehouse;
     }
 }

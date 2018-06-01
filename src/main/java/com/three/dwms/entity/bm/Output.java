@@ -24,6 +24,9 @@ public class Output extends BaseEntity implements Serializable {
     private String outputNo; //出库单号，自动生成
 
     @Column(length = 20, nullable = false)
+    private String whCode; //仓库编号
+
+    @Column(length = 20, nullable = false)
     private String whName; //仓库名称
 
     @Column(length = 20, nullable = false)

@@ -1,10 +1,10 @@
 package com.three.dwms.service.bm;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.three.dwms.entity.bm.Inventory;
 import com.three.dwms.param.bm.InventoryParam;
 import com.three.dwms.repository.bm.InventoryRepository;
-import com.three.dwms.repository.bm.InventoryResult;
 import com.three.dwms.utils.BeanValidator;
 import org.springframework.stereotype.Service;
 
@@ -30,5 +30,11 @@ public class InventoryService {
             inventoryList.add(inventory);
         }
         return inventoryList;
+    }
+
+    public Inventory findById(Integer id) {
+        Inventory inventory = inventoryRepository.findOne(id);
+        Preconditions.checkNotNull(inventory, "库存汇总信息(id:" + id + ")不存在");
+        return inventory;
     }
 }

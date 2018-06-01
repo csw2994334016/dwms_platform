@@ -2,11 +2,10 @@ package com.three.dwms.controller.sys;
 
 import com.google.common.collect.Lists;
 import com.three.dwms.beans.JsonData;
-import com.three.dwms.constant.StateCode;
+import com.three.dwms.constant.StatusCode;
 import com.three.dwms.entity.sys.SysAcl;
 import com.three.dwms.param.sys.AclParam;
 import com.three.dwms.param.sys.AclTree;
-import com.three.dwms.param.sys.RoleParam;
 import com.three.dwms.service.sys.SysAclService;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,7 +31,7 @@ public class SysAclController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public JsonData delete(@PathVariable int id) {
-        sysAclService.updateStateById(id, StateCode.DELETE);
+        sysAclService.updateStateById(id, StatusCode.DELETE);
         return JsonData.success();
     }
 

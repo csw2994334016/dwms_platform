@@ -1,6 +1,6 @@
 package com.three.dwms.param.basic;
 
-import com.three.dwms.constant.StateCode;
+import com.three.dwms.constant.StatusCode;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
@@ -38,7 +38,7 @@ public class ProductParam {
 
     @Min(value = 0, message = "状态不合法")
     @Max(value = 2, message = "状态不合法")
-    private Integer status = StateCode.NORMAL.getCode();
+    private Integer status = StatusCode.NORMAL.getCode();
 
     @Length(min = 0, max = 200, message = "备注长度需要在200个字符以内")
     private String remark;

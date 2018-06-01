@@ -13,4 +13,12 @@ public interface OutputRepository extends PagingAndSortingRepository<Output, Int
     String findMaxOutputNo();
 
     List<Output> findAllByProposer(@Param("proposer") String proposer);
+
+    List<Output> findAllByApprover(String approver);
+
+    List<Output> findAllByApproverAndState(String username, int code);
+
+    List<Output> findAllByWhCodeIn(List<String> whCodeList);
+
+    Output findByOutputNo(String outputNo);
 }

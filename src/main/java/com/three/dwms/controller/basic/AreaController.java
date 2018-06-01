@@ -3,7 +3,7 @@ package com.three.dwms.controller.basic;
 import com.google.common.collect.Lists;
 import com.three.dwms.beans.JsonData;
 import com.three.dwms.beans.PageQuery;
-import com.three.dwms.constant.StateCode;
+import com.three.dwms.constant.StatusCode;
 import com.three.dwms.entity.basic.Area;
 import com.three.dwms.param.basic.AreaParam;
 import com.three.dwms.service.basic.AreaService;
@@ -32,7 +32,7 @@ public class AreaController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public JsonData delete(@PathVariable int id) {
-        areaService.updateStateById(id, StateCode.DELETE);
+        areaService.updateStateById(id, StatusCode.DELETE);
         return JsonData.success();
     }
 

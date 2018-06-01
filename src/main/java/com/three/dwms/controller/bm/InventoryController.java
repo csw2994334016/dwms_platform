@@ -1,10 +1,8 @@
 package com.three.dwms.controller.bm;
 
-import com.google.common.collect.Lists;
 import com.three.dwms.beans.JsonData;
 import com.three.dwms.entity.bm.Inventory;
 import com.three.dwms.param.bm.InventoryParam;
-import com.three.dwms.repository.bm.InventoryResult;
 import com.three.dwms.service.bm.InventoryService;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

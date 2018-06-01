@@ -4,7 +4,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.three.dwms.common.RequestHolder;
 import com.three.dwms.constant.OutputStateCode;
-import com.three.dwms.constant.StateCode;
+import com.three.dwms.constant.StatusCode;
+import com.three.dwms.entity.basic.Warehouse;
 import com.three.dwms.entity.bm.Output;
 import com.three.dwms.entity.bm.OutputDetail;
 import com.three.dwms.exception.ParamException;
@@ -12,6 +13,7 @@ import com.three.dwms.param.bm.OutputDetailParam;
 import com.three.dwms.param.bm.OutputParam;
 import com.three.dwms.repository.bm.OutputDetailRepository;
 import com.three.dwms.repository.bm.OutputRepository;
+import com.three.dwms.service.basic.WarehouseService;
 import com.three.dwms.utils.BeanValidator;
 import com.three.dwms.utils.IpUtil;
 import com.three.dwms.utils.StringUtil;
@@ -32,15 +34,24 @@ public class OutputApplyService {
     @Resource
     private OutputDetailRepository outputDetailRepository;
 
+    @Resource
+    private WarehouseService warehouseService;
+
+    @Resource
+    private OutputService outputService;
+
     //添加
     @Transactional
     public void create(OutputParam param) {
         BeanValidator.check(param);
         String maxNo = outputRepository.findMaxOutputNo();
         String outputNo = StringUtil.getCurCode("O", maxNo);
-        Output output = Output.builder().outputNo(outputNo).whName(param.getWhName()).proposer(RequestHolder.getCurrentUser().getUsername()).approver(param.getApprover()).banJiName(param.getBanJiName()).projectName(param.getProjectName()).state(OutputStateCode.DRAFT.getCode()).build();
+
+        Warehouse warehouse = warehouseService.findByWhName(param.getWhName());
+
+        Output output = Output.builder().outputNo(outputNo).whCode(warehouse.getWhCode()).whName(param.getWhName()).proposer(RequestHolder.getCurrentUser().getUsername()).approver(param.getApprover()).banJiName(param.getBanJiName()).projectName(param.getProjectName()).state(OutputStateCode.DRAFT.getCode()).build();
         output.setRemark(param.getRemark());
-        output.setStatus(StateCode.NORMAL.getCode());
+        output.setStatus(StatusCode.NORMAL.getCode());
         output.setCreator(RequestHolder.getCurrentUser().getUsername());
         output.setCreateTime(new Date());
         output.setOperator(RequestHolder.getCurrentUser().getUsername());
@@ -55,7 +66,7 @@ public class OutputApplyService {
     }
 
     public List<Output> findAll() {
-        return (List<Output>) outputRepository.findAll();
+        return outputService.findAll();
     }
 
     @Transactional
@@ -90,10 +101,10 @@ public class OutputApplyService {
             output.setOperator(RequestHolder.getCurrentUser().getUsername());
             output.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
             output.setOperateTime(new Date());
-            List<OutputDetail> outputDetailList = createDetailList(output, param);
             List<OutputDetail> outputDetailList1 = outputDetailRepository.findAllByOutput(output);
             outputDetailRepository.delete(outputDetailList1);
-            outputRepository.save(output);
+            output = outputRepository.save(output);
+            List<OutputDetail> outputDetailList = createDetailList(output, param);
             outputDetailRepository.save(outputDetailList);
         } else {
             throw new ParamException("只有草稿状态下才可以修改");
@@ -104,8 +115,11 @@ public class OutputApplyService {
         List<OutputDetail> outputDetailList = Lists.newArrayList();
         for (OutputDetailParam detailParam : param.getOutputDetailParamList()) {
             BeanValidator.check(detailParam);
-            OutputDetail outputDetail = OutputDetail.builder().output(output).sku(detailParam.getSku()).skuDesc(detailParam.getSkuDesc()).spec(detailParam.getSpec()).outNumber(detailParam.getOutNumber()).build();
-            outputDetail.setStatus(StateCode.NORMAL.getCode());
+            if (existOutputAndSku(output, detailParam.getSku())) {
+                throw new ParamException("出库单(outputNo:" + output.getOutputNo() + ")已存在该物料(sku:" + detailParam.getSku() + ")");
+            }
+            OutputDetail outputDetail = OutputDetail.builder().output(output).sku(detailParam.getSku()).skuDesc(detailParam.getSkuDesc()).spec(detailParam.getSpec()).outNumber(detailParam.getOutNumber()).actualNumber(0.0).build();
+            outputDetail.setStatus(StatusCode.NORMAL.getCode());
             outputDetail.setCreator(RequestHolder.getCurrentUser().getUsername());
             outputDetail.setCreateTime(new Date());
             outputDetail.setOperator(RequestHolder.getCurrentUser().getUsername());
@@ -114,6 +128,13 @@ public class OutputApplyService {
             outputDetailList.add(outputDetail);
         }
         return outputDetailList;
+    }
+
+    private boolean existOutputAndSku(Output output, String sku) {
+        if (output != null && sku != null) {
+            return outputDetailRepository.countByOutputAndSku(output, sku) > 0;
+        }
+        return false;
     }
 
     private Output findById(Integer id) {

@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.three.dwms.common.RequestHolder;
-import com.three.dwms.constant.StateCode;
+import com.three.dwms.constant.StatusCode;
 import com.three.dwms.entity.sys.SysAcl;
 import com.three.dwms.entity.sys.SysRoleAcl;
 import com.three.dwms.exception.ParamException;
@@ -60,7 +60,7 @@ public class SysAclService {
         sysAclRepository.save(sysAcl);
     }
 
-    public void updateStateById(int id, StateCode stateCode) {
+    public void updateStateById(int id, StatusCode statusCode) {
         int count = sysAclRepository.countByParentId(id);
         if (count > 0) {
             throw new ParamException("待操作的权限有下级权限，请先操作下级权限");
@@ -69,7 +69,7 @@ public class SysAclService {
         SysAcl sysAcl = sysAclRepository.findOne(id);
         Preconditions.checkNotNull(sysAcl, "权限不存在");
 
-        sysAcl.setStatus(stateCode.getCode());
+        sysAcl.setStatus(statusCode.getCode());
         sysAclRepository.save(sysAcl);
     }
 

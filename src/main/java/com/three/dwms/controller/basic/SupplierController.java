@@ -3,10 +3,8 @@ package com.three.dwms.controller.basic;
 import com.google.common.collect.Lists;
 import com.three.dwms.beans.JsonData;
 import com.three.dwms.beans.PageQuery;
-import com.three.dwms.constant.StateCode;
-import com.three.dwms.entity.basic.Project;
+import com.three.dwms.constant.StatusCode;
 import com.three.dwms.entity.basic.Supplier;
-import com.three.dwms.param.basic.ProjectParam;
 import com.three.dwms.param.basic.SupplierParam;
 import com.three.dwms.service.basic.SupplierService;
 import org.springframework.data.domain.Page;
@@ -34,7 +32,7 @@ public class SupplierController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public JsonData delete(@PathVariable int id) {
-        supplierService.updateStateById(id, StateCode.DELETE);
+        supplierService.updateStateById(id, StatusCode.DELETE);
         return JsonData.success();
     }
 

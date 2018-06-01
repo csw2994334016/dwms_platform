@@ -2,7 +2,7 @@ package com.three.dwms.param.sys;
 
 import com.google.common.collect.Lists;
 import com.three.dwms.constant.RoleTypeCode;
-import com.three.dwms.constant.StateCode;
+import com.three.dwms.constant.StatusCode;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
@@ -36,7 +36,7 @@ public class RoleUserAclParam {
 //    @NotNull(message = "角色状态不可以为空")
     @Min(value = 0, message = "角色状态不合法")
     @Max(value = 1, message = "角色状态不合法")
-    private Integer status = StateCode.NORMAL.getCode();
+    private Integer status = StatusCode.NORMAL.getCode();
 
     @Length(min = 0, max = 200, message = "角色备注长度需要在200个字符以内")
     private String remark;

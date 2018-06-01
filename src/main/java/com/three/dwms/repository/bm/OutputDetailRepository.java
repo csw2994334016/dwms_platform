@@ -14,4 +14,8 @@ public interface OutputDetailRepository extends PagingAndSortingRepository<Outpu
     boolean deleteAllByOutput(Output output);
 
     boolean deleteByOutput(Output output);
+
+    OutputDetail findByOutputAndSku(Output output, String sku);
+
+    int countByOutputAndSku(Output output, String sku);
 }
