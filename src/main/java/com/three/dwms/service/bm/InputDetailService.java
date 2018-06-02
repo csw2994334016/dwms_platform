@@ -203,7 +203,7 @@ public class InputDetailService {
                 inventoryRepository.save(inventory);
             }
             //状态
-            inputDetail.setState(InputStateCode.NOT_INPUT.getCode());
+            inputDetail.setState(InputStateCode.INPUT.getCode());
             inputDetailList.add(inputDetail);
         }
         inputDetailRepository.save(inputDetailList);

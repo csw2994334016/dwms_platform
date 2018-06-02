@@ -28,4 +28,6 @@ public class AllocationParam {
     @NotNull(message = "实际领用量不可以为空")
     private Double allocateAmount = 0.0; //实际出库数量
 
+    private Double returnNumber = 0.0; //退还数量
+
 }

@@ -39,5 +39,6 @@ public class OutputDetail extends BaseEntity implements Serializable {
     @Column(nullable = false)
     private Double actualNumber; //出库数量，实际领用量
 
+    @Column(nullable = false)
     private Double returnNumber; //归还数量
 }

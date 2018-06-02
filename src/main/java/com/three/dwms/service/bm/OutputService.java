@@ -75,6 +75,7 @@ public class OutputService {
                         inventory.setAllocateAmount(outNumber);
                         outNumber -= outNumber;
                     }
+                    inventory.setReturnNumber(0.0);
                 }
                 inventoryList.addAll(inventories);
             }
@@ -102,7 +103,7 @@ public class OutputService {
                         inventory.setSkuAmount(inventory.getSkuAmount() - param.getAllocateAmount());
                         inventoryList.add(inventory);
                         OutputDetail outputDetail = outputDetailRepository.findByOutputAndSku(output, inventory.getSku());
-                        Preconditions.checkNotNull(outputDetail, "物料(outputNo:" + output.getOutputNo() + ", sku:" + inventory.getSku() + ")出库详情不存在");
+                        Preconditions.checkNotNull(outputDetail, "物料(outputNo:" + output.getOutputNo() + ", sku:" + inventory.getSku() + ")出库单据详情不存在");
                         if (param.getAllocateAmount() > (outputDetail.getOutNumber() - outputDetail.getActualNumber())) {
                             throw new ParamException("领用数量大于单据申请数量，无法出库");
                         }
@@ -118,6 +119,33 @@ public class OutputService {
             inventoryRepository.save(inventoryList);
             outputDetailRepository.save(outputDetailList);
             outputRepository.save(outputList);
+        }
+    }
+
+    @Transactional
+    public void giveBack(List<AllocationParam> paramList) {
+        if (CollectionUtils.isNotEmpty(paramList)) {
+            List<Inventory> inventoryList = Lists.newArrayList();
+            List<OutputDetail> outputDetailList = Lists.newArrayList();
+            for (AllocationParam param : paramList) {
+                BeanValidator.check(param);
+                Output output = this.findByOutputNo(param.getOutputNo());
+                if (output.getState().equals(OutputStateCode.OUTPUT.getCode())) {
+                    Inventory inventory = inventoryService.findById(param.getId());
+                    if (param.getReturnNumber() > 0.0) { //退还改变Inventory.skuAmount、OutputDetail.returnNumber
+                        inventory.setSkuAmount(inventory.getSkuAmount() + param.getReturnNumber());
+                        inventoryList.add(inventory);
+                        OutputDetail outputDetail = outputDetailRepository.findByOutputAndSku(output, inventory.getSku());
+                        Preconditions.checkNotNull(outputDetail, "物料(outputNo:" + output.getOutputNo() + ", sku:" + inventory.getSku() + ")出库单据详情不存在");
+                        outputDetail.setReturnNumber(outputDetail.getReturnNumber() + param.getReturnNumber());
+                        outputDetailList.add(outputDetail);
+                    }
+                } else {
+                    throw new ParamException("只有出库状态的单据才能退还");
+                }
+            }
+            inventoryRepository.save(inventoryList);
+            outputDetailRepository.save(outputDetailList);
         }
     }
 

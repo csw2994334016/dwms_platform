@@ -66,7 +66,8 @@ public class OutputApplyService {
     }
 
     public List<Output> findAll() {
-        return outputService.findAll();
+//        return outputService.findAll();
+        return outputRepository.findAllByProposer(RequestHolder.getCurrentUser().getUsername());
     }
 
     @Transactional

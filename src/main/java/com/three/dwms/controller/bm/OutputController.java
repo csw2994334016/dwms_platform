@@ -45,4 +45,11 @@ public class OutputController {
         outputService.allocate(paramList);
         return JsonData.success();
     }
+
+    //出库退还
+    @RequestMapping(value = "/giveBack", method = RequestMethod.POST)
+    public JsonData giveBack(@RequestBody List<AllocationParam> paramList) {
+        outputService.giveBack(paramList);
+        return JsonData.success();
+    }
 }
