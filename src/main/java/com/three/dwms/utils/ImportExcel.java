@@ -109,10 +109,10 @@ public class ImportExcel<T> {
                 String value = this.getCellValue(cell);
 
                 // 3.单元格中的值等于null或等于"" 就放弃整行数据
-                if (value == null || "".equals(value)) {
-                    judge = false;
-                    break;
-                }
+//                if (value == null || "".equals(value)) {
+//                    judge = false;
+//                    break;
+//                }
 
                 Field field = clazz.getDeclaredField(attributes.get(columnIndex));
                 Class<?> fieldType = field.getType();
@@ -130,6 +130,8 @@ public class ImportExcel<T> {
                 } else if (fieldType.isAssignableFrom(Boolean.class)) {
                     arg = "Y".equals(value) || "1".equals(value);
                 } else if (fieldType.isAssignableFrom(String.class)) {
+                    arg = value;
+                } else {
                     arg = value;
                 }
                 // char跟byte就不用判断了
