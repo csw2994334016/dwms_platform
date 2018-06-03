@@ -13,4 +13,6 @@ public interface InputDetailRepository extends PagingAndSortingRepository<InputD
 
     @Query("select max(i.inputNo) from InputDetail i")
     String findMaxInputNo();
+
+    int countByBatchNo(String batchNo);
 }

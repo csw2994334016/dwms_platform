@@ -1,5 +1,6 @@
 package com.three.dwms.entity.base;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -27,10 +28,12 @@ public class BaseEntity1 {
 
     private String creator; //创建者
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime; //创建时间
 
     private String operator; //最后一次操作者
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date operateTime; //最后一次操作时间
 
     private String operateIp; //最后一次操作的ip地址

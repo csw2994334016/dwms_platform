@@ -24,6 +24,9 @@ public class InputDetailParam {
 
     private Integer id;
 
+    private String batchNo; //导入批次号
+    private String inputType; //input、import
+
     private String sku; //物料编号
 
     @NotBlank(message = "物料名称不可以为空")

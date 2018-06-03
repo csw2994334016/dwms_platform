@@ -8,6 +8,7 @@ import com.three.dwms.constant.StatusCode;
 import com.three.dwms.entity.basic.*;
 import com.three.dwms.entity.bm.InputDetail;
 import com.three.dwms.entity.bm.Inventory;
+import com.three.dwms.exception.ParamException;
 import com.three.dwms.param.bm.InputDetailParam;
 import com.three.dwms.repository.basic.*;
 import com.three.dwms.repository.bm.InputDetailRepository;
@@ -16,10 +17,7 @@ import com.three.dwms.service.basic.AreaService;
 import com.three.dwms.service.basic.LocService;
 import com.three.dwms.service.basic.WarehouseService;
 import com.three.dwms.service.basic.ZoneService;
-import com.three.dwms.utils.BeanValidator;
-import com.three.dwms.utils.ImportExcel;
-import com.three.dwms.utils.IpUtil;
-import com.three.dwms.utils.StringUtil;
+import com.three.dwms.utils.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
@@ -78,7 +76,7 @@ public class InputDetailService {
         //创建处理EXCEL
         ImportExcel<InputDetail> importExcel = new ImportExcel<>();
         //解析excel，获取客户信息集合
-        String[] str = {"whName", "locName", "skuDesc", "spec", "categoryName", "unitName", "unitPrice", "amount", "totalPrice", "purchaseDept", "purchaser", "receiver", "supplierName", "remark"};
+        String[] str = {"batchNo", "whName", "locName", "skuDesc", "spec", "categoryName", "unitName", "unitPrice", "amount", "totalPrice", "purchaseDept", "purchaser", "receiver", "supplierName", "remark"};
         List<String> attributes = Arrays.asList(str);
         List<InputDetail> inputDetailList = importExcel.leadInExcel(filename, file, InputDetail.class, attributes);
 
@@ -93,11 +91,29 @@ public class InputDetailService {
         List<InputDetail> inputDetailList = Lists.newArrayList();
         String maxNo = inputDetailRepository.findMaxInputNo();
         String inputNo = StringUtil.getCurCode("I", maxNo);
+        //批次号验证
+        InputDetailParam first = null;
+        if (paramList.size() > 0) {
+            first = paramList.get(0);
+        }
+        for (InputDetailParam param : paramList) {
+            if ("import".equals(param.getInputType())) {
+                if (!param.getBatchNo().equals(first.getBatchNo())) {
+                    throw new ParamException("EXCEL导入每条数据批次号必须相同");
+                }
+            }
+        }
+        if (first != null && "import".equals(first.getInputType())) {
+            if (checkBatchNoExist(first.getBatchNo())) {
+                throw new ParamException("入库批次号已经存在，判断为重复导入");
+            }
+        }
         for (InputDetailParam param : paramList) {
             BeanValidator.check(param);
             InputDetail inputDetail = InputDetail.builder().build();
             //自动生成入库单编号
             inputDetail.setInputNo(inputNo);
+            inputDetail.setBatchNo(inputNo);
             //物料信息
             Product product = productRepository.findBySkuDescAndSpec(param.getSkuDesc(), param.getSpec());
             if (product == null) {
@@ -105,7 +121,7 @@ public class InputDetailService {
                 Category category = categoryRepository.findByName(categoryName);
                 if (category == null) {
                     Category category1 = Category.builder().name(param.getCategoryName()).build();
-                    category1.setRemark("导入入库自动生成");
+                    category1.setRemark("入库自动生成");
                     category1.setStatus(StatusCode.NORMAL.getCode());
                     category1.setCreator(RequestHolder.getCurrentUser().getUsername());
                     category1.setCreateTime(new Date());
@@ -117,7 +133,7 @@ public class InputDetailService {
                 String maxCode = productRepository.findMaxSku();
                 String sku = StringUtil.getCurCode("P", maxCode);
                 Product product1 = Product.builder().sku(sku).skuDesc(param.getSkuDesc()).spec(param.getSpec()).category(category).build();
-                product1.setRemark("导入入库自动生成物");
+                product1.setRemark("入库自动生成");
                 product1.setStatus(StatusCode.NORMAL.getCode());
                 product1.setCreator(RequestHolder.getCurrentUser().getUsername());
                 product1.setCreateTime(new Date());
@@ -135,7 +151,7 @@ public class InputDetailService {
                 String maxCode = unitRepository.findMaxUnitCode();
                 String unitCode = StringUtil.getCurCode("U", maxCode);
                 Unit unit1 = Unit.builder().unitCode(unitCode).unitName(param.getUnitName()).build();
-                unit1.setRemark("导入入库自动生成");
+                unit1.setRemark("入库自动生成");
                 unit1.setStatus(StatusCode.NORMAL.getCode());
                 unit1.setCreator(RequestHolder.getCurrentUser().getUsername());
                 unit1.setCreateTime(new Date());
@@ -157,7 +173,7 @@ public class InputDetailService {
                 Supplier supplier = supplierRepository.findBySupplierName(param.getSupplierName());
                 if (supplier == null) {
                     Supplier supplier1 = Supplier.builder().supplierCode(param.getSupplierName()).supplierName(param.getSupplierName()).build();
-                    supplier1.setRemark("导入入库自动生成");
+                    supplier1.setRemark("入库自动生成");
                     supplier1.setStatus(StatusCode.NORMAL.getCode());
                     supplier1.setCreator(RequestHolder.getCurrentUser().getUsername());
                     supplier1.setCreateTime(new Date());
@@ -190,7 +206,7 @@ public class InputDetailService {
             Inventory inventory = inventoryRepository.findBySkuAndWhCodeAndLocName(product.getSku(), warehouse.getWhCode(), inputDetail.getLocName());
             if (inventory == null) {
                 Inventory inventory1 = Inventory.builder().sku(product.getSku()).whCode(warehouse.getWhCode()).locName(inputDetail.getLocName()).skuDesc(product.getSkuDesc()).spec(product.getSpec()).whName(warehouse.getWhName()).skuAmount(inputDetail.getAmount()).build();
-                inventory1.setRemark("导入入库自动生成");
+                inventory1.setRemark("入库自动生成");
                 inventory1.setStatus(StatusCode.NORMAL.getCode());
                 inventory1.setCreator(RequestHolder.getCurrentUser().getUsername());
                 inventory1.setCreateTime(new Date());
@@ -207,6 +223,10 @@ public class InputDetailService {
             inputDetailList.add(inputDetail);
         }
         inputDetailRepository.save(inputDetailList);
+    }
+
+    private boolean checkBatchNoExist(String batchNo) {
+        return inputDetailRepository.countByBatchNo(batchNo) > 0;
     }
 
     public List<InputDetail> stockQuery() {
@@ -237,24 +257,7 @@ public class InputDetailService {
                 if (StringUtils.isNotBlank(request.getParameter("purchaseDept"))) {
                     predicateList.add(criteriaBuilder.equal(root.get("purchaseDept"), request.getParameter("purchaseDept")));
                 }
-                if (StringUtils.isNotBlank(request.getParameter("startTime")) && StringUtils.isNotBlank(request.getParameter("endTime"))) {
-                    Date st = StringUtil.toDate(request.getParameter("startTime"));
-                    Date et = StringUtil.toDate(request.getParameter("endTime"));
-                    if (st != null && et != null) {
-                        predicateList.add(criteriaBuilder.greaterThanOrEqualTo(root.get("createTime"), st));
-                        predicateList.add(criteriaBuilder.lessThanOrEqualTo(root.get("createTime"), et));
-                    }
-                } else if (StringUtils.isNotBlank(request.getParameter("startTime"))) {
-                    Date st = StringUtil.toDate(request.getParameter("startTime"));
-                    if (st != null) {
-                        predicateList.add(criteriaBuilder.greaterThanOrEqualTo(root.get("createTime"), st));
-                    }
-                } else if (StringUtils.isNotBlank(request.getParameter("endTime"))) {
-                    Date et = StringUtil.toDate(request.getParameter("endTime"));
-                    if (et != null) {
-                        predicateList.add(criteriaBuilder.lessThanOrEqualTo(root.get("createTime"), et));
-                    }
-                }
+                TimeCriteriaUtil.timePredication(request, criteriaBuilder, predicateList, root.get("createTime"));
                 return criteriaBuilder.and(predicateList.toArray(new Predicate[0]));
             };
             inputDetailList = inputDetailRepository.findAll(specification);

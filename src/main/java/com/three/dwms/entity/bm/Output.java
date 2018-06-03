@@ -1,6 +1,6 @@
 package com.three.dwms.entity.bm;
 
-import com.three.dwms.entity.base.BaseEntity;
+import com.three.dwms.entity.base.BaseEntity1;
 import lombok.*;
 
 import javax.persistence.*;
@@ -18,7 +18,7 @@ import java.io.Serializable;
 @ToString
 @Entity
 @Table(name = "bm_output")
-public class Output extends BaseEntity implements Serializable {
+public class Output extends BaseEntity1 implements Serializable {
 
     @Column(length = 20, unique = true, nullable = false)
     private String outputNo; //出库单号，自动生成

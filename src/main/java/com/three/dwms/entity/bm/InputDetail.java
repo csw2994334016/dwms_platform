@@ -26,7 +26,8 @@ public class InputDetail implements Serializable {
     @Column(length = 20, nullable = false)
     private String inputNo; //入库单编号
 
-    private String batchNo; //入库批次号
+    @Column(nullable = false)
+    private String batchNo; //入库批次号，入库之后取入库单编号
 
     @Column(length = 20, nullable = false)
     private String sku; //物料编号
