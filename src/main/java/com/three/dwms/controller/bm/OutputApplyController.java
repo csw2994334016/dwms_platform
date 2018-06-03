@@ -5,6 +5,7 @@ import com.three.dwms.beans.JsonData;
 import com.three.dwms.entity.bm.Output;
 import com.three.dwms.entity.bm.OutputDetail;
 import com.three.dwms.param.bm.OutputParam;
+import com.three.dwms.param.bm.StateCode;
 import com.three.dwms.service.bm.OutputApplyService;
 import org.springframework.web.bind.annotation.*;
 
@@ -65,6 +66,19 @@ public class OutputApplyController {
         return JsonData.success();
     }
 
+    //撤回申请
+    @RequestMapping(value = "/withdraw", method = RequestMethod.POST)
+    public JsonData withdraw(@RequestBody List<OutputParam> paramList) {
+        List<Integer> ids = Lists.newArrayList();
+        for (OutputParam param : paramList) {
+            if (param.getId() != null) {
+                ids.add(param.getId());
+            }
+        }
+        outputApplyService.withdrawByIds(ids);
+        return JsonData.success();
+    }
+
     //OutputDetail详情
     @RequestMapping(value = "/details", method = RequestMethod.GET)
     public JsonData findOutputDetails() {
@@ -77,5 +91,12 @@ public class OutputApplyController {
     public JsonData findCurrentOutputApplies() {
         List<Output> outputList = outputApplyService.findCurrentOutputApplies();
         return JsonData.success(outputList);
+    }
+
+    //加载个人申请单
+    @RequestMapping(value = "/status", method = RequestMethod.GET)
+    public JsonData findStatus() {
+        List<StateCode> stateCodeCodeList = outputApplyService.findStatus();
+        return JsonData.success(stateCodeCodeList);
     }
 }

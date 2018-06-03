@@ -237,6 +237,24 @@ public class InputDetailService {
                 if (StringUtils.isNotBlank(request.getParameter("purchaseDept"))) {
                     predicateList.add(criteriaBuilder.equal(root.get("purchaseDept"), request.getParameter("purchaseDept")));
                 }
+                if (StringUtils.isNotBlank(request.getParameter("startTime")) && StringUtils.isNotBlank(request.getParameter("endTime"))) {
+                    Date st = StringUtil.toDate(request.getParameter("startTime"));
+                    Date et = StringUtil.toDate(request.getParameter("endTime"));
+                    if (st != null && et != null) {
+                        predicateList.add(criteriaBuilder.greaterThanOrEqualTo(root.get("createTime"), st));
+                        predicateList.add(criteriaBuilder.lessThanOrEqualTo(root.get("createTime"), et));
+                    }
+                } else if (StringUtils.isNotBlank(request.getParameter("startTime"))) {
+                    Date st = StringUtil.toDate(request.getParameter("startTime"));
+                    if (st != null) {
+                        predicateList.add(criteriaBuilder.greaterThanOrEqualTo(root.get("createTime"), st));
+                    }
+                } else if (StringUtils.isNotBlank(request.getParameter("endTime"))) {
+                    Date et = StringUtil.toDate(request.getParameter("endTime"));
+                    if (et != null) {
+                        predicateList.add(criteriaBuilder.lessThanOrEqualTo(root.get("createTime"), et));
+                    }
+                }
                 return criteriaBuilder.and(predicateList.toArray(new Predicate[0]));
             };
             inputDetailList = inputDetailRepository.findAll(specification);

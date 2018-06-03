@@ -37,7 +37,7 @@ public class OutputDetailParam {
     @DecimalMin(value = "1.0", message = "出库数量必须大于1")
     private Double outNumber; //出库数量
 
-    private Double returnNumber; //归还数量
+    private Double returnNumber = 0.0; //归还数量
 
     @Min(value = 0, message = "状态不合法")
     @Max(value = 2, message = "状态不合法")

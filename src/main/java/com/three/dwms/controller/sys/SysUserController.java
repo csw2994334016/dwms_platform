@@ -71,6 +71,12 @@ public class SysUserController {
         return JsonData.success(sysUserList);
     }
 
+    @RequestMapping(value = "/findByRoleType", method = RequestMethod.GET)
+    public JsonData findAllByRoleType() {
+        List<SysUser> sysUserList = sysUserService.findAllByRoleType();
+        return JsonData.success(sysUserList);
+    }
+
     @RequestMapping(value = "/role/{id}", method = RequestMethod.GET)
     public JsonData findAllByRole(@PathVariable("id") int id) {
         List<SysUser> sysUserList = sysUserService.findAllByRole(id);
@@ -100,7 +106,6 @@ public class SysUserController {
     @RequestMapping(value = "/fuzzySearch", method = RequestMethod.POST)
     public JsonData fuzzySearch(@RequestBody UserParam userParam) {
         List<SysUser> sysUserList = sysUserService.fuzzySearch(userParam.getKeyword());
-//        sysUser = sysUserService.createUserAndRoleAndAcl(sysUser);
         return JsonData.success(sysUserList);
     }
 

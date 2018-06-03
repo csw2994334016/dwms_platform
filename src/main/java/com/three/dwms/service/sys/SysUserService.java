@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.three.dwms.beans.PageQuery;
 import com.three.dwms.common.RequestHolder;
 import com.three.dwms.constant.LogTypeCode;
+import com.three.dwms.constant.RoleTypeCode;
 import com.three.dwms.constant.StatusCode;
 import com.three.dwms.entity.sys.*;
 import com.three.dwms.exception.ParamException;
@@ -235,6 +236,22 @@ public class SysUserService {
         SysUser sysUser = sysUserRepository.findOne(id);
         Preconditions.checkNotNull(sysUser, "用户(id:" + id + ")不存在");
         return sysUser;
+    }
+
+    public List<SysUser> findAllByRoleType() {
+        List<SysUser> sysUserList = Lists.newArrayList();
+        List<SysUser> sysUserList1 = Lists.newArrayList();
+        SysUser sysUser = RequestHolder.getCurrentUser();
+        if (sysUser != null && RoleTypeCode.ADMIN.getType().equals(sysUser.getSysRole().getType())) {
+            sysUserList1 = (List<SysUser>) sysUserRepository.findAll();
+        } else {
+            sysUserList1.add(sysUser);
+        }
+        for (SysUser sysUser1 : sysUserList1) {
+            SysUser sysUser2 = SysUser.builder().username(sysUser1.getUsername()).build();
+            sysUserList.add(sysUser2);
+        }
+        return sysUserList;
     }
 
     public SysUser findCurrentUser() {

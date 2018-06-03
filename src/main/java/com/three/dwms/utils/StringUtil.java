@@ -4,7 +4,10 @@ package com.three.dwms.utils;
 import com.three.dwms.exception.ParamException;
 import lombok.extern.slf4j.Slf4j;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -16,6 +19,8 @@ public class StringUtil {
 
     public static final String excel2003 = ".xls";
     public static final String excel2007 = ".xlsx";
+
+    public static SimpleDateFormat sdf =  new SimpleDateFormat("yyyy-MM-dd");
 
     public static List<Integer> splitToIntListByReg(String userIds, String reg) {
         List<Integer> userIdList = new ArrayList<>();
@@ -46,5 +51,14 @@ public class StringUtil {
             max = Integer.valueOf(maxCode.substring(1)) + 1;
         }
         return  pre + String.format("%06d", max);
+    }
+
+    public static Date toDate(String time) {
+        try {
+            return sdf.parse(time);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

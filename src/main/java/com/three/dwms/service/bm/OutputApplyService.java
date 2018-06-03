@@ -11,6 +11,7 @@ import com.three.dwms.entity.bm.OutputDetail;
 import com.three.dwms.exception.ParamException;
 import com.three.dwms.param.bm.OutputDetailParam;
 import com.three.dwms.param.bm.OutputParam;
+import com.three.dwms.param.bm.StateCode;
 import com.three.dwms.repository.bm.OutputDetailRepository;
 import com.three.dwms.repository.bm.OutputRepository;
 import com.three.dwms.service.basic.WarehouseService;
@@ -119,7 +120,7 @@ public class OutputApplyService {
             if (existOutputAndSku(output, detailParam.getSku())) {
                 throw new ParamException("出库单(outputNo:" + output.getOutputNo() + ")已存在该物料(sku:" + detailParam.getSku() + ")");
             }
-            OutputDetail outputDetail = OutputDetail.builder().output(output).sku(detailParam.getSku()).skuDesc(detailParam.getSkuDesc()).spec(detailParam.getSpec()).outNumber(detailParam.getOutNumber()).actualNumber(0.0).build();
+            OutputDetail outputDetail = OutputDetail.builder().output(output).sku(detailParam.getSku()).skuDesc(detailParam.getSkuDesc()).spec(detailParam.getSpec()).outNumber(detailParam.getOutNumber()).actualNumber(0.0).returnNumber(0.0).build();
             outputDetail.setStatus(StatusCode.NORMAL.getCode());
             outputDetail.setCreator(RequestHolder.getCurrentUser().getUsername());
             outputDetail.setCreateTime(new Date());
@@ -163,6 +164,24 @@ public class OutputApplyService {
         outputRepository.save(outputList);
     }
 
+    @Transactional
+    public void withdrawByIds(List<Integer> ids) {
+        List<Output> outputList = Lists.newArrayList();
+        for (Integer id : ids) {
+            Output output = this.findById(id);
+            if (output.getState() == OutputStateCode.APPLY.getCode()) {
+                output.setState(OutputStateCode.DRAFT.getCode());
+                output.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
+                output.setOperateTime(new Date());
+                output.setOperator(RequestHolder.getCurrentUser().getUsername());
+                outputList.add(output);
+            } else {
+                throw new ParamException("只有申请状态下才可以撤回申请！");
+            }
+        }
+        outputRepository.save(outputList);
+    }
+
     public List<OutputDetail> findOutputDetails() {
         HttpServletRequest request = RequestHolder.getCurrentRequest();
         if (request != null && request.getParameter("id") != null) {
@@ -177,5 +196,14 @@ public class OutputApplyService {
             return outputRepository.findAllByProposer(RequestHolder.getCurrentUser().getUsername());
         }
         return Lists.newArrayList();
+    }
+
+    public List<StateCode> findStatus() {
+        List<StateCode> stateCodeList = Lists.newArrayList();
+        for (OutputStateCode stateCode : OutputStateCode.values()) {
+            StateCode state = StateCode.builder().code(stateCode.getCode()).desc(stateCode.getDesc()).build();
+            stateCodeList.add(state);
+        }
+        return stateCodeList;
     }
 }
