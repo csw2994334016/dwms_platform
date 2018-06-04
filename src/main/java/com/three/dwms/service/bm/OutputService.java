@@ -14,12 +14,15 @@ import com.three.dwms.repository.bm.InventoryRepository;
 import com.three.dwms.repository.bm.OutputDetailRepository;
 import com.three.dwms.repository.bm.OutputRepository;
 import com.three.dwms.utils.BeanValidator;
+import com.three.dwms.utils.TimeCriteriaUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import javax.persistence.criteria.Predicate;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.List;
@@ -44,14 +47,37 @@ public class OutputService {
     private InventoryService inventoryService;
 
     public List<Output> findAll() {
-        SysUser sysUser = RequestHolder.getCurrentUser();
-        if (sysUser != null) {
-            String whCodes = sysUser.getWhCodes();
-            List<String> whCodeList = Arrays.asList(StringUtils.split(whCodes, ","));
-            return outputRepository.findAllByWhCodeIn(whCodeList);
-        } else {
-            return Lists.newArrayList();
+//        SysUser sysUser = RequestHolder.getCurrentUser();
+//        if (sysUser != null) {
+//            String whCodes = sysUser.getWhCodes();
+//            List<String> whCodeList = Arrays.asList(StringUtils.split(whCodes, ","));
+//            return outputRepository.findAllByWhCodeIn(whCodeList);
+//        } else {
+//            return Lists.newArrayList();
+//        }
+        List<Output> outputList = Lists.newArrayList();
+        HttpServletRequest request = RequestHolder.getCurrentRequest();
+        if (request != null) {
+            Specification<Output> specification = (root, criteriaQuery, criteriaBuilder) -> {
+                List<Predicate> predicateList = Lists.newArrayList();
+                if (StringUtils.isNotBlank(request.getParameter("proposer"))) {
+                    predicateList.add(criteriaBuilder.equal(root.get("proposer"), request.getParameter("proposer")));
+                }
+                if (StringUtils.isNotBlank(request.getParameter("approver"))) {
+                    predicateList.add(criteriaBuilder.equal(root.get("approver"), request.getParameter("approver")));
+                }
+                if (StringUtils.isNotBlank(request.getParameter("banJiName"))) {
+                    predicateList.add(criteriaBuilder.equal(root.get("banJiName"), request.getParameter("banJiName")));
+                }
+                String whCodes = RequestHolder.getCurrentUser().getWhCodes();
+                List<String> whCodeList = Arrays.asList(StringUtils.split(whCodes, ","));
+                predicateList.add(root.get("whCode").in(whCodeList));
+                TimeCriteriaUtil.timePredication(request, criteriaBuilder, predicateList, root.get("createTime"));
+                return criteriaBuilder.and(predicateList.toArray(new Predicate[0]));
+            };
+            outputList = outputRepository.findAll(specification);
         }
+        return outputList;
     }
 
     public List<Inventory> findInventory() {

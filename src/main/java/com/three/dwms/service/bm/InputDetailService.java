@@ -117,10 +117,10 @@ public class InputDetailService {
             //物料信息
             Product product = productRepository.findBySkuDescAndSpec(param.getSkuDesc(), param.getSpec());
             if (product == null) {
-                String categoryName = StringUtils.isBlank(param.getCategoryName()) ? "其他" : param.getCategoryName();
+                String categoryName = StringUtils.isBlank(param.getCategoryName()) ? "其它" : param.getCategoryName();
                 Category category = categoryRepository.findByName(categoryName);
                 if (category == null) {
-                    Category category1 = Category.builder().name(param.getCategoryName()).build();
+                    Category category1 = Category.builder().name(categoryName).build();
                     category1.setRemark("入库自动生成");
                     category1.setStatus(StatusCode.NORMAL.getCode());
                     category1.setCreator(RequestHolder.getCurrentUser().getUsername());
@@ -266,7 +266,7 @@ public class InputDetailService {
     }
 
     public List<InputDetail> findAll() {
-        return (List<InputDetail>) inputDetailRepository.findAll();
+        return this.stockQuery();
     }
 
     @Transactional

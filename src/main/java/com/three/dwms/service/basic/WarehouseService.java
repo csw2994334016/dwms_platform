@@ -147,7 +147,9 @@ public class WarehouseService {
 
     public List<WarehouseTree> findAllByTree() {
         List<WarehouseTree> warehouseTreeList = Lists.newArrayList();
-        List<Warehouse> warehouseList = (List<Warehouse>) warehouseRepository.findAll();
+        String whCodes = RequestHolder.getCurrentUser().getWhCodes();
+        List<String> whCodeList = Arrays.asList(StringUtils.split(whCodes, ","));
+        List<Warehouse> warehouseList = warehouseRepository.findAllByWhCodeIn(whCodeList);
         WarehouseTree root = WarehouseTree.builder().id(0).text(WhTypeCode.ROOT.getDesc()).type(WhTypeCode.ROOT.getCode()).nodes(Lists.newArrayList()).build();
         for (Warehouse warehouse : warehouseList) {
             WarehouseTree warehouseTree1 = WarehouseTree.builder().id(warehouse.getId()).text(warehouse.getWhName()).type(WhTypeCode.WAREHOUSE.getCode()).build();
