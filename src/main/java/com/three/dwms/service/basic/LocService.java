@@ -135,7 +135,7 @@ public class LocService {
         HttpServletRequest request = RequestHolder.getCurrentRequest();
         if (request != null && request.getParameter("pareaId") != null) {
             Area area = areaService.findById(Integer.valueOf(request.getParameter("pareaId")));
-            return locRepository.findAllByArea(area);
+            return locRepository.findAllByAreaOrderByLocNameAsc(area);
         }
         return (List<Loc>) locRepository.findAll();
     }
@@ -169,7 +169,7 @@ public class LocService {
     public List<Loc> findAllByAreaId(Integer areaId) {
         if (areaId != null) {
             Area area = areaService.findById(areaId);
-            return locRepository.findAllByArea(area);
+            return locRepository.findAllByAreaOrderByLocNameAsc(area);
         }
         return Lists.newArrayList();
     }

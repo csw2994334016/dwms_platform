@@ -136,13 +136,14 @@ public class WarehouseService {
     }
 
     public List<Warehouse> findAll() {
-        if (RequestHolder.getCurrentUser() != null) {
-            String whCodes = RequestHolder.getCurrentUser().getWhCodes();
-            List<String> whCodeList = Arrays.asList(StringUtils.split(whCodes, ","));
-            return warehouseRepository.findAllByWhCodeIn(whCodeList);
-        } else {
-            return Lists.newArrayList();
+        List<Warehouse> warehouseList;
+        String whCodes = RequestHolder.getCurrentUser().getWhCodes();
+        if (StringUtils.isBlank(whCodes)) {
+            throw new ParamException("用户没有访问仓库的权限");
         }
+        List<String> whCodeList = Arrays.asList(StringUtils.split(whCodes, ","));
+        warehouseList = warehouseRepository.findAllByWhCodeIn(whCodeList);
+        return warehouseList;
     }
 
     public List<WarehouseTree> findAllByTree() {
@@ -153,19 +154,19 @@ public class WarehouseService {
         WarehouseTree root = WarehouseTree.builder().id(0).text(WhTypeCode.ROOT.getDesc()).type(WhTypeCode.ROOT.getCode()).nodes(Lists.newArrayList()).build();
         for (Warehouse warehouse : warehouseList) {
             WarehouseTree warehouseTree1 = WarehouseTree.builder().id(warehouse.getId()).text(warehouse.getWhName()).type(WhTypeCode.WAREHOUSE.getCode()).build();
-            List<Zone> zoneList = zoneRepository.findAllByWarehouse(warehouse);
+            List<Zone> zoneList = zoneRepository.findAllByWarehouseOrderByZoneCodeAsc(warehouse);
             if (zoneList.size() > 0) {
                 warehouseTree1.setNodes(Lists.newArrayList());
             }
             for (Zone zone : zoneList) {
                 WarehouseTree warehouseTree2 = WarehouseTree.builder().id(zone.getId()).text(zone.getZoneName()).type(WhTypeCode.ZONE.getCode()).build();
-                List<Area> areaList = areaRepository.findAllByZone(zone);
+                List<Area> areaList = areaRepository.findAllByZoneOrderByAreaNameAsc(zone);
                 if (areaList.size() > 0) {
                     warehouseTree2.setNodes(Lists.newArrayList());
                 }
                 for (Area area : areaList) {
                     WarehouseTree warehouseTree3 = WarehouseTree.builder().id(area.getId()).text(area.getAreaName()).type(WhTypeCode.AREA.getCode()).build();
-                    List<Loc> locList = locRepository.findAllByArea(area);
+                    List<Loc> locList = locRepository.findAllByAreaOrderByLocNameAsc(area);
                     if (locList.size() > 0) {
                         warehouseTree3.setNodes(Lists.newArrayList());
                     }

@@ -61,4 +61,8 @@ public class StringUtil {
         }
         return null;
     }
+
+    public static String getCurDateStr() {
+        return sdf.format(new Date());
+    }
 }

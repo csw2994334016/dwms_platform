@@ -22,7 +22,7 @@ public interface LocRepository extends PagingAndSortingRepository<Loc, Integer> 
 
     int countByLocName(String locName);
 
-    List<Loc> findAllByArea(Area area);
+    List<Loc> findAllByAreaOrderByLocNameAsc(Area area);
 
     @Query("select max(l.locCode) from Loc l where l.area = :area")
     Integer findMaxLocCodeByArea(@Param("area") Area area);

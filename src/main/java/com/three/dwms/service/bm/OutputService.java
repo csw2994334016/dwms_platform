@@ -47,14 +47,6 @@ public class OutputService {
     private InventoryService inventoryService;
 
     public List<Output> findAll() {
-//        SysUser sysUser = RequestHolder.getCurrentUser();
-//        if (sysUser != null) {
-//            String whCodes = sysUser.getWhCodes();
-//            List<String> whCodeList = Arrays.asList(StringUtils.split(whCodes, ","));
-//            return outputRepository.findAllByWhCodeIn(whCodeList);
-//        } else {
-//            return Lists.newArrayList();
-//        }
         List<Output> outputList = Lists.newArrayList();
         HttpServletRequest request = RequestHolder.getCurrentRequest();
         if (request != null) {
@@ -70,6 +62,9 @@ public class OutputService {
                     predicateList.add(criteriaBuilder.equal(root.get("banJiName"), request.getParameter("banJiName")));
                 }
                 String whCodes = RequestHolder.getCurrentUser().getWhCodes();
+                if (StringUtils.isBlank(whCodes)) {
+                    throw new ParamException("用户没有访问仓库的权限");
+                }
                 List<String> whCodeList = Arrays.asList(StringUtils.split(whCodes, ","));
                 predicateList.add(root.get("whCode").in(whCodeList));
                 TimeCriteriaUtil.timePredication(request, criteriaBuilder, predicateList, root.get("createTime"));

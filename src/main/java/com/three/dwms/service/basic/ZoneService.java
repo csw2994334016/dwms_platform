@@ -12,7 +12,6 @@ import com.three.dwms.param.basic.ZoneParam;
 import com.three.dwms.repository.basic.ZoneRepository;
 import com.three.dwms.utils.BeanValidator;
 import com.three.dwms.utils.IpUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -141,7 +140,7 @@ public class ZoneService {
             int pwhId = Integer.valueOf(request.getParameter("pwhId")); //表格查询条件
             if (pwhId > 0) {
                 Warehouse warehouse = warehouseService.findById(pwhId);
-                return zoneRepository.findAllByWarehouse(warehouse);
+                return zoneRepository.findAllByWarehouseOrderByZoneCodeAsc(warehouse);
             } else {
                 return (List<Zone>) zoneRepository.findAll();
             }
@@ -164,7 +163,7 @@ public class ZoneService {
     public List<Zone> findByWarehouseId(Integer whId) {
         if (whId != null) {
             Warehouse warehouse = warehouseService.findById(whId);
-            return zoneRepository.findAllByWarehouse(warehouse);
+            return zoneRepository.findAllByWarehouseOrderByZoneCodeAsc(warehouse);
         } else {
             return Lists.newArrayList();
         }

@@ -90,7 +90,7 @@ public class InputDetailService {
     public void create(List<InputDetailParam> paramList) {
         List<InputDetail> inputDetailList = Lists.newArrayList();
         String maxNo = inputDetailRepository.findMaxInputNo();
-        String inputNo = StringUtil.getCurCode("I", maxNo);
+        String inputNo = StringUtil.getCurCode("R", maxNo);
         //批次号验证
         InputDetailParam first = null;
         if (paramList.size() > 0) {
@@ -98,22 +98,28 @@ public class InputDetailService {
         }
         for (InputDetailParam param : paramList) {
             if ("import".equals(param.getInputType())) {
-                if (!param.getBatchNo().equals(first.getBatchNo())) {
-                    throw new ParamException("EXCEL导入每条数据批次号必须相同");
+                if (StringUtils.isNotBlank(param.getBatchNo())) {
+                    if (!param.getBatchNo().equals(first.getBatchNo())) {
+                        throw new ParamException("EXCEL导入每条数据批次号必须相同");
+                    }
+                } else {
+                    throw new ParamException("EXCEL导入批次号不可以为空");
                 }
             }
         }
+        String batchNo = StringUtil.getCurDateStr();
         if (first != null && "import".equals(first.getInputType())) {
             if (checkBatchNoExist(first.getBatchNo())) {
-                throw new ParamException("入库批次号已经存在，判断为重复导入");
+                throw new ParamException("导入批次号已经存在，判断为重复导入");
             }
+            batchNo = first.getBatchNo();
         }
         for (InputDetailParam param : paramList) {
             BeanValidator.check(param);
             InputDetail inputDetail = InputDetail.builder().build();
             //自动生成入库单编号
             inputDetail.setInputNo(inputNo);
-            inputDetail.setBatchNo(inputNo);
+            inputDetail.setBatchNo(batchNo);
             //物料信息
             Product product = productRepository.findBySkuDescAndSpec(param.getSkuDesc(), param.getSpec());
             if (product == null) {

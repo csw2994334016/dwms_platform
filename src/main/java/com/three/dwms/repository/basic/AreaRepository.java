@@ -18,7 +18,7 @@ public interface AreaRepository extends PagingAndSortingRepository<Area, Integer
 
     int countByAreaName(String areaName);
 
-    List<Area> findAllByZone(Zone zone);
+    List<Area> findAllByZoneOrderByAreaNameAsc(Zone zone);
 
     int countByAreaNameAndZoneAndIdNot(String areaName, Zone zone, Integer id);
 

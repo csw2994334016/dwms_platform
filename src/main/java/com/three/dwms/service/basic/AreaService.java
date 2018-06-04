@@ -129,7 +129,7 @@ public class AreaService {
         HttpServletRequest request = RequestHolder.getCurrentRequest();
         if (request != null && request.getParameter("pzoneId") != null) {
             Zone zone = zoneService.findById(Integer.valueOf(request.getParameter("pzoneId")));
-            return areaRepository.findAllByZone(zone);
+            return areaRepository.findAllByZoneOrderByAreaNameAsc(zone);
         }
         return (List<Area>) areaRepository.findAll();
     }
@@ -149,7 +149,7 @@ public class AreaService {
     public List<Area> findAllByZoneId(Integer zoneId) {
         if (zoneId != null) {
             Zone zone = zoneService.findById(zoneId);
-            return areaRepository.findAllByZone(zone);
+            return areaRepository.findAllByZoneOrderByAreaNameAsc(zone);
         }
         return Lists.newArrayList();
     }
