@@ -27,7 +27,7 @@ public interface LocRepository extends PagingAndSortingRepository<Loc, Integer> 
     @Query("select max(l.locCode) from Loc l where l.area = :area")
     Integer findMaxLocCodeByArea(@Param("area") Area area);
 
-    @Query("select l from Loc l where l.area.zone.warehouse = :warehouse")
+    @Query("select l from Loc l where l.area.zone.warehouse = :warehouse order by l.locName")
     List<Loc> findAllByWarehouse(@Param("warehouse") Warehouse warehouse);
 
     @Query("select l from Loc l where l.locName = :locName and l.area.zone.warehouse = :warehouse")

@@ -282,7 +282,7 @@ public class InputDetailService {
         for (Integer id : ids) {
             InputDetail inputDetail = this.findById(id);
             inputDetails.add(inputDetail);
-            Inventory inventory = inventoryRepository.findBySkuAndWhCode(inputDetail.getSku(), inputDetail.getWhCode());
+            Inventory inventory = inventoryRepository.findBySkuAndWhCodeAndLocName(inputDetail.getSku(), inputDetail.getWhCode(), inputDetail.getLocName());
             if (inventory != null) {
                 inventory.setSkuAmount(inventory.getSkuAmount() - inputDetail.getAmount());
                 inventories.add(inventory);
