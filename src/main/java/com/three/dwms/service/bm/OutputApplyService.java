@@ -16,18 +16,14 @@ import com.three.dwms.repository.bm.OutputDetailRepository;
 import com.three.dwms.repository.bm.OutputRepository;
 import com.three.dwms.service.basic.WarehouseService;
 import com.three.dwms.utils.BeanValidator;
+import com.three.dwms.utils.CriteriaUtil;
 import com.three.dwms.utils.IpUtil;
 import com.three.dwms.utils.StringUtil;
-import com.three.dwms.utils.TimeCriteriaUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
@@ -77,20 +73,7 @@ public class OutputApplyService {
         HttpServletRequest request = RequestHolder.getCurrentRequest();
         if (request != null) {
             Specification<Output> specification = (root, criteriaQuery, criteriaBuilder) -> {
-                List<Predicate> predicateList = Lists.newArrayList();
-                if (StringUtils.isNotBlank(request.getParameter("proposer"))) {
-                    predicateList.add(criteriaBuilder.equal(root.get("proposer"), request.getParameter("proposer")));
-                } else {
-                    predicateList.add(criteriaBuilder.equal(root.get("proposer"), RequestHolder.getCurrentUser().getUsername()));
-                }
-                if (StringUtils.isNotBlank(request.getParameter("approver"))) {
-                    predicateList.add(criteriaBuilder.equal(root.get("approver"), request.getParameter("approver")));
-                }
-                if (StringUtils.isNotBlank(request.getParameter("state"))) {
-                    predicateList.add(criteriaBuilder.equal(root.get("state"), Integer.valueOf(request.getParameter("state"))));
-                }
-                TimeCriteriaUtil.timePredication(request, criteriaBuilder, predicateList, root.get("createTime"));
-                return criteriaBuilder.and(predicateList.toArray(new Predicate[0]));
+                return CriteriaUtil.getPredicate(request, criteriaBuilder, root.get("proposer"), root.get("approver"), root.get("state"), root.get("createTime"));
             };
             outputList = outputRepository.findAll(specification);
         }

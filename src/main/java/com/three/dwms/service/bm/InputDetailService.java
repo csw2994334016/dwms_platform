@@ -110,12 +110,21 @@ public class InputDetailService {
         String batchNo = StringUtil.getCurDateStr();
         if (first != null && "import".equals(first.getInputType())) {
             if (checkBatchNoExist(first.getBatchNo())) {
-                throw new ParamException("导入批次号已经存在，判断为重复导入");
+                throw new ParamException("系统检测该Excel批次号已导入，请检查后重新导入");
             }
             batchNo = first.getBatchNo();
         }
+        //验证此次导入是否拥有仓库权限
         for (InputDetailParam param : paramList) {
             BeanValidator.check(param);
+            Warehouse warehouse = warehouseRepository.findByWhName(param.getWhName());
+            Preconditions.checkNotNull(warehouse, "库房信息不存在");
+            List<String> whCodeList = Arrays.asList(StringUtils.split(RequestHolder.getCurrentUser().getWhCodes(), ","));
+            if (!whCodeList.contains(warehouse.getWhCode())) {
+                throw new ParamException("当前用户没有操作库房(whName:" + param.getWhName() + ")的权限");
+            }
+        }
+        for (InputDetailParam param : paramList) {
             InputDetail inputDetail = InputDetail.builder().build();
             //自动生成入库单编号
             inputDetail.setInputNo(inputNo);
@@ -208,10 +217,16 @@ public class InputDetailService {
             inputDetail.setOperator(RequestHolder.getCurrentUser().getUsername());
             inputDetail.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
             inputDetail.setOperateTime(new Date());
-            //inventory表的操作
-            Inventory inventory = inventoryRepository.findBySkuAndWhCodeAndLocName(product.getSku(), warehouse.getWhCode(), inputDetail.getLocName());
+            //状态
+            inputDetail.setState(InputStateCode.INPUT.getCode());
+            inputDetailList.add(inputDetail);
+        }
+        inputDetailRepository.save(inputDetailList);
+        //所有单子入库成功后，统一对inventory表操作
+        for (InputDetail inputDetail : inputDetailList) {
+            Inventory inventory = inventoryRepository.findBySkuAndWhCodeAndLocName(inputDetail.getSku(), inputDetail.getWhCode(), inputDetail.getLocName());
             if (inventory == null) {
-                Inventory inventory1 = Inventory.builder().sku(product.getSku()).whCode(warehouse.getWhCode()).locName(inputDetail.getLocName()).skuDesc(product.getSkuDesc()).spec(product.getSpec()).whName(warehouse.getWhName()).skuAmount(inputDetail.getAmount()).build();
+                Inventory inventory1 = Inventory.builder().sku(inputDetail.getSku()).whCode(inputDetail.getWhCode()).locName(inputDetail.getLocName()).skuDesc(inputDetail.getSkuDesc()).spec(inputDetail.getSpec()).whName(inputDetail.getWhName()).skuAmount(inputDetail.getAmount()).build();
                 inventory1.setRemark("入库自动生成");
                 inventory1.setStatus(StatusCode.NORMAL.getCode());
                 inventory1.setCreator(RequestHolder.getCurrentUser().getUsername());
@@ -224,11 +239,7 @@ public class InputDetailService {
                 inventory.setSkuAmount(inventory.getSkuAmount() + inputDetail.getAmount());
                 inventoryRepository.save(inventory);
             }
-            //状态
-            inputDetail.setState(InputStateCode.INPUT.getCode());
-            inputDetailList.add(inputDetail);
         }
-        inputDetailRepository.save(inputDetailList);
     }
 
     private boolean checkBatchNoExist(String batchNo) {
@@ -263,7 +274,7 @@ public class InputDetailService {
                 if (StringUtils.isNotBlank(request.getParameter("purchaseDept"))) {
                     predicateList.add(criteriaBuilder.equal(root.get("purchaseDept"), request.getParameter("purchaseDept")));
                 }
-                TimeCriteriaUtil.timePredication(request, criteriaBuilder, predicateList, root.get("createTime"));
+                CriteriaUtil.getDatePredicate(request, criteriaBuilder, predicateList, root.get("createTime"));
                 return criteriaBuilder.and(predicateList.toArray(new Predicate[0]));
             };
             inputDetailList = inputDetailRepository.findAll(specification);

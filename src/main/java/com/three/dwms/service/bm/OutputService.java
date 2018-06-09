@@ -7,14 +7,13 @@ import com.three.dwms.constant.OutputStateCode;
 import com.three.dwms.entity.bm.Inventory;
 import com.three.dwms.entity.bm.Output;
 import com.three.dwms.entity.bm.OutputDetail;
-import com.three.dwms.entity.sys.SysUser;
 import com.three.dwms.exception.ParamException;
 import com.three.dwms.param.bm.AllocationParam;
 import com.three.dwms.repository.bm.InventoryRepository;
 import com.three.dwms.repository.bm.OutputDetailRepository;
 import com.three.dwms.repository.bm.OutputRepository;
 import com.three.dwms.utils.BeanValidator;
-import com.three.dwms.utils.TimeCriteriaUtil;
+import com.three.dwms.utils.CriteriaUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
@@ -67,7 +66,7 @@ public class OutputService {
                 }
                 List<String> whCodeList = Arrays.asList(StringUtils.split(whCodes, ","));
                 predicateList.add(root.get("whCode").in(whCodeList));
-                TimeCriteriaUtil.timePredication(request, criteriaBuilder, predicateList, root.get("createTime"));
+                CriteriaUtil.getDatePredicate(request, criteriaBuilder, predicateList, root.get("createTime"));
                 return criteriaBuilder.and(predicateList.toArray(new Predicate[0]));
             };
             outputList = outputRepository.findAll(specification);

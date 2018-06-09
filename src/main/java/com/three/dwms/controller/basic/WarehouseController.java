@@ -7,6 +7,7 @@ import com.three.dwms.constant.StatusCode;
 import com.three.dwms.entity.basic.Warehouse;
 import com.three.dwms.param.basic.WarehouseParam;
 import com.three.dwms.param.basic.WarehouseTree;
+import com.three.dwms.param.basic.VirtualZone;
 import com.three.dwms.service.basic.WarehouseService;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
@@ -77,5 +78,11 @@ public class WarehouseController {
     public JsonData findOne(@PathVariable int id) {
         Warehouse warehouse = warehouseService.findById(id);
         return JsonData.success(warehouse);
+    }
+
+    @RequestMapping(value = "/virtualWarehouses/{id}", method = RequestMethod.GET)
+    public JsonData findVirtualWarehouse(@PathVariable Integer id) {
+        List<VirtualZone> virtualZoneList = warehouseService.findVirtualWarehouse(id);
+        return JsonData.success(virtualZoneList);
     }
 }

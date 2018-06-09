@@ -10,15 +10,19 @@ import com.three.dwms.entity.basic.Area;
 import com.three.dwms.entity.basic.Loc;
 import com.three.dwms.entity.basic.Warehouse;
 import com.three.dwms.entity.basic.Zone;
+import com.three.dwms.entity.bm.Inventory;
 import com.three.dwms.exception.ParamException;
-import com.three.dwms.param.basic.WarehouseParam;
-import com.three.dwms.param.basic.WarehouseTree;
+import com.three.dwms.param.basic.*;
+import com.three.dwms.param.bm.InventoryParam;
 import com.three.dwms.repository.basic.AreaRepository;
 import com.three.dwms.repository.basic.LocRepository;
 import com.three.dwms.repository.basic.WarehouseRepository;
 import com.three.dwms.repository.basic.ZoneRepository;
+import com.three.dwms.repository.bm.InventoryRepository;
+import com.three.dwms.service.bm.InventoryService;
 import com.three.dwms.utils.BeanValidator;
 import com.three.dwms.utils.IpUtil;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -49,6 +53,9 @@ public class WarehouseService {
 
     @Resource
     private LocRepository locRepository;
+
+    @Resource
+    private InventoryRepository inventoryRepository;
 
     @Transactional
     public void create(WarehouseParam param) {
@@ -170,10 +177,6 @@ public class WarehouseService {
                     if (locList.size() > 0) {
                         warehouseTree3.setNodes(Lists.newArrayList());
                     }
-//                    for (Loc loc : locList) {
-//                        WarehouseTree warehouseTree4 = WarehouseTree.builder().id(loc.getId()).text(loc.getLocName()).type(WhTypeCode.LOC.getCode()).build();
-//                        warehouseTree3.getNodes().add(warehouseTree4);
-//                    }
                     warehouseTree2.getNodes().add(warehouseTree3);
                 }
                 warehouseTree1.getNodes().add(warehouseTree2);
@@ -206,5 +209,36 @@ public class WarehouseService {
         Warehouse warehouse = warehouseRepository.findByWhCode(whCode);
         Preconditions.checkNotNull(warehouse, "仓库(whCode:" + whCode + ")信息不存在");
         return warehouse;
+    }
+
+    public List<VirtualZone> findVirtualWarehouse(Integer id) {
+        List<VirtualZone> virtualZoneList = Lists.newArrayList();
+        Warehouse warehouse = this.findById(id);
+        List<Zone> zoneList = zoneRepository.findAllByWarehouseOrderByZoneCodeAsc(warehouse);
+        for (Zone zone : zoneList) {
+            VirtualZone virtualZone = VirtualZone.builder().zoneId(zone.getId()).zoneName(zone.getZoneName()).virtualAreaList(Lists.newArrayList()).build();
+            List<Area> areaList = areaRepository.findAllByZoneOrderByAreaNameAsc(zone);
+            for (Area area : areaList) {
+                VirtualArea virtualArea = VirtualArea.builder().areaId(area.getId()).areaCode(area.getAreaCode()).areaName(area.getAreaName()).virtualLocList(Lists.newArrayList()).build();
+                //查找储位，统计使用情况
+                int usedNum = 0;
+                List<Loc> locList = locRepository.findAllByAreaOrderByLocNameAsc(area);
+                for (Loc loc : locList) {
+                    VirtualLoc virtualLoc = VirtualLoc.builder().locId(loc.getId()).locCode(loc.getLocCode()).locName(loc.getLocName()).inventoryList(Lists.newArrayList()).build();
+                    //查找物料汇总信息
+                    List<Inventory> inventoryList = inventoryRepository.findAllByWhNameAndLocName(warehouse.getWhName(), loc.getLocName());
+                    virtualLoc.setUseFlag(CollectionUtils.isNotEmpty(inventoryList));
+                    usedNum = CollectionUtils.isNotEmpty(inventoryList) ? usedNum + 1 : usedNum;
+                    virtualLoc.getInventoryList().addAll(inventoryList);
+                    virtualArea.getVirtualLocList().add(virtualLoc);
+                }
+                //统计储位使用数量，和总数
+                virtualArea.setUsedNum(usedNum);
+                virtualArea.setTotalNum(locList.size());
+                virtualZone.getVirtualAreaList().add(virtualArea);
+            }
+            virtualZoneList.add(virtualZone);
+        }
+        return virtualZoneList;
     }
 }

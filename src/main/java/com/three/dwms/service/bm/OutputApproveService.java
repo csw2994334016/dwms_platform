@@ -9,7 +9,7 @@ import com.three.dwms.exception.ParamException;
 import com.three.dwms.param.bm.OutputParam;
 import com.three.dwms.repository.bm.OutputRepository;
 import com.three.dwms.utils.IpUtil;
-import com.three.dwms.utils.TimeCriteriaUtil;
+import com.three.dwms.utils.CriteriaUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
@@ -89,7 +89,7 @@ public class OutputApproveService {
                 Output output = this.findById(param.getId());
                 if (output.getApprover().equals(RequestHolder.getCurrentUser().getUsername())) {
                     if (output.getState() == OutputStateCode.APPROVE.getCode() || output.getState() == OutputStateCode.DECLINE.getCode()) {
-                        output.setState(OutputStateCode.DRAFT.getCode());
+                        output.setState(OutputStateCode.APPLY.getCode());
                         output.setOperator(RequestHolder.getCurrentUser().getUsername());
                         output.setOperateTime(new Date());
                         output.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
@@ -124,7 +124,7 @@ public class OutputApproveService {
                 if (StringUtils.isNotBlank(request.getParameter("state"))) {
                     predicateList.add(criteriaBuilder.equal(root.get("state"), Integer.valueOf(request.getParameter("state"))));
                 }
-                TimeCriteriaUtil.timePredication(request, criteriaBuilder, predicateList, root.get("createTime"));
+                CriteriaUtil.getDatePredicate(request, criteriaBuilder, predicateList, root.get("createTime"));
                 return criteriaBuilder.and(predicateList.toArray(new Predicate[0]));
             };
             outputList = outputRepository.findAll(specification);
