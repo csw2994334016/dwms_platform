@@ -28,10 +28,11 @@ public class AclControlFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
 
-        String servletPath = request.getServletPath();
+        String url = request.getServletPath();
+        String method = request.getMethod();
         Map requestMap = request.getParameterMap();
 
-        if (servletPath.startsWith(noAuthUrl)) {
+        if (url.startsWith(noAuthUrl)) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
@@ -50,8 +51,8 @@ public class AclControlFilter implements Filter {
         RequestHolder.add(request);
 
         SysCoreService sysCoreService = ContextHelper.popBean(SysCoreService.class);
-        if (!sysCoreService.hasUrlAcl(servletPath)) {
-            log.error("{} visit: {}, but no access auth, parameter: {}", JsonMapper.obj2String(sysUser), servletPath, JsonMapper.obj2String(requestMap));
+        if (sysCoreService != null && !sysCoreService.hasUrlAcl(sysUser, url, method)) {
+            log.error("{} visit url: {}, method: {}, but no access auth, parameter: {}", JsonMapper.obj2String(sysUser), url, method, JsonMapper.obj2String(requestMap));
             request.getRequestDispatcher("/auth/noAuth").forward(request, response);
             return;
         }

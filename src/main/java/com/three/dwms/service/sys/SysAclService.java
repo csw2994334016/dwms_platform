@@ -42,12 +42,13 @@ public class SysAclService {
         if (checkExist(param.getParentId(), param.getName(), param.getId())) {
             throw new ParamException("同级权限下面存在相同名称的权限");
         }
+        SysAcl parentAcl = null;
         if (param.getParentId() > 0) {
-            SysAcl parentAcl = sysAclRepository.findOne(param.getParentId());
+            parentAcl = sysAclRepository.findOne(param.getParentId());
             Preconditions.checkNotNull(parentAcl, "上级权限不存在，可以选择一级权限");
         }
 
-        SysAcl sysAcl = SysAcl.builder().name(param.getName()).parentId(param.getParentId()).type(param.getType()).icon(param.getIcon()).url(param.getUrl()).seq(param.getSeq()).build();
+        SysAcl sysAcl = SysAcl.builder().name(param.getName()).parentId(param.getParentId()).type(param.getType()).icon(param.getIcon()).url(param.getUrl()).method(param.getMethod()).seq(param.getSeq()).sysAcl(parentAcl).build();
 
         sysAcl.setStatus(param.getStatus());
         sysAcl.setRemark(param.getRemark());
@@ -75,10 +76,13 @@ public class SysAclService {
 
     public void deleteByIds(List<Integer> ids) {
         List<SysAcl> sysAcls = Lists.newArrayList();
+        List<SysRoleAcl> sysRoleAclList = Lists.newArrayList();
         for (Integer id : ids) {
             sysAcls.add(this.findById(id));
+            sysRoleAclList.addAll(sysRoleAclRepository.findAllByAclId(id));
         }
         sysAclRepository.delete(sysAcls);
+        sysRoleAclRepository.delete(sysRoleAclList);
     }
 
     public SysAcl update(AclParam param) {
@@ -88,12 +92,13 @@ public class SysAclService {
         if (checkExist(param.getParentId(), param.getName(), param.getId())) {
             throw new ParamException("同级权限下面存在相同名称的权限");
         }
+        SysAcl parentAcl = null;
         if (param.getParentId() > 0) {
-            SysAcl parentAcl = sysAclRepository.findOne(param.getParentId());
+            parentAcl = sysAclRepository.findOne(param.getParentId());
             Preconditions.checkNotNull(parentAcl, "上级权限不存在，可以选择一级权限");
         }
 
-        SysAcl after = SysAcl.builder().name(param.getName()).parentId(param.getParentId()).type(param.getType()).icon(param.getIcon()).url(param.getUrl()).seq(param.getSeq()).build();
+        SysAcl after = SysAcl.builder().name(param.getName()).parentId(param.getParentId()).type(param.getType()).icon(param.getIcon()).url(param.getUrl()).method(param.getMethod()).seq(param.getSeq()).sysAcl(parentAcl).build();
         after.setId(param.getId());
 
 //        before.setName(param.getName());

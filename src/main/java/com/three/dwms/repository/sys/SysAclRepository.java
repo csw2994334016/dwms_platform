@@ -14,4 +14,6 @@ public interface SysAclRepository extends PagingAndSortingRepository<SysAcl, Int
     int countByParentIdAndName(Integer parentId, String name);
 
     int countByParentId(int id);
+
+    SysAcl findByUrlAndMethod(String url, String method);
 }

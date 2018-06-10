@@ -28,6 +28,8 @@ public class SysAcl extends BaseEntity implements Serializable {
 
     private String url; //接口地址（可以填正则表达式）：api/sys/users
 
+    private String method; ///接口请求的方法
+
     private Integer seq; //权限在当前模块下的顺序，由小到大
 
     @OneToOne(cascade = CascadeType.REFRESH)

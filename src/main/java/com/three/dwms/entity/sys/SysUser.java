@@ -46,12 +46,6 @@ public class SysUser extends BaseEntity implements Serializable {
     private SysRole sysRole; //角色Id，唯一值
 
     @Transient
-    private List<SysAcl> sysAclList;
+    private List<Integer> alcIdList = Lists.newArrayList();
 
-    public List<SysAcl> getSysAclList() {
-        if (sysAclList == null) {
-            return new ArrayList<>();
-        }
-        return sysAclList;
-    }
 }

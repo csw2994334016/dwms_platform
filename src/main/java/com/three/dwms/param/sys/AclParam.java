@@ -42,6 +42,8 @@ public class AclParam {
     @Length(min = 0, max = 100, message = "权限点URL长度需要在4-100个字符之间")
     private String url; //接口地址（可以填正则表达式）：api/sys/users
 
+    private String method; //接口请求的方法
+
     @NotNull(message = "必须指定权限点的展示顺序")
     private Integer seq; //权限在当前模块下的顺序，由小到大
 

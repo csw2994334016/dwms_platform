@@ -113,9 +113,9 @@ public class AuthController {
             } else if (sysUser.getStatus() != 1) {
                 errorMsg = "用户已被禁用，请联系管理员";
             } else {
-                request.getSession().setAttribute("user", sysUser);
+                SysUser userRoleAcl = sysUserService.bindUserWithAcl(sysUser); //给用户绑定权限
+                request.getSession().setAttribute("user", userRoleAcl);
                 request.getSession().setMaxInactiveInterval(sessionInterval);
-                SysUser userRoleAcl = sysUserService.createUserAndRoleAndAcl(sysUser);
                 return JsonData.success(userRoleAcl);
             }
         }

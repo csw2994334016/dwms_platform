@@ -3,7 +3,9 @@ package com.three.dwms.controller.sys;
 import com.google.common.collect.Lists;
 import com.three.dwms.beans.JsonData;
 import com.three.dwms.beans.PageQuery;
+import com.three.dwms.entity.sys.SysAcl;
 import com.three.dwms.entity.sys.SysUser;
+import com.three.dwms.param.sys.AclMenu;
 import com.three.dwms.param.sys.User;
 import com.three.dwms.param.sys.UserParam;
 import com.three.dwms.param.sys.UserRoleParam;
@@ -53,7 +55,6 @@ public class SysUserController {
     public JsonData update(@PathVariable int id, @RequestBody UserParam userParam) {
         userParam.setId(id);
         SysUser sysUser = sysUserService.update(userParam);
-        sysUser = sysUserService.createUserAndRoleAndAcl(sysUser);
         return JsonData.success(sysUser);
     }
 
@@ -61,7 +62,6 @@ public class SysUserController {
     public JsonData updatePassword(@PathVariable int id, User user) {
         user.setId(id);
         SysUser sysUser = sysUserService.updatePassword(user);
-        sysUser = sysUserService.createUserAndRoleAndAcl(sysUser);
         return JsonData.success(sysUser);
     }
 
@@ -92,15 +92,19 @@ public class SysUserController {
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public JsonData findOne(@PathVariable int id) {
         SysUser sysUser = sysUserService.findById(id);
-        sysUser = sysUserService.createUserAndRoleAndAcl(sysUser);
         return JsonData.success(sysUser);
     }
 
     @RequestMapping(value = "/currentUser", method = RequestMethod.GET)
     public JsonData findCurrentUser() {
         SysUser sysUser = sysUserService.findCurrentUser();
-        sysUser = sysUserService.createUserAndRoleAndAcl(sysUser);
         return JsonData.success(sysUser);
+    }
+
+    @RequestMapping(value = "/currentMenu", method = RequestMethod.GET)
+    public JsonData findCurrentMenu() {
+        List<AclMenu> aclMenuList = sysUserService.findCurrentMenu();
+        return JsonData.success(aclMenuList);
     }
 
     @RequestMapping(value = "/fuzzySearch", method = RequestMethod.POST)

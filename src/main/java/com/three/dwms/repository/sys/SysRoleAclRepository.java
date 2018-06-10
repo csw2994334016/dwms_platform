@@ -21,4 +21,6 @@ public interface SysRoleAclRepository extends PagingAndSortingRepository<SysRole
     int countByRoleId(Integer id);
 
     int countByRoleIdAndAclId(Integer id, Integer id1);
+
+    List<SysRoleAcl> findAllByAclId(Integer id);
 }

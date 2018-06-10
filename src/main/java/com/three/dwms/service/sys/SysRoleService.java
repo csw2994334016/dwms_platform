@@ -95,19 +95,14 @@ public class SysRoleService {
     @Transactional
     public void deleteByIds(List<Integer> ids) {
         List<SysRole> sysRoles = Lists.newArrayList();
-        List<SysRoleAcl> sysRoleAcls = Lists.newArrayList();
+        List<SysRoleAcl> sysRoleAclList = Lists.newArrayList();
         for (Integer id : ids) {
-            SysRole sysRole = this.findById(id);
-//            int count = sysRoleAclRepository.countByRoleId(id);
-//            if (count > 0) {
-//                throw new ParamException("待删除角色中配有权限，请先删除角色绑定的权限");
-//            }
-            sysRoles.add(sysRole);
-            sysRoleAcls = sysRoleAclRepository.findAllByRoleId(id);
+            sysRoles.add(this.findById(id));
+            sysRoleAclList.addAll(sysRoleAclRepository.findAllByRoleId(id));
         }
         sysRoleRepository.delete(sysRoles);
         //删除角色绑定的权限信息
-        sysRoleAclRepository.delete(sysRoleAcls);
+        sysRoleAclRepository.delete(sysRoleAclList);
     }
 
     @Transactional

@@ -6,7 +6,6 @@ package com.three.dwms.constant;
  */
 public enum RoleTypeCode {
 
-    SYSTEM_ADMIN("SYSTEM_ADMIN", "系统管理员"),
     ADMIN("ADMIN", "管理员"), USER("USER", "普通用户");
 
     private String type;

@@ -4,11 +4,13 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.three.dwms.beans.PageQuery;
 import com.three.dwms.common.RequestHolder;
+import com.three.dwms.constant.AclTypeCode;
 import com.three.dwms.constant.LogTypeCode;
 import com.three.dwms.constant.RoleTypeCode;
 import com.three.dwms.constant.StatusCode;
 import com.three.dwms.entity.sys.*;
 import com.three.dwms.exception.ParamException;
+import com.three.dwms.param.sys.AclMenu;
 import com.three.dwms.param.sys.User;
 import com.three.dwms.param.sys.UserParam;
 import com.three.dwms.param.sys.UserRoleParam;
@@ -179,6 +181,7 @@ public class SysUserService {
         sysLogService.saveSysLog(before, after, sysLog);
 
         //更新用户，要更新session
+        update = bindUserWithAcl(update);
         RequestHolder.getCurrentRequest().setAttribute("user", update);
 
         return update;
@@ -206,7 +209,6 @@ public class SysUserService {
         List<SysUser> sysUserList = (List<SysUser>) sysUserRepository.findAll();
         for (SysUser sysUser : sysUserList) {
             sysUser.setPassword(null);
-            createUserAndRoleAndAcl(sysUser);
         }
         return sysUserList;
     }
@@ -217,7 +219,6 @@ public class SysUserService {
         Page<SysUser> sysUserPage = sysUserRepository.findAll(pageable);
         for (SysUser sysUser : sysUserPage.getContent()) {
             sysUser.setPassword(null);
-            createUserAndRoleAndAcl(sysUser);
         }
         return sysUserPage;
     }
@@ -227,7 +228,6 @@ public class SysUserService {
         List<SysUser> sysUserList = sysUserRepository.findAllBySysRole(sysRole);
         for (SysUser sysUser : sysUserList) {
             sysUser.setPassword(null);
-            createUserAndRoleAndAcl(sysUser);
         }
         return sysUserList;
     }
@@ -259,6 +259,30 @@ public class SysUserService {
         return this.findById(id);
     }
 
+    public List<AclMenu> findCurrentMenu() {
+        List<AclMenu> aclMenuList = Lists.newArrayList();
+        SysUser sysUser = RequestHolder.getCurrentUser();
+        if (RoleTypeCode.ADMIN.getType().equals(sysUser.getSysRole().getType())) {
+            List<SysAcl> sysAclList = sysAclService.findAll();
+            for (SysAcl sysAcl : sysAclList) {
+                if (AclTypeCode.TYPE_MENU.getCode() == sysAcl.getType()) {
+                    AclMenu aclMenu = AclMenu.builder().id(sysAcl.getId().toString()).parentId(sysAcl.getParentId().toString()).name(sysAcl.getName()).icon(sysAcl.getIcon()).url(sysAcl.getUrl()).build();
+                    aclMenuList.add(aclMenu);
+                }
+            }
+        } else {
+            List<SysRoleAcl> sysRoleAclList = sysRoleAclRepository.findAllByRoleId(sysUser.getSysRole().getId());
+            for (SysRoleAcl sysRoleAcl : sysRoleAclList) {
+                SysAcl sysAcl = sysAclService.findById(sysRoleAcl.getAclId());
+                if (AclTypeCode.TYPE_MENU.getCode() == sysAcl.getType()) {
+                    AclMenu aclMenu = AclMenu.builder().id(sysAcl.getId().toString()).parentId(sysAcl.getParentId().toString()).name(sysAcl.getName()).icon(sysAcl.getIcon()).url(sysAcl.getUrl()).build();
+                    aclMenuList.add(aclMenu);
+                }
+            }
+        }
+        return aclMenuList;
+    }
+
     public SysUser findByKeyword(String keyword) {
         Preconditions.checkNotNull(keyword, "查找用户的关键字不可以为空");
         return sysUserRepository.findByUsernameOrTelOrEmail(keyword, keyword, keyword);
@@ -271,7 +295,6 @@ public class SysUserService {
             List<SysUser> sysUserList = sysUserRepository.findAllByUsernameContainingOrTelContainingOrEmailContaining(keyword, keyword, keyword);
             for (SysUser sysUser : sysUserList) {
                 sysUser.setPassword(null);
-                createUserAndRoleAndAcl(sysUser);
             }
             return sysUserList;
         }
@@ -320,16 +343,12 @@ public class SysUserService {
         return false;
     }
 
-    public SysUser createUserAndRoleAndAcl(SysUser sysUser) {
-        //给用户绑定角色
-//        SysRole sysRole = sysRoleService.findById(sysUser.getRoleId());
-//        sysUser.setSysRole(sysRole);
+    public SysUser bindUserWithAcl(SysUser sysUser) {
 
         //给用户绑定权限
         List<SysRoleAcl> sysRoleAclList = sysRoleAclRepository.findAllByRoleId(sysUser.getSysRole().getId());
         for (SysRoleAcl sysRoleAcl : sysRoleAclList) {
-            SysAcl sysAcl = sysAclService.findById(sysRoleAcl.getAclId());
-            sysUser.getSysAclList().add(sysAcl);
+            sysUser.getAlcIdList().add(sysRoleAcl.getAclId());
         }
 
         return sysUser;
