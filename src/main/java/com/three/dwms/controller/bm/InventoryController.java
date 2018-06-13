@@ -2,6 +2,7 @@ package com.three.dwms.controller.bm;
 
 import com.three.dwms.beans.JsonData;
 import com.three.dwms.entity.bm.Inventory;
+import com.three.dwms.param.bm.InventoryMoveParam;
 import com.three.dwms.param.bm.InventoryParam;
 import com.three.dwms.service.bm.InventoryService;
 import org.springframework.web.bind.annotation.*;
@@ -30,5 +31,11 @@ public class InventoryController {
     public JsonData findAll() {
         List<Inventory> inventoryList = inventoryService.findAll();
         return JsonData.success(inventoryList);
+    }
+
+    @RequestMapping(value = "/moveInventory", method = RequestMethod.POST)
+    public JsonData moveInventory(@RequestBody List<InventoryMoveParam> paramList) {
+        inventoryService.moveInventory(paramList);
+        return JsonData.success();
     }
 }

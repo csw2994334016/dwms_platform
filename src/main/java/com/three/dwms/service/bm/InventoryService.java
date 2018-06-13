@@ -3,14 +3,18 @@ package com.three.dwms.service.bm;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.three.dwms.common.RequestHolder;
+import com.three.dwms.constant.StatusCode;
 import com.three.dwms.entity.basic.Loc;
 import com.three.dwms.entity.basic.Warehouse;
 import com.three.dwms.entity.bm.Inventory;
+import com.three.dwms.exception.ParamException;
+import com.three.dwms.param.bm.InventoryMoveParam;
 import com.three.dwms.param.bm.InventoryParam;
 import com.three.dwms.repository.bm.InventoryRepository;
 import com.three.dwms.service.basic.LocService;
 import com.three.dwms.service.basic.WarehouseService;
 import com.three.dwms.utils.BeanValidator;
+import com.three.dwms.utils.IpUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -18,6 +22,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import javax.persistence.criteria.Predicate;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -75,5 +80,35 @@ public class InventoryService {
             inventoryList = inventoryRepository.findAll(specification);
         }
         return inventoryList;
+    }
+
+    public void moveInventory(List<InventoryMoveParam> paramList) {
+        List<Inventory> inventoryList = Lists.newArrayList();
+        List<Inventory> inventoryMoveList = Lists.newArrayList();
+        for (InventoryMoveParam param : paramList) {
+            BeanValidator.check(param);
+            Inventory inventory = this.findById(param.getId());
+            if (param.getMoveNumber().compareTo(inventory.getSkuAmount()) > 0) {
+                throw new ParamException("移库数量(" + param.getMoveNumber() + ")不能比储位库存量(" + inventory.getSkuAmount() + ")大");
+            }
+            Warehouse warehouse = warehouseService.findByWhName(param.getWhName());
+            Inventory inventoryMove = inventoryRepository.findBySkuAndWhNameAndLocName(inventory.getSku(), param.getWhName(), param.getLocName());
+            if (inventoryMove == null) {
+                inventoryMove = Inventory.builder().whCode(warehouse.getWhCode()).whName(param.getWhName()).locName(param.getLocName()).sku(inventory.getSku()).skuDesc(inventory.getSkuDesc()).spec(inventory.getSpec()).skuAmount(0.0).build();
+                inventoryMove.setStatus(StatusCode.NORMAL.getCode());
+                inventoryMove.setRemark("移库自动生成");
+                inventoryMove.setCreator(RequestHolder.getCurrentUser().getUsername());
+                inventoryMove.setCreateTime(new Date());
+                inventoryMove.setOperator(RequestHolder.getCurrentUser().getUsername());
+                inventoryMove.setOperateTime(new Date());
+                inventoryMove.setOperateIp(IpUtil.getUserIP(RequestHolder.getCurrentRequest()));
+            }
+            inventoryMove.setSkuAmount(inventoryMove.getSkuAmount() + param.getMoveNumber());
+            inventory.setSkuAmount(inventory.getSkuAmount() - param.getMoveNumber());
+            inventoryList.add(inventory);
+            inventoryMoveList.add(inventoryMove);
+        }
+        inventoryRepository.save(inventoryList);
+        inventoryRepository.save(inventoryMoveList);
     }
 }

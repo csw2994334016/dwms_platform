@@ -24,4 +24,6 @@ public interface InventoryRepository extends PagingAndSortingRepository<Inventor
     List<Inventory> findAllBySkuAndWhName(String sku, String whName);
 
     List<Inventory> findAllByWhNameAndLocName(String whName, String locName);
+
+    Inventory findBySkuAndWhNameAndLocName(String sku, String whName, String locName);
 }
