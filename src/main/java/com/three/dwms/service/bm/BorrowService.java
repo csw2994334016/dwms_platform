@@ -94,6 +94,7 @@ public class BorrowService {
                         inventory.setAllocateAmount(outNumber);
                         outNumber -= outNumber;
                     }
+                    inventory.setNotReturnNumber(borrowDetail.getNotReturnNumber());
                     inventory.setReturnNumber(0.0);
                 }
                 inventoryList.addAll(inventories);

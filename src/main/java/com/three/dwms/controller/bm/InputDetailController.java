@@ -71,4 +71,10 @@ public class InputDetailController {
         return JsonData.success(inputDetailList);
     }
 
+    @RequestMapping(value = "/inputStatics", method = RequestMethod.GET)
+    public JsonData inputStatics( ) {
+        List<InputDetail> inputDetailList = inputDetailService.inputStatics();
+        return JsonData.success(inputDetailList);
+    }
+
 }

@@ -306,7 +306,11 @@ public class InputDetailService {
 
     private InputDetail findById(Integer id) {
         InputDetail inputDetail = inputDetailRepository.findOne(id);
-        Preconditions.checkNotNull(inputDetail, "入库单详情不存在");
+        Preconditions.checkNotNull(inputDetail, "入库单(id:" + id + ")详情不存在");
         return inputDetail;
+    }
+
+    public List<InputDetail> inputStatics() {
+        return null;
     }
 }
