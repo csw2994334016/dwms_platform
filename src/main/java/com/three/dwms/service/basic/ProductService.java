@@ -138,8 +138,13 @@ public class ProductService {
 
     public Product findById(int id) {
         Product product = productRepository.findOne(id);
-        Preconditions.checkNotNull(product, "物料信息不存在");
+        Preconditions.checkNotNull(product, "物料(id:" + id + ")信息不存在");
         return product;
     }
 
+    public Product findBySku(String sku) {
+        Product product = productRepository.findBySku(sku);
+        Preconditions.checkNotNull(product, "物料(sku:" + sku + ")信息不存在");
+        return product;
+    }
 }

@@ -32,4 +32,6 @@ public interface ProductRepository extends PagingAndSortingRepository<Product, I
 
     @Query("select max(p.sku) from Product p")
     String findMaxSku();
+
+    Product findBySku(String sku);
 }
