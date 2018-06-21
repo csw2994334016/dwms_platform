@@ -1,7 +1,6 @@
 package com.three.dwms.entity.bm;
 
 import com.three.dwms.entity.base.BaseEntity;
-import com.three.dwms.entity.basic.Product;
 import lombok.*;
 
 import javax.persistence.*;
@@ -49,5 +48,12 @@ public class Inventory extends BaseEntity implements Serializable {
     private Double outNumber; //该物料出库的总量，领用申请总量
     @Transient
     private Double returnNumber; //归还数量
+
+    @Transient
+    private String borrowNo; //借出单号
+    @Transient
+    private Double borrowNumber; //该物料借出的总量，借出申请总量
+    @Transient
+    private Double notReturnNumber; //未归还数量
 
 }

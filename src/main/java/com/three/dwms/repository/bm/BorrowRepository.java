@@ -22,4 +22,5 @@ public interface BorrowRepository extends PagingAndSortingRepository<Borrow, Int
 
     List<Borrow> findAllByWhCodeIn(List<String> whCodeList);
 
+    Borrow findByBorrowNo(String borrowNo);
 }

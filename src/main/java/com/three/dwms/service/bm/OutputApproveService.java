@@ -44,7 +44,7 @@ public class OutputApproveService {
                         output.setRemark(param.getRemark());
                         outputList.add(output);
                     } else {
-                        throw new ParamException("只有提交申请的单据才可以审批！");
+                        throw new ParamException("只有提交申请的单据才可以通过审批！");
                     }
                 } else {
                     throw new ParamException("审批人非当前用户");
@@ -70,7 +70,7 @@ public class OutputApproveService {
                         output.setRemark(param.getRemark());
                         outputList.add(output);
                     } else {
-                        throw new ParamException("只有提交申请的单据才可以审批！");
+                        throw new ParamException("只有提交申请的单据才可以拒绝审批！");
                     }
                 } else {
                     throw new ParamException("审批人非当前用户");
@@ -96,7 +96,7 @@ public class OutputApproveService {
                         output.setRemark(param.getRemark());
                         outputList.add(output);
                     } else {
-                        throw new ParamException("只有审批通过的单据才可以取消！");
+                        throw new ParamException("只有审批通过或者拒绝状态的单据才可以取消！");
                     }
                 } else {
                     throw new ParamException("审批人非当前用户");

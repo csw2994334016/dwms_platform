@@ -46,7 +46,7 @@ public class Borrow extends BaseEntity1 implements Serializable {
 
     @Column(nullable = false)
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
-    private Date returnDate; //归还时间，预计归还时间，借出申请时填写
+    private Date returnDate; //归还日期，预计归还时间，借出申请时填写
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date actualReturnDate; //归还时间，实际归还时间，出库时系统自动生成
