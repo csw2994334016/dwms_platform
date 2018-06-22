@@ -5,9 +5,11 @@ import com.three.dwms.common.RequestHolder;
 import com.three.dwms.constant.LogTypeCode;
 import com.three.dwms.entity.base.BaseEntity;
 import com.three.dwms.entity.sys.SysLog;
+import com.three.dwms.entity.sys.SysLoginLog;
 import com.three.dwms.entity.sys.SysRole;
 import com.three.dwms.entity.sys.SysUser;
 import com.three.dwms.repository.sys.SysLogRepository;
+import com.three.dwms.repository.sys.SysLoginLogRepository;
 import com.three.dwms.utils.IpUtil;
 import com.three.dwms.utils.JsonMapper;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,9 @@ public class SysLogService {
 
     @Resource
     private SysLogRepository sysLogRepository;
+
+    @Resource
+    private SysLoginLogRepository sysLoginLogRepository;
 
     public void saveSysLog(BaseEntity before, BaseEntity after, SysLog sysLog) {
         sysLog.setTargetId(after != null ? after.getId() : before.getId());
@@ -48,5 +53,10 @@ public class SysLogService {
         }
         sysLog.setOperateTime(new Date());
         sysLogRepository.save(sysLog);
+    }
+
+    public void saveLoginLog(Integer id, String remoteIp) {
+        SysLoginLog sysLoginLog = SysLoginLog.builder().userId(id).type(LogTypeCode.TYPE_LOGIN.getCode()).operateTime(new Date()).operateIp(remoteIp).build();
+        sysLoginLogRepository.save(sysLoginLog);
     }
 }

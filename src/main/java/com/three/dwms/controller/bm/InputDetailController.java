@@ -4,6 +4,8 @@ import com.google.common.collect.Lists;
 import com.three.dwms.beans.JsonData;
 import com.three.dwms.entity.bm.InputDetail;
 import com.three.dwms.param.bm.InputDetailParam;
+import com.three.dwms.param.statics.InputStaticsParam;
+import com.three.dwms.param.statics.Statics;
 import com.three.dwms.service.bm.InputDetailService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -71,10 +73,10 @@ public class InputDetailController {
         return JsonData.success(inputDetailList);
     }
 
-    @RequestMapping(value = "/inputStatics", method = RequestMethod.GET)
-    public JsonData inputStatics( ) {
-        List<InputDetail> inputDetailList = inputDetailService.inputStatics();
-        return JsonData.success(inputDetailList);
+    @RequestMapping(value = "/inputStatics", method = RequestMethod.POST)
+    public JsonData inputStatics(@RequestBody InputStaticsParam param) {
+        Statics statics = inputDetailService.inputStatics(param);
+        return JsonData.success(statics);
     }
 
 }

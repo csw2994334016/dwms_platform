@@ -2,6 +2,7 @@ package com.three.dwms.service.bm;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.three.dwms.common.RequestHolder;
 import com.three.dwms.constant.InputStateCode;
 import com.three.dwms.constant.StatusCode;
@@ -10,6 +11,8 @@ import com.three.dwms.entity.bm.InputDetail;
 import com.three.dwms.entity.bm.Inventory;
 import com.three.dwms.exception.ParamException;
 import com.three.dwms.param.bm.InputDetailParam;
+import com.three.dwms.param.statics.InputStaticsParam;
+import com.three.dwms.param.statics.Statics;
 import com.three.dwms.repository.basic.*;
 import com.three.dwms.repository.bm.InputDetailRepository;
 import com.three.dwms.repository.bm.InventoryRepository;
@@ -31,6 +34,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by csw on 2018/5/22.
@@ -310,7 +314,44 @@ public class InputDetailService {
         return inputDetail;
     }
 
-    public List<InputDetail> inputStatics() {
-        return null;
+    public Statics inputStatics(InputStaticsParam param) {
+        String startTime = StringUtil.getStartTime(param.getYear(), param.getMonth());
+        String endTime = StringUtil.getEndTime(param.getYear(), param.getMonth());
+        Specification<InputDetail> specification = (root, criteriaQuery, criteriaBuilder) -> {
+            List<Predicate> predicateList = Lists.newArrayList();
+            if (StringUtils.isNotBlank(param.getSku())) {
+                predicateList.add(criteriaBuilder.equal(root.get("sku"), param.getSku()));
+            }
+            if (StringUtils.isNotBlank(param.getPurchaseDept())) {
+                predicateList.add(criteriaBuilder.equal(root.get("purchaseDept"), param.getPurchaseDept()));
+            }
+            Date st = StringUtil.toDate(startTime);
+            Date et = StringUtil.toDate(endTime);
+            if (st != null && et != null) {
+                predicateList.add(criteriaBuilder.greaterThanOrEqualTo(root.get("createTime"), st));
+                predicateList.add(criteriaBuilder.lessThanOrEqualTo(root.get("createTime"), et));
+            }
+            return criteriaBuilder.and(predicateList.toArray(new Predicate[0]));
+        };
+        List<InputDetail> inputDetailList = inputDetailRepository.findAll(specification);
+        Map<String, Double> dayNumberMap = Maps.newHashMap();
+        for (InputDetail inputDetail : inputDetailList) {
+            if (inputDetail.getCreateTime() != null) {
+                String createTimeStr = StringUtil.getDateToStr(inputDetail.getCreateTime());
+                String day = createTimeStr.split("-")[2];
+                dayNumberMap.putIfAbsent(day, 0.0);
+                dayNumberMap.put(day, CalculateUtil.add(dayNumberMap.get(day), inputDetail.getAmount()));
+            }
+        }
+        Statics statics = Statics.builder().labelList(Lists.newArrayList()).dataList(Lists.newArrayList()).build();
+        for (String day : StringUtil.getMonthDays(startTime, endTime)) {
+            statics.getLabelList().add(day);
+            if (dayNumberMap.get(day) == null) {
+                statics.getDataList().add(0.0);
+            } else {
+                statics.getDataList().add(dayNumberMap.get(day));
+            }
+        }
+        return statics;
     }
 }

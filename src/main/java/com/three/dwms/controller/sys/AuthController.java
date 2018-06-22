@@ -7,8 +7,10 @@ import com.three.dwms.entity.sys.SysUser;
 import com.three.dwms.param.sys.RoleUserAclParam;
 import com.three.dwms.param.sys.User;
 import com.three.dwms.param.sys.UserParam;
+import com.three.dwms.service.sys.SysLogService;
 import com.three.dwms.service.sys.SysRoleService;
 import com.three.dwms.service.sys.SysUserService;
+import com.three.dwms.utils.IpUtil;
 import com.three.dwms.utils.MD5Util;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -73,6 +75,9 @@ public class AuthController {
     @Resource
     private SysUserService sysUserService;
 
+    @Resource
+    private SysLogService sysLogService;
+
     @RequestMapping(value = "/noLogin")
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public JsonData unLogin(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -116,6 +121,7 @@ public class AuthController {
                 SysUser userRoleAcl = sysUserService.bindUserWithAcl(sysUser); //给用户绑定权限
                 request.getSession().setAttribute("user", userRoleAcl);
                 request.getSession().setMaxInactiveInterval(sessionInterval);
+                sysLogService.saveLoginLog(sysUser.getId(), IpUtil.getRemoteIp(request));
                 return JsonData.success(userRoleAcl);
             }
         }
