@@ -6,12 +6,14 @@ import com.three.dwms.common.RequestHolder;
 import com.three.dwms.constant.OutputStateCode;
 import com.three.dwms.constant.StatusCode;
 import com.three.dwms.entity.basic.Warehouse;
+import com.three.dwms.entity.bm.Inventory;
 import com.three.dwms.entity.bm.Output;
 import com.three.dwms.entity.bm.OutputDetail;
 import com.three.dwms.exception.ParamException;
 import com.three.dwms.param.bm.OutputDetailParam;
 import com.three.dwms.param.bm.OutputParam;
 import com.three.dwms.param.bm.StateCode;
+import com.three.dwms.repository.bm.InventoryRepository;
 import com.three.dwms.repository.bm.OutputDetailRepository;
 import com.three.dwms.repository.bm.OutputRepository;
 import com.three.dwms.service.basic.WarehouseService;
@@ -43,6 +45,9 @@ public class OutputApplyService {
     @Resource
     private OutputService outputService;
 
+    @Resource
+    private InventoryService inventoryService;
+
     //添加
     @Transactional
     public void create(OutputParam param) {
@@ -61,9 +66,11 @@ public class OutputApplyService {
         output.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
         output.setOperateTime(new Date());
 
-        output = outputRepository.save(output);
-
         List<OutputDetail> outputDetailList = createDetailList(output, param);
+        output = outputRepository.save(output);
+        for (OutputDetail outputDetail : outputDetailList) {
+            outputDetail.setOutput(output);
+        }
         outputDetailRepository.save(outputDetailList);
 
     }
@@ -112,9 +119,9 @@ public class OutputApplyService {
             output.setOperator(RequestHolder.getCurrentUser().getUsername());
             output.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
             output.setOperateTime(new Date());
-            List<OutputDetail> outputDetailList1 = outputDetailRepository.findAllByOutput(output);
-            outputDetailRepository.delete(outputDetailList1);
+
             output = outputRepository.save(output);
+
             List<OutputDetail> outputDetailList = createDetailList(output, param);
             outputDetailRepository.save(outputDetailList);
         } else {
@@ -126,13 +133,18 @@ public class OutputApplyService {
         List<OutputDetail> outputDetailList = Lists.newArrayList();
         for (OutputDetailParam detailParam : param.getOutputDetailParamList()) {
             BeanValidator.check(detailParam);
-            if (existOutputAndSku(output, detailParam.getSku())) {
-                throw new ParamException("出库单(outputNo:" + output.getOutputNo() + ")已存在该物料(sku:" + detailParam.getSku() + ")");
+            Inventory inventory = inventoryService.findBySkuAndWhName(detailParam.getSku(), output.getWhName());
+            if (detailParam.getOutNumber() > inventory.getSkuAmount()) {
+                throw new ParamException("物料(" + detailParam.getSku() + ")申请数量(" + detailParam.getOutNumber() + ")大于库存量(" + inventory.getSkuAmount() + ")");
             }
-            OutputDetail outputDetail = OutputDetail.builder().output(output).sku(detailParam.getSku()).skuDesc(detailParam.getSkuDesc()).spec(detailParam.getSpec()).outNumber(detailParam.getOutNumber()).actualNumber(0.0).returnNumber(0.0).build();
-            outputDetail.setStatus(StatusCode.NORMAL.getCode());
-            outputDetail.setCreator(RequestHolder.getCurrentUser().getUsername());
-            outputDetail.setCreateTime(new Date());
+            OutputDetail outputDetail = outputDetailRepository.findByOutputAndSku(output, detailParam.getSku());
+            if (outputDetail == null) {
+                outputDetail = OutputDetail.builder().output(output).sku(detailParam.getSku()).skuDesc(detailParam.getSkuDesc()).spec(detailParam.getSpec()).actualNumber(0.0).returnNumber(0.0).build();
+                outputDetail.setStatus(StatusCode.NORMAL.getCode());
+                outputDetail.setCreator(RequestHolder.getCurrentUser().getUsername());
+                outputDetail.setCreateTime(new Date());
+            }
+            outputDetail.setOutNumber(detailParam.getOutNumber());
             outputDetail.setOperator(RequestHolder.getCurrentUser().getUsername());
             outputDetail.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
             outputDetail.setOperateTime(new Date());
@@ -214,5 +226,15 @@ public class OutputApplyService {
             stateCodeList.add(state);
         }
         return stateCodeList;
+    }
+
+    public void deleteDetailByIds(List<Integer> ids) {
+        List<OutputDetail> outputDetailList = Lists.newArrayList();
+        for (Integer id : ids) {
+            OutputDetail outputDetail = outputDetailRepository.findOne(id);
+            Preconditions.checkNotNull(outputDetail, "出库申请详情(id:" + id + ")不存在");
+            outputDetailList.add(outputDetail);
+        }
+        outputDetailRepository.delete(outputDetailList);
     }
 }

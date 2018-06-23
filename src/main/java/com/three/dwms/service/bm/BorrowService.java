@@ -151,7 +151,7 @@ public class BorrowService {
             for (BorrowAllocationParam param : paramList) {
                 BeanValidator.check(param);
                 Borrow borrow = this.findByBorrowNo(param.getBorrowNo());
-                if (borrow.getState().equals(BorrowStateCode.BORROW.getCode())) {
+                if (borrow.getState().equals(BorrowStateCode.BORROW.getCode()) || borrow.getState().equals(BorrowStateCode.RETURN_PART.getCode())) {
                     Inventory inventory = inventoryService.findById(param.getId());
                     if (param.getReturnNumber() > 0.0) { //退还改变Inventory.skuAmount、OutputDetail.returnNumber
                         inventory.setSkuAmount(inventory.getSkuAmount() + param.getReturnNumber());

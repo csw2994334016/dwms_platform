@@ -8,6 +8,7 @@ import com.three.dwms.constant.StatusCode;
 import com.three.dwms.entity.basic.Warehouse;
 import com.three.dwms.entity.bm.Borrow;
 import com.three.dwms.entity.bm.BorrowDetail;
+import com.three.dwms.entity.bm.Inventory;
 import com.three.dwms.exception.ParamException;
 import com.three.dwms.param.bm.*;
 import com.three.dwms.repository.bm.BorrowDetailRepository;
@@ -38,6 +39,9 @@ public class BorrowApplyService {
     @Resource
     private WarehouseService warehouseService;
 
+    @Resource
+    private InventoryService inventoryService;
+
     //添加
     @Transactional
     public void create(BorrowParam param) {
@@ -56,11 +60,12 @@ public class BorrowApplyService {
         borrow.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
         borrow.setOperateTime(new Date());
 
-        borrow = borrowRepository.save(borrow);
-
         List<BorrowDetail> borrowDetailList = createDetailList(borrow, param);
+        borrow = borrowRepository.save(borrow);
+        for (BorrowDetail borrowDetail : borrowDetailList) {
+            borrowDetail.setBorrow(borrow);
+        }
         borrowDetailRepository.save(borrowDetailList);
-
     }
 
     public List<Borrow> findAll() {
@@ -106,11 +111,11 @@ public class BorrowApplyService {
             borrow.setOperator(RequestHolder.getCurrentUser().getUsername());
             borrow.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
             borrow.setOperateTime(new Date());
-            List<BorrowDetail> borrowDetailList = borrowDetailRepository.findAllByBorrow(borrow);
-            borrowDetailRepository.delete(borrowDetailList);
+
             borrow = borrowRepository.save(borrow);
-            List<BorrowDetail> borrowDetailList1 = createDetailList(borrow, param);
-            borrowDetailRepository.save(borrowDetailList1);
+
+            List<BorrowDetail> borrowDetailList = createDetailList(borrow, param);
+            borrowDetailRepository.save(borrowDetailList);
         } else {
             throw new ParamException("只有草稿状态下才可以修改");
         }
@@ -120,13 +125,18 @@ public class BorrowApplyService {
         List<BorrowDetail> borrowDetailList = Lists.newArrayList();
         for (BorrowDetailParam detailParam : param.getBorrowDetailParamList()) {
             BeanValidator.check(detailParam);
-            if (existOutputAndSku(borrow, detailParam.getSku())) {
-                throw new ParamException("借出单(borrowNo:" + borrow.getBorrowNo() + ")已存在该物料(sku:" + detailParam.getSku() + ")");
+            Inventory inventory = inventoryService.findBySkuAndWhName(detailParam.getSku(), borrow.getWhName());
+            if (detailParam.getBorrowNumber() > inventory.getSkuAmount()) {
+                throw new ParamException("物料(" + detailParam.getSku() + ")借出数量(" + detailParam.getBorrowNumber() + ")大于库存量(" + inventory.getSkuAmount() + ")");
             }
-            BorrowDetail borrowDetail = BorrowDetail.builder().borrow(borrow).sku(detailParam.getSku()).skuDesc(detailParam.getSkuDesc()).spec(detailParam.getSpec()).borrowNumber(detailParam.getBorrowNumber()).notReturnNumber(detailParam.getBorrowNumber()).returnNumber(0.0).build();
-            borrowDetail.setStatus(StatusCode.NORMAL.getCode());
-            borrowDetail.setCreator(RequestHolder.getCurrentUser().getUsername());
-            borrowDetail.setCreateTime(new Date());
+            BorrowDetail borrowDetail = borrowDetailRepository.findByBorrowAndSku(borrow, detailParam.getSku());
+            if (borrowDetail == null) {
+                borrowDetail = BorrowDetail.builder().borrow(borrow).sku(detailParam.getSku()).skuDesc(detailParam.getSkuDesc()).spec(detailParam.getSpec()).notReturnNumber(detailParam.getBorrowNumber()).returnNumber(0.0).build();
+                borrowDetail.setStatus(StatusCode.NORMAL.getCode());
+                borrowDetail.setCreator(RequestHolder.getCurrentUser().getUsername());
+                borrowDetail.setCreateTime(new Date());
+            }
+            borrowDetail.setBorrowNumber(detailParam.getBorrowNumber());
             borrowDetail.setOperator(RequestHolder.getCurrentUser().getUsername());
             borrowDetail.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
             borrowDetail.setOperateTime(new Date());
@@ -208,5 +218,15 @@ public class BorrowApplyService {
             stateCodeList.add(state);
         }
         return stateCodeList;
+    }
+
+    public void deleteDetailsByIds(List<Integer> ids) {
+        List<BorrowDetail> borrowDetailList = Lists.newArrayList();
+        for (Integer id : ids) {
+            BorrowDetail borrowDetail = borrowDetailRepository.findOne(id);
+            Preconditions.checkNotNull(borrowDetail, "借出申请详情(id:" + id + ")不存在");
+            borrowDetailList.add(borrowDetail);
+        }
+        borrowDetailRepository.delete(borrowDetailList);
     }
 }

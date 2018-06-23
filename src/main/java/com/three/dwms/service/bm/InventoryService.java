@@ -15,6 +15,7 @@ import com.three.dwms.service.basic.LocService;
 import com.three.dwms.service.basic.WarehouseService;
 import com.three.dwms.utils.BeanValidator;
 import com.three.dwms.utils.IpUtil;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -50,6 +51,15 @@ public class InventoryService {
             inventoryList.add(inventory);
         }
         return inventoryList;
+    }
+
+    public Inventory findBySkuAndWhName(String sku, String whName) {
+        List<Object[]> objectList = inventoryRepository.findBySkuAndWhName(sku, whName);
+        if (CollectionUtils.isEmpty(objectList)) {
+            throw new ParamException("物料汇总信息不存在");
+        }
+        Object[] object = objectList.get(0);
+        return Inventory.builder().whName((String) object[0]).sku((String) object[1]).skuDesc((String) object[2]).spec((String) object[3]).skuAmount((Double) object[4]).build();
     }
 
     public Inventory findById(Integer id) {

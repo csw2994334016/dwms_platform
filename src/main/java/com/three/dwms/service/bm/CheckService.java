@@ -20,6 +20,7 @@ import com.three.dwms.utils.StringUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import javax.persistence.criteria.Predicate;
@@ -46,8 +47,8 @@ public class CheckService {
     @Resource
     private WarehouseService warehouseService;
 
+    @Transactional
     public void create(CheckParam param) {
-
         List<CheckDetail> checkDetailList = Lists.newArrayList();
         for (CheckDetailParam checkDetailParam : param.getCheckDetailParamList()) {
             Product product = productService.findBySku(checkDetailParam.getSku());

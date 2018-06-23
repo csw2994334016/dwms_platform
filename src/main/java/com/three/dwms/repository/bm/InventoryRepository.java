@@ -17,6 +17,9 @@ public interface InventoryRepository extends PagingAndSortingRepository<Inventor
     @Query("select i.whName, i.sku, i.skuDesc, i.spec, sum(i.skuAmount) from Inventory i where i.whName = :whName group by i.whName, i.sku, i.skuDesc, i.spec")
     List<Object[]> findAllByWhName(@Param("whName") String whName);
 
+    @Query("select i.whName, i.sku, i.skuDesc, i.spec, sum(i.skuAmount) from Inventory i where i.sku = :sku and i.whName = :whName group by i.whName, i.sku, i.skuDesc, i.spec")
+    List<Object[]> findBySkuAndWhName(@Param("sku") String sku, @Param("whName") String whName);
+
     Inventory findBySkuAndWhCodeAndLocName(String sku, String whCode, String locName);
 
     List<Inventory> findAllBySku(String sku);

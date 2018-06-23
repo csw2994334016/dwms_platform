@@ -86,6 +86,19 @@ public class OutputApplyController {
         return JsonData.success(outputDetailList);
     }
 
+    //删除详情
+    @RequestMapping(value = "/details/batch", method = RequestMethod.DELETE)
+    public JsonData deleteDetail(@RequestBody List<OutputParam> paramList) {
+        List<Integer> ids = Lists.newArrayList();
+        for (OutputParam param : paramList) {
+            if (param.getId() != null) {
+                ids.add(param.getId());
+            }
+        }
+        outputApplyService.deleteDetailByIds(ids);
+        return JsonData.success();
+    }
+
     //加载个人申请单
     @RequestMapping(value = "/currentOutputApplies", method = RequestMethod.GET)
     public JsonData findCurrentOutputApplies() {

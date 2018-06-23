@@ -86,6 +86,19 @@ public class BorrowApplyController {
         return JsonData.success(borrowDetailList);
     }
 
+    //删除详情
+    @RequestMapping(value = "/details/batch", method = RequestMethod.DELETE)
+    public JsonData deleteDetailsByIds(@RequestBody List<BorrowParam> paramList) {
+        List<Integer> ids = Lists.newArrayList();
+        for (BorrowParam param : paramList) {
+            if (param.getId() != null) {
+                ids.add(param.getId());
+            }
+        }
+        borrowApplyService.deleteDetailsByIds(ids);
+        return JsonData.success();
+    }
+
     //加载个人申请单
     @RequestMapping(value = "/currentBorrowApplies", method = RequestMethod.GET)
     public JsonData findCurrentBorrowApplies() {
