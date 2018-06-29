@@ -51,7 +51,7 @@ public class BorrowApplyService {
 
         Warehouse warehouse = warehouseService.findByWhName(param.getWhName());
 
-        Borrow borrow = Borrow.builder().borrowNo(borrowNo).whCode(warehouse.getWhCode()).whName(param.getWhName()).proposer(RequestHolder.getCurrentUser().getUsername()).approver(param.getApprover()).returnDate(StringUtil.toDate(param.getReturnDate())).reason(param.getReason()).state(BorrowStateCode.DRAFT.getCode()).build();
+        Borrow borrow = Borrow.builder().borrowNo(borrowNo).whCode(warehouse.getWhCode()).whName(param.getWhName()).proposer(RequestHolder.getCurrentUser().getUsername()).approver(param.getApprover()).returnDate(StringUtil.getStrToDate(param.getReturnDate())).reason(param.getReason()).state(BorrowStateCode.DRAFT.getCode()).build();
         borrow.setRemark(param.getRemark());
         borrow.setStatus(StatusCode.NORMAL.getCode());
         borrow.setCreator(RequestHolder.getCurrentUser().getUsername());
@@ -107,7 +107,7 @@ public class BorrowApplyService {
         if (borrow.getState().equals(BorrowStateCode.DRAFT.getCode())) {
             borrow.setWhName(param.getWhName());
             borrow.setApprover(param.getApprover());
-            borrow.setReturnDate(StringUtil.toDate(param.getReturnDate()));
+            borrow.setReturnDate(StringUtil.getStrToDate(param.getReturnDate()));
             borrow.setReason(param.getReason());
             borrow.setRemark(param.getRemark());
             borrow.setOperator(RequestHolder.getCurrentUser().getUsername());

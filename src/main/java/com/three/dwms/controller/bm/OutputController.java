@@ -1,10 +1,11 @@
 package com.three.dwms.controller.bm;
 
-import com.google.common.collect.Lists;
 import com.three.dwms.beans.JsonData;
 import com.three.dwms.entity.bm.Inventory;
 import com.three.dwms.entity.bm.Output;
 import com.three.dwms.param.bm.AllocationParam;
+import com.three.dwms.param.statics.StaticsParam;
+import com.three.dwms.param.statics.Statics;
 import com.three.dwms.service.bm.OutputService;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,5 +52,11 @@ public class OutputController {
     public JsonData giveBack(@RequestBody List<AllocationParam> paramList) {
         outputService.giveBack(paramList);
         return JsonData.success();
+    }
+
+    @RequestMapping(value = "/outputStatics", method = RequestMethod.POST)
+    public JsonData inputStatics(@RequestBody StaticsParam param) {
+        Statics statics = outputService.outputStatics(param);
+        return JsonData.success(statics);
     }
 }

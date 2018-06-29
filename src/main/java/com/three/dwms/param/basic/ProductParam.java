@@ -34,7 +34,7 @@ public class ProductParam {
     @NotNull(message = "物料分类号不可以为空")
     private Integer categoryId; //物料分类号
 
-    private Integer safeNumber; //物料安全数量
+    private Integer safeNumber = 1; //物料安全数量
 
     @Min(value = 0, message = "状态不合法")
     @Max(value = 2, message = "状态不合法")

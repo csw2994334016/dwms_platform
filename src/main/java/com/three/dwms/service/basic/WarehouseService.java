@@ -13,13 +13,11 @@ import com.three.dwms.entity.basic.Zone;
 import com.three.dwms.entity.bm.Inventory;
 import com.three.dwms.exception.ParamException;
 import com.three.dwms.param.basic.*;
-import com.three.dwms.param.bm.InventoryParam;
 import com.three.dwms.repository.basic.AreaRepository;
 import com.three.dwms.repository.basic.LocRepository;
 import com.three.dwms.repository.basic.WarehouseRepository;
 import com.three.dwms.repository.basic.ZoneRepository;
 import com.three.dwms.repository.bm.InventoryRepository;
-import com.three.dwms.service.bm.InventoryService;
 import com.three.dwms.utils.BeanValidator;
 import com.three.dwms.utils.IpUtil;
 import org.apache.commons.collections.CollectionUtils;
@@ -31,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -62,7 +61,7 @@ public class WarehouseService {
         BeanValidator.check(param);
         long whCount = warehouseRepository.count();
         if (whCount >= 2) {
-            throw new ParamException("系统最多支持创建量仓库");
+            throw new ParamException("系统最多支持创建两个仓库");
         }
         if (checkWhCodeExist(param.getWhCode(), param.getId())) {
             throw new ParamException("仓库编号已经存在");
@@ -240,5 +239,30 @@ public class WarehouseService {
             virtualZoneList.add(virtualZone);
         }
         return virtualZoneList;
+    }
+
+    public List<WarehouseUses> findWarehouseUses() {
+        List<WarehouseUses> warehouseUsesList = Lists.newArrayList();
+        List<Warehouse> warehouseList = (List<Warehouse>) warehouseRepository.findAll();
+        for (Warehouse warehouse : warehouseList) {
+            int usedNum = 0, allNum = 0;
+            List<Zone> zoneList = zoneRepository.findAllByWarehouse(warehouse);
+            for (Zone zone : zoneList) {
+                List<Area> areaList = areaRepository.findAllByZone(zone);
+                for (Area area : areaList) {
+                    List<Loc> locList = locRepository.findAllByArea(area);
+                    for (Loc loc : locList) {
+                        List<Inventory> inventoryList = inventoryRepository.findAllByWhNameAndLocName(warehouse.getWhName(), loc.getLocName());
+                        usedNum = CollectionUtils.isNotEmpty(inventoryList) ? usedNum + 1 : usedNum;
+                    }
+                    allNum += locList.size();
+                }
+            }
+            double usedRatio = new BigDecimal((float) usedNum / allNum).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+            double unUsedRatio = new BigDecimal(1 - usedRatio).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+            WarehouseUses warehouseUses = WarehouseUses.builder().whName(warehouse.getWhName()).usedRatio(usedRatio).unUsedRatio(unUsedRatio).build();
+            warehouseUsesList.add(warehouseUses);
+        }
+        return warehouseUsesList;
     }
 }

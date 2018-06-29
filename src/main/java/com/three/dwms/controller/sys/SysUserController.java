@@ -3,8 +3,9 @@ package com.three.dwms.controller.sys;
 import com.google.common.collect.Lists;
 import com.three.dwms.beans.JsonData;
 import com.three.dwms.beans.PageQuery;
-import com.three.dwms.entity.sys.SysAcl;
 import com.three.dwms.entity.sys.SysUser;
+import com.three.dwms.param.statics.StaticsParam;
+import com.three.dwms.param.statics.Statics;
 import com.three.dwms.param.sys.AclMenu;
 import com.three.dwms.param.sys.User;
 import com.three.dwms.param.sys.UserParam;
@@ -117,6 +118,12 @@ public class SysUserController {
     public JsonData bindRole(@RequestBody UserRoleParam userRoleParam) {
         sysUserService.bindRole(userRoleParam);
         return JsonData.success();
+    }
+
+    @RequestMapping(value = "/loginStatics", method = RequestMethod.GET)
+    public JsonData loginStatics() {
+        Statics statics = sysUserService.loginStatics();
+        return JsonData.success(statics);
     }
 
 }

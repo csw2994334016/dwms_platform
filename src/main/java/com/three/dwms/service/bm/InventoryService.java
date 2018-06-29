@@ -5,13 +5,17 @@ import com.google.common.collect.Lists;
 import com.three.dwms.common.RequestHolder;
 import com.three.dwms.constant.StatusCode;
 import com.three.dwms.entity.basic.Loc;
+import com.three.dwms.entity.basic.Product;
 import com.three.dwms.entity.basic.Warehouse;
 import com.three.dwms.entity.bm.Inventory;
 import com.three.dwms.exception.ParamException;
 import com.three.dwms.param.bm.InventoryMoveParam;
 import com.three.dwms.param.bm.InventoryParam;
+import com.three.dwms.repository.basic.ProductRepository;
+import com.three.dwms.repository.basic.WarehouseRepository;
 import com.three.dwms.repository.bm.InventoryRepository;
 import com.three.dwms.service.basic.LocService;
+import com.three.dwms.service.basic.ProductService;
 import com.three.dwms.service.basic.WarehouseService;
 import com.three.dwms.utils.BeanValidator;
 import com.three.dwms.utils.IpUtil;
@@ -19,6 +23,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import javax.persistence.criteria.Predicate;
@@ -42,6 +47,9 @@ public class InventoryService {
     @Resource
     private LocService locService;
 
+    @Resource
+    private ProductRepository productRepository;
+
     public List<Inventory> findByWhName(InventoryParam param) {
         BeanValidator.check(param);
         List<Object[]> objectList = inventoryRepository.findAllByWhName(param.getWhName());
@@ -53,7 +61,7 @@ public class InventoryService {
         return inventoryList;
     }
 
-    public Inventory findBySkuAndWhName(String sku, String whName) {
+    Inventory findBySkuAndWhName(String sku, String whName) {
         List<Object[]> objectList = inventoryRepository.findBySkuAndWhName(sku, whName);
         if (CollectionUtils.isEmpty(objectList)) {
             throw new ParamException("物料汇总信息不存在");
@@ -92,6 +100,7 @@ public class InventoryService {
         return inventoryList;
     }
 
+    @Transactional
     public void moveInventory(List<InventoryMoveParam> paramList) {
         List<Inventory> inventoryList = Lists.newArrayList();
         List<Inventory> inventoryMoveList = Lists.newArrayList();
@@ -120,5 +129,25 @@ public class InventoryService {
         }
         inventoryRepository.save(inventoryList);
         inventoryRepository.save(inventoryMoveList);
+    }
+
+    public List<Inventory> inventoryWarning() {
+        List<Inventory> inventoryList = Lists.newArrayList();
+        List<Warehouse> warehouseList = warehouseService.findAll();
+        for (Warehouse warehouse : warehouseList) {
+            InventoryParam param = InventoryParam.builder().whName(warehouse.getWhName()).build();
+            List<Inventory> inventories = this.findByWhName(param);
+            for (Inventory inventory : inventories) {
+                Product product = productRepository.findBySku(inventory.getSku());
+                if (product != null) {
+                    double safeNumber = product.getSafeNumber() != null ? product.getSafeNumber() : 1.0;
+                    if (inventory.getSkuAmount() <= safeNumber) {
+                        inventory.setSafeNumber(safeNumber);
+                        inventoryList.add(inventory);
+                    }
+                }
+            }
+        }
+        return inventoryList;
     }
 }

@@ -56,4 +56,7 @@ public class Inventory extends BaseEntity implements Serializable {
     @Transient
     private Double notReturnNumber; //未归还数量
 
+    @Transient
+    private Double safeNumber; //物料安全数量
+
 }

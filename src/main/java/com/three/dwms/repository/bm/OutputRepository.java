@@ -22,4 +22,8 @@ public interface OutputRepository extends PagingAndSortingRepository<Output, Int
     List<Output> findAllByWhCodeIn(List<String> whCodeList);
 
     Output findByOutputNo(String outputNo);
+
+    List<Output> findAllByBanJiName(String banJiName);
+
+    List<Output> findAllByProjectName(String projectName);
 }

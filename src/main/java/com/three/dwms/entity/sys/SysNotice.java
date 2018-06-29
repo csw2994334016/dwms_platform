@@ -1,6 +1,6 @@
 package com.three.dwms.entity.sys;
 
-import com.three.dwms.entity.base.BaseEntity;
+import com.three.dwms.entity.base.BaseEntity1;
 import lombok.*;
 
 import javax.persistence.*;
@@ -18,7 +18,7 @@ import java.io.Serializable;
 @ToString
 @Entity
 @Table(name = "sys_notice")
-public class SysNotice extends BaseEntity implements Serializable {
+public class SysNotice extends BaseEntity1 implements Serializable {
 
     @Column(nullable = false)
     private String title;

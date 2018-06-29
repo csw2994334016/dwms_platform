@@ -56,7 +56,7 @@ public class StringUtil {
         return pre + String.format("%06d", max);
     }
 
-    public static Date toDate(String time) {
+    public static Date getStrToDate(String time) {
         try {
             return sdf.parse(time);
         } catch (ParseException e) {
@@ -88,7 +88,7 @@ public class StringUtil {
             String curTime = getCurDateStr();
             String[] curTimes = curTime.split("-");
             calendar.setTime(new Date());
-            return curTimes[0] + "-" + curTimes[1] + "-" + calendar.get(Calendar.DAY_OF_MONTH);
+            return curTimes[0] + "-" + curTimes[1] + "-" + (calendar.get(Calendar.DAY_OF_MONTH) + 1);
         }
     }
 
@@ -104,5 +104,15 @@ public class StringUtil {
             dayList.add(String.format("%02d", i));
         }
         return dayList;
+    }
+
+    public static String getWeekOfDate(Date date) {
+        String[] weekDays = {"星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"};
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        int w = cal.get(Calendar.DAY_OF_WEEK) - 1;
+        if (w < 0)
+            w = 0;
+        return weekDays[w];
     }
 }

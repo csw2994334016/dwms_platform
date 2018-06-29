@@ -12,11 +12,15 @@ import lombok.*;
 @Getter
 @Setter
 @ToString
-public class InputStaticsParam {
+public class StaticsParam {
 
     private String sku; //物料编号
 
     private String purchaseDept; //采购部门
+
+    private String banJiName;
+
+    private String projectName;
 
     private String year;
 

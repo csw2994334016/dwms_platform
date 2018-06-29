@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import com.three.dwms.beans.JsonData;
 import com.three.dwms.entity.bm.InputDetail;
 import com.three.dwms.param.bm.InputDetailParam;
-import com.three.dwms.param.statics.InputStaticsParam;
+import com.three.dwms.param.statics.StaticsParam;
 import com.three.dwms.param.statics.Statics;
 import com.three.dwms.service.bm.InputDetailService;
 import lombok.extern.slf4j.Slf4j;
@@ -74,7 +74,7 @@ public class InputDetailController {
     }
 
     @RequestMapping(value = "/inputStatics", method = RequestMethod.POST)
-    public JsonData inputStatics(@RequestBody InputStaticsParam param) {
+    public JsonData inputStatics(@RequestBody StaticsParam param) {
         Statics statics = inputDetailService.inputStatics(param);
         return JsonData.success(statics);
     }

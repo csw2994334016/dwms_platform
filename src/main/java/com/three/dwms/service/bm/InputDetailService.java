@@ -11,7 +11,7 @@ import com.three.dwms.entity.bm.InputDetail;
 import com.three.dwms.entity.bm.Inventory;
 import com.three.dwms.exception.ParamException;
 import com.three.dwms.param.bm.InputDetailParam;
-import com.three.dwms.param.statics.InputStaticsParam;
+import com.three.dwms.param.statics.StaticsParam;
 import com.three.dwms.param.statics.Statics;
 import com.three.dwms.repository.basic.*;
 import com.three.dwms.repository.bm.InputDetailRepository;
@@ -314,7 +314,7 @@ public class InputDetailService {
         return inputDetail;
     }
 
-    public Statics inputStatics(InputStaticsParam param) {
+    public Statics inputStatics(StaticsParam param) {
         String startTime = StringUtil.getStartTime(param.getYear(), param.getMonth());
         String endTime = StringUtil.getEndTime(param.getYear(), param.getMonth());
         Specification<InputDetail> specification = (root, criteriaQuery, criteriaBuilder) -> {
@@ -325,8 +325,8 @@ public class InputDetailService {
             if (StringUtils.isNotBlank(param.getPurchaseDept())) {
                 predicateList.add(criteriaBuilder.equal(root.get("purchaseDept"), param.getPurchaseDept()));
             }
-            Date st = StringUtil.toDate(startTime);
-            Date et = StringUtil.toDate(endTime);
+            Date st = StringUtil.getStrToDate(startTime);
+            Date et = StringUtil.getStrToDate(endTime);
             if (st != null && et != null) {
                 predicateList.add(criteriaBuilder.greaterThanOrEqualTo(root.get("createTime"), st));
                 predicateList.add(criteriaBuilder.lessThanOrEqualTo(root.get("createTime"), et));
@@ -344,14 +344,6 @@ public class InputDetailService {
             }
         }
         Statics statics = Statics.builder().labelList(Lists.newArrayList()).dataList(Lists.newArrayList()).build();
-        for (String day : StringUtil.getMonthDays(startTime, endTime)) {
-            statics.getLabelList().add(day);
-            if (dayNumberMap.get(day) == null) {
-                statics.getDataList().add(0.0);
-            } else {
-                statics.getDataList().add(dayNumberMap.get(day));
-            }
-        }
-        return statics;
+        return CriteriaUtil.createStatics(startTime, endTime, dayNumberMap, statics);
     }
 }

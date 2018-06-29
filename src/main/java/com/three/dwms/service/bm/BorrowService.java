@@ -81,9 +81,10 @@ public class BorrowService {
             List<BorrowDetail> borrowDetailList = borrowDetailRepository.findAllByBorrow(borrow);
             List<Inventory> inventoryList = Lists.newArrayList();
             for (BorrowDetail borrowDetail : borrowDetailList) {
-                List<Inventory> inventories = inventoryRepository.findAllBySkuAndWhName(borrowDetail.getSku(), borrow.getWhName());
+                List<Inventory> inventories = inventoryRepository.findAllBySkuAndWhNameOrderBySkuAmountAsc(borrowDetail.getSku(), borrow.getWhName());
                 //分配策略
                 Double outNumber = borrowDetail.getBorrowNumber(); //借出总数量
+                Double notReturnNumber = borrowDetail.getNotReturnNumber();
                 for (Inventory inventory : inventories) {
                     inventory.setBorrowNo(borrowDetail.getBorrow().getBorrowNo());
                     inventory.setBorrowNumber(borrowDetail.getBorrowNumber()); //该物料总申请量、总借用量
@@ -95,7 +96,8 @@ public class BorrowService {
                         outNumber -= outNumber;
                     }
                     inventory.setNotReturnNumber(borrowDetail.getNotReturnNumber());
-                    inventory.setReturnNumber(0.0);
+                    inventory.setReturnNumber(notReturnNumber);
+                    notReturnNumber -= notReturnNumber;
                 }
                 inventoryList.addAll(inventories);
             }

@@ -26,4 +26,6 @@ public interface AreaRepository extends PagingAndSortingRepository<Area, Integer
 
     @Query("select max(a.areaCode) from Area a where a.zone = :zone")
     Integer findMaxAreaCodeByZone(@Param("zone") Zone zone);
+
+    List<Area> findAllByZone(Zone zone);
 }

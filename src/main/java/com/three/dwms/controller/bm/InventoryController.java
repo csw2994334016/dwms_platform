@@ -38,4 +38,10 @@ public class InventoryController {
         inventoryService.moveInventory(paramList);
         return JsonData.success();
     }
+
+    @RequestMapping(value = "/inventoryWarning", method = RequestMethod.GET)
+    public JsonData inventoryWarning() {
+        List<Inventory> inventoryList = inventoryService.inventoryWarning();
+        return JsonData.success(inventoryList);
+    }
 }

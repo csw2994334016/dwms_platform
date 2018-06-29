@@ -2,6 +2,7 @@ package com.three.dwms.service.bm;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.three.dwms.common.RequestHolder;
 import com.three.dwms.constant.OutputStateCode;
 import com.three.dwms.entity.bm.Inventory;
@@ -9,11 +10,12 @@ import com.three.dwms.entity.bm.Output;
 import com.three.dwms.entity.bm.OutputDetail;
 import com.three.dwms.exception.ParamException;
 import com.three.dwms.param.bm.AllocationParam;
+import com.three.dwms.param.statics.StaticsParam;
+import com.three.dwms.param.statics.Statics;
 import com.three.dwms.repository.bm.InventoryRepository;
 import com.three.dwms.repository.bm.OutputDetailRepository;
 import com.three.dwms.repository.bm.OutputRepository;
-import com.three.dwms.utils.BeanValidator;
-import com.three.dwms.utils.CriteriaUtil;
+import com.three.dwms.utils.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
@@ -24,7 +26,9 @@ import javax.annotation.Resource;
 import javax.persistence.criteria.Predicate;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by csw on 2018/6/1.
@@ -82,7 +86,7 @@ public class OutputService {
             List<OutputDetail> outputDetailList = outputDetailRepository.findAllByOutput(output);
             List<Inventory> inventoryList = Lists.newArrayList();
             for (OutputDetail outputDetail : outputDetailList) {
-                List<Inventory> inventories = inventoryRepository.findAllBySkuAndWhName(outputDetail.getSku(), output.getWhName());
+                List<Inventory> inventories = inventoryRepository.findAllBySkuAndWhNameOrderBySkuAmountAsc(outputDetail.getSku(), output.getWhName());
                 //分配策略
                 Double outNumber = outputDetail.getOutNumber() - outputDetail.getActualNumber();
                 for (Inventory inventory : inventories) {
@@ -128,6 +132,9 @@ public class OutputService {
                             throw new ParamException("领用数量大于单据申请数量，无法出库");
                         }
                         outputDetail.setActualNumber(outputDetail.getActualNumber() + param.getAllocateAmount());
+                        outputDetail.setOperateTime(new Date());
+                        outputDetail.setOperator(RequestHolder.getCurrentUser().getUsername());
+                        outputDetail.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
                         outputDetailList.add(outputDetail);
                         output.setState(OutputStateCode.OUTPUT.getCode());
                         outputList.add(output);
@@ -179,5 +186,63 @@ public class OutputService {
         Output output = outputRepository.findOne(id);
         Preconditions.checkNotNull(output, "出库单(id:" + id + ")不存在");
         return output;
+    }
+
+    public Statics outputStatics(StaticsParam param) {
+        String startTime = StringUtil.getStartTime(param.getYear(), param.getMonth());
+        String endTime = StringUtil.getEndTime(param.getYear(), param.getMonth());
+        List<OutputDetail> outputDetailList = Lists.newArrayList();
+        List<Output> outputList = Lists.newArrayList();
+        if (StringUtils.isNotBlank(param.getBanJiName())) {
+            outputList.addAll(outputRepository.findAllByBanJiName(param.getBanJiName()));
+        }
+        if (StringUtils.isNotBlank(param.getProjectName())) {
+            outputList.addAll(outputRepository.findAllByProjectName(param.getProjectName()));
+        }
+        if (CollectionUtils.isNotEmpty(outputList)) {
+            for (Output output : outputList) {
+                Specification<OutputDetail> specification = (root, criteriaQuery, criteriaBuilder) -> {
+                    List<Predicate> predicateList = Lists.newArrayList();
+                    if (StringUtils.isNotBlank(param.getSku())) {
+                        predicateList.add(criteriaBuilder.equal(root.get("sku"), param.getSku()));
+                    }
+                    predicateList.add(criteriaBuilder.equal(root.get("output"), output));
+                    Date st = StringUtil.getStrToDate(startTime);
+                    Date et = StringUtil.getStrToDate(endTime);
+                    if (st != null && et != null) {
+                        predicateList.add(criteriaBuilder.greaterThanOrEqualTo(root.get("operateTime"), st));
+                        predicateList.add(criteriaBuilder.lessThanOrEqualTo(root.get("operateTime"), et));
+                    }
+                    return criteriaBuilder.and(predicateList.toArray(new Predicate[0]));
+                };
+                outputDetailList.addAll(outputDetailRepository.findAll(specification));
+            }
+        } else {
+            Specification<OutputDetail> specification = (root, criteriaQuery, criteriaBuilder) -> {
+                List<Predicate> predicateList = Lists.newArrayList();
+                if (StringUtils.isNotBlank(param.getSku())) {
+                    predicateList.add(criteriaBuilder.equal(root.get("sku"), param.getSku()));
+                }
+                Date st = StringUtil.getStrToDate(startTime);
+                Date et = StringUtil.getStrToDate(endTime);
+                if (st != null && et != null) {
+                    predicateList.add(criteriaBuilder.greaterThanOrEqualTo(root.get("operateTime"), st));
+                    predicateList.add(criteriaBuilder.lessThanOrEqualTo(root.get("operateTime"), et));
+                }
+                return criteriaBuilder.and(predicateList.toArray(new Predicate[0]));
+            };
+            outputDetailList.addAll(outputDetailRepository.findAll(specification));
+        }
+        Map<String, Double> dayNumberMap = Maps.newHashMap();
+        for (OutputDetail outputDetail : outputDetailList) {
+            if (outputDetail.getOperateTime() != null) {
+                String operateTimeStr = StringUtil.getDateToStr(outputDetail.getOperateTime());
+                String day = operateTimeStr.split("-")[2];
+                dayNumberMap.putIfAbsent(day, 0.0);
+                dayNumberMap.put(day, CalculateUtil.add(dayNumberMap.get(day), outputDetail.getActualNumber()));
+            }
+        }
+        Statics statics = Statics.builder().labelList(Lists.newArrayList()).dataList(Lists.newArrayList()).build();
+        return CriteriaUtil.createStatics(startTime, endTime, dayNumberMap, statics);
     }
 }

@@ -2,6 +2,7 @@ package com.three.dwms.service.sys;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.three.dwms.beans.PageQuery;
 import com.three.dwms.common.RequestHolder;
 import com.three.dwms.constant.AclTypeCode;
@@ -10,27 +11,33 @@ import com.three.dwms.constant.RoleTypeCode;
 import com.three.dwms.constant.StatusCode;
 import com.three.dwms.entity.sys.*;
 import com.three.dwms.exception.ParamException;
+import com.three.dwms.param.statics.StaticsParam;
+import com.three.dwms.param.statics.Statics;
 import com.three.dwms.param.sys.AclMenu;
 import com.three.dwms.param.sys.User;
 import com.three.dwms.param.sys.UserParam;
 import com.three.dwms.param.sys.UserRoleParam;
+import com.three.dwms.repository.sys.SysLoginLogRepository;
 import com.three.dwms.repository.sys.SysRoleAclRepository;
 import com.three.dwms.repository.sys.SysUserRepository;
 import com.three.dwms.utils.BeanValidator;
 import com.three.dwms.utils.IpUtil;
 import com.three.dwms.utils.MD5Util;
+import com.three.dwms.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.Date;
-import java.util.List;
+import javax.persistence.criteria.Predicate;
+import java.util.*;
 
 /**
  * Created by csw on 2018/5/6.
@@ -57,6 +64,9 @@ public class SysUserService {
 
     @Resource
     private SysRoleAclRepository sysRoleAclRepository;
+
+    @Resource
+    private SysLoginLogRepository sysLoginLogRepository;
 
     @Transactional
     public void create(UserParam param) {
@@ -344,7 +354,6 @@ public class SysUserService {
     }
 
     public SysUser bindUserWithAcl(SysUser sysUser) {
-
         //给用户绑定权限
         List<SysRoleAcl> sysRoleAclList = sysRoleAclRepository.findAllByRoleId(sysUser.getSysRole().getId());
         for (SysRoleAcl sysRoleAcl : sysRoleAclList) {
@@ -352,5 +361,46 @@ public class SysUserService {
         }
 
         return sysUser;
+    }
+
+    public Statics loginStatics() {
+        Date et = new Date();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(et);
+        calendar.add(Calendar.DATE, -6);
+        Date st = StringUtil.getStrToDate(StringUtil.getDateToStr(calendar.getTime()));
+        Specification<SysLoginLog> specification = (root, criteriaQuery, criteriaBuilder) -> {
+            List<Predicate> predicateList = Lists.newArrayList();
+            predicateList.add(criteriaBuilder.greaterThanOrEqualTo(root.get("operateTime"), st));
+            predicateList.add(criteriaBuilder.lessThanOrEqualTo(root.get("operateTime"), et));
+            return criteriaBuilder.and(predicateList.toArray(new Predicate[0]));
+        };
+        Sort sort = new Sort(Sort.Direction.ASC, "operateTime");
+        List<SysLoginLog> sysLoginLogList = sysLoginLogRepository.findAll(specification, sort);
+
+        Map<String, Integer> ciShuMap = Maps.newHashMap(); //登陆次数
+        Map<String, Set<Integer>> renShuMap = Maps.newHashMap(); //登陆人数
+        for (SysLoginLog sysLoginLog : sysLoginLogList) {
+            String time = StringUtil.getDateToStr(sysLoginLog.getOperateTime());
+            ciShuMap.putIfAbsent(time, 0);
+            ciShuMap.put(time, ciShuMap.get(time) + 1);
+            renShuMap.put(time, new HashSet<>());
+            renShuMap.get(time).add(sysLoginLog.getUserId());
+        }
+
+        Statics statics = Statics.builder().labelList(Lists.newArrayList()).loginCiShuList(Lists.newArrayList()).loginRenShuList(Lists.newArrayList()).build();
+        List<String> days = Lists.newArrayList();
+        for (int i = 6; i >= 0; i--) {
+            calendar.setTime(et);
+            calendar.add(Calendar.DATE, -i);
+            days.add(StringUtil.getDateToStr(calendar.getTime()));
+        }
+        for (String day : days) {
+            String week = StringUtil.getWeekOfDate(StringUtil.getStrToDate(day));
+            statics.getLabelList().add(week);
+            statics.getLoginCiShuList().add(ciShuMap.get(day) != null ? ciShuMap.get(day) : 0);
+            statics.getLoginRenShuList().add(renShuMap.get(day) != null ? renShuMap.get(day).size() : 0);
+        }
+        return statics;
     }
 }

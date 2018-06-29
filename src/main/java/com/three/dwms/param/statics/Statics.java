@@ -19,4 +19,7 @@ public class Statics {
     private List<String> labelList;
 
     private List<Double> dataList;
+
+    private List<Integer> loginRenShuList;
+    private List<Integer> loginCiShuList;
 }
