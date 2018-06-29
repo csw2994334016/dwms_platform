@@ -25,10 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import javax.persistence.criteria.Predicate;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by csw on 2018/6/1.
@@ -154,6 +151,7 @@ public class OutputService {
         if (CollectionUtils.isNotEmpty(paramList)) {
             List<Inventory> inventoryList = Lists.newArrayList();
             List<OutputDetail> outputDetailList = Lists.newArrayList();
+            Map<String, AllocationParam> skuParamMap = new HashMap<>();
             for (AllocationParam param : paramList) {
                 BeanValidator.check(param);
                 Output output = this.findByOutputNo(param.getOutputNo());
@@ -162,14 +160,24 @@ public class OutputService {
                     if (param.getReturnNumber() > 0.0) { //退还改变Inventory.skuAmount、OutputDetail.returnNumber
                         inventory.setSkuAmount(inventory.getSkuAmount() + param.getReturnNumber());
                         inventoryList.add(inventory);
-                        OutputDetail outputDetail = outputDetailRepository.findByOutputAndSku(output, inventory.getSku());
-                        Preconditions.checkNotNull(outputDetail, "物料(outputNo:" + output.getOutputNo() + ", sku:" + inventory.getSku() + ")出库单据详情不存在");
-                        outputDetail.setReturnNumber(outputDetail.getReturnNumber() + param.getReturnNumber());
-                        outputDetailList.add(outputDetail);
+                        skuParamMap.putIfAbsent(inventory.getSku(), AllocationParam.builder().outputNo(param.getOutputNo()).sku(inventory.getSku()).allReturnNumber(0.0).build());
+                        skuParamMap.get(inventory.getSku()).setAllReturnNumber(skuParamMap.get(inventory.getSku()).getAllReturnNumber() + param.getReturnNumber());
+
+//                        OutputDetail outputDetail = outputDetailRepository.findByOutputAndSku(output, inventory.getSku());
+//                        Preconditions.checkNotNull(outputDetail, "物料(outputNo:" + output.getOutputNo() + ", sku:" + inventory.getSku() + ")出库单据详情不存在");
+//                        outputDetail.setReturnNumber(outputDetail.getReturnNumber() + param.getReturnNumber());
+//                        outputDetailList.add(outputDetail);
                     }
                 } else {
                     throw new ParamException("只有出库状态的单据才能退还");
                 }
+            }
+            for (Map.Entry<String, AllocationParam> entry : skuParamMap.entrySet()) {
+                Output output = this.findByOutputNo(entry.getValue().getOutputNo());
+                OutputDetail outputDetail = outputDetailRepository.findByOutputAndSku(output, entry.getValue().getSku());
+                Preconditions.checkNotNull(outputDetail, "物料(outputNo:" + output.getOutputNo() + ", sku:" + entry.getValue().getSku() + ")出库单据详情不存在");
+                outputDetail.setReturnNumber(outputDetail.getReturnNumber() + entry.getValue().getAllocateAmount());
+                outputDetailList.add(outputDetail);
             }
             inventoryRepository.save(inventoryList);
             outputDetailRepository.save(outputDetailList);

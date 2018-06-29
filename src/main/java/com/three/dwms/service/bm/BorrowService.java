@@ -21,9 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import javax.persistence.criteria.Predicate;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by csw on 2018/6/1.
@@ -150,6 +148,7 @@ public class BorrowService {
             List<Inventory> inventoryList = Lists.newArrayList();
             List<BorrowDetail> borrowDetailList = Lists.newArrayList();
             List<Borrow> borrowList = Lists.newArrayList();
+            Map<String, BorrowAllocationParam> skuParamMap = new HashMap<>();
             for (BorrowAllocationParam param : paramList) {
                 BeanValidator.check(param);
                 Borrow borrow = this.findByBorrowNo(param.getBorrowNo());
@@ -158,23 +157,28 @@ public class BorrowService {
                     if (param.getReturnNumber() > 0.0) { //退还改变Inventory.skuAmount、OutputDetail.returnNumber
                         inventory.setSkuAmount(inventory.getSkuAmount() + param.getReturnNumber());
                         inventoryList.add(inventory);
-                        BorrowDetail borrowDetail = borrowDetailRepository.findByBorrowAndSku(borrow, inventory.getSku());
-                        Preconditions.checkNotNull(borrowDetail, "物料(borrowNo:" + borrow.getBorrowNo() + ", sku:" + inventory.getSku() + ")借出单据详情不存在");
-                        borrowDetail.setReturnNumber(borrowDetail.getReturnNumber() + param.getReturnNumber());
-                        borrowDetail.setNotReturnNumber(borrowDetail.getBorrowNumber() - borrowDetail.getReturnNumber());
-                        borrowDetailList.add(borrowDetail);
-                        if (borrowDetail.getNotReturnNumber() > 0.0) {
-                            borrow.setState(BorrowStateCode.RETURN_PART.getCode());
-                        }
-                        if (borrowDetail.getNotReturnNumber() == 0.0) {
-                            borrow.setState(BorrowStateCode.RETURN.getCode());
-                        }
-                        borrow.setActualReturnDate(new Date());
-                        borrowList.add(borrow);
+                        skuParamMap.putIfAbsent(inventory.getSku(), BorrowAllocationParam.builder().borrowNo(param.getBorrowNo()).sku(inventory.getSku()).allReturnNumber(0.0).build());
+                        skuParamMap.get(inventory.getSku()).setAllReturnNumber(skuParamMap.get(inventory.getSku()).getAllReturnNumber() + param.getReturnNumber());
                     }
                 } else {
                     throw new ParamException("只有出库状态的单据才能退还");
                 }
+            }
+            for (Map.Entry<String, BorrowAllocationParam> entry : skuParamMap.entrySet()) {
+                Borrow borrow = this.findByBorrowNo(entry.getValue().getBorrowNo());
+                BorrowDetail borrowDetail = borrowDetailRepository.findByBorrowAndSku(borrow, entry.getValue().getSku());
+                Preconditions.checkNotNull(borrowDetail, "物料(borrowNo:" + borrow.getBorrowNo() + ", sku:" + entry.getValue().getSku() + ")借出单据详情不存在");
+                borrowDetail.setReturnNumber(borrowDetail.getReturnNumber() + entry.getValue().getAllReturnNumber());
+                borrowDetail.setNotReturnNumber(borrowDetail.getBorrowNumber() - borrowDetail.getReturnNumber());
+                borrowDetailList.add(borrowDetail);
+                if (borrowDetail.getNotReturnNumber() > 0.0) {
+                    borrow.setState(BorrowStateCode.RETURN_PART.getCode());
+                }
+                if (borrowDetail.getNotReturnNumber() == 0.0) {
+                    borrow.setState(BorrowStateCode.RETURN.getCode());
+                }
+                borrow.setActualReturnDate(new Date());
+                borrowList.add(borrow);
             }
             inventoryRepository.save(inventoryList);
             borrowDetailRepository.save(borrowDetailList);

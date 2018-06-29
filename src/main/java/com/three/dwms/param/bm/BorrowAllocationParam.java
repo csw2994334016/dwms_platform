@@ -30,4 +30,7 @@ public class BorrowAllocationParam {
 
     private Double returnNumber = 0.0; //退还数量
 
+    private String sku;
+    private Double allReturnNumber = 0.0;
+
 }

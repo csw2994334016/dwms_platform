@@ -50,4 +50,10 @@ public class SysNoticeController {
         List<SysNotice> sysNoticeList = sysNoticeService.findAll();
         return JsonData.success(sysNoticeList);
     }
+
+    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
+    public JsonData findById(@PathVariable Integer id) {
+        SysNotice sysNotice = sysNoticeService.findById(id);
+        return JsonData.success(sysNotice);
+    }
 }

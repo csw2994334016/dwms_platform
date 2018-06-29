@@ -28,6 +28,8 @@ public class SysNoticeService {
         BeanValidator.check(param);
 
         SysNotice sysNotice = SysNotice.builder().title(param.getTitle()).content(param.getContent()).noticeType(param.getNoticeType()).build();
+        sysNotice.setStatus(param.getStatus());
+        sysNotice.setRemark(param.getRemark());
 
         sysNotice.setCreateTime(new Date());
         sysNotice.setCreator(RequestHolder.getCurrentUser().getUsername());
@@ -52,8 +54,10 @@ public class SysNoticeService {
         BeanValidator.check(param);
 
         sysNotice.setTitle(param.getTitle());
-        sysNotice.setCreator(param.getContent());
+        sysNotice.setCreator(RequestHolder.getCurrentUser().getUsername());
         sysNotice.setNoticeType(param.getNoticeType());
+        sysNotice.setStatus(param.getStatus());
+        sysNotice.setRemark(param.getRemark());
 
         sysNotice.setOperator(RequestHolder.getCurrentUser().getUsername());
         sysNotice.setOperateTime(new Date());
@@ -66,7 +70,7 @@ public class SysNoticeService {
         return (List<SysNotice>) sysNoticeRepository.findAll();
     }
 
-    private SysNotice findById(Integer id) {
+    public SysNotice findById(Integer id) {
         SysNotice sysNotice = sysNoticeRepository.findOne(id);
         Preconditions.checkNotNull(sysNotice, "通知公告(id:" + id + ")不存在");
         return sysNotice;
