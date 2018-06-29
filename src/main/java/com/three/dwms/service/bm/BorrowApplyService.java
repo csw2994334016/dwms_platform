@@ -60,6 +60,8 @@ public class BorrowApplyService {
         borrow.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
         borrow.setOperateTime(new Date());
 
+//        borrow = borrowRepository.save(borrow);
+
         List<BorrowDetail> borrowDetailList = createDetailList(borrow, param);
         borrow = borrowRepository.save(borrow);
         for (BorrowDetail borrowDetail : borrowDetailList) {
@@ -113,8 +115,11 @@ public class BorrowApplyService {
             borrow.setOperateTime(new Date());
 
             borrow = borrowRepository.save(borrow);
-
             List<BorrowDetail> borrowDetailList = createDetailList(borrow, param);
+//            borrow = borrowRepository.save(borrow);
+//            for (BorrowDetail borrowDetail : borrowDetailList) {
+//                borrowDetail.setBorrow(borrow);
+//            }
             borrowDetailRepository.save(borrowDetailList);
         } else {
             throw new ParamException("只有草稿状态下才可以修改");
@@ -129,7 +134,11 @@ public class BorrowApplyService {
             if (detailParam.getBorrowNumber() > inventory.getSkuAmount()) {
                 throw new ParamException("物料(" + detailParam.getSku() + ")借出数量(" + detailParam.getBorrowNumber() + ")大于库存量(" + inventory.getSkuAmount() + ")");
             }
-            BorrowDetail borrowDetail = borrowDetailRepository.findByBorrowAndSku(borrow, detailParam.getSku());
+            BorrowDetail borrowDetail = null;
+            if (borrow.getId() != null) {
+                borrowDetail = borrowDetailRepository.findByBorrowAndSku(borrow, detailParam.getSku());
+            }
+//            BorrowDetail borrowDetail = borrowDetailRepository.findByBorrowAndSku(borrow, detailParam.getSku());
             if (borrowDetail == null) {
                 borrowDetail = BorrowDetail.builder().borrow(borrow).sku(detailParam.getSku()).skuDesc(detailParam.getSkuDesc()).spec(detailParam.getSpec()).notReturnNumber(detailParam.getBorrowNumber()).returnNumber(0.0).build();
                 borrowDetail.setStatus(StatusCode.NORMAL.getCode());

@@ -66,6 +66,7 @@ public class OutputApplyService {
         output.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
         output.setOperateTime(new Date());
 
+//        output = outputRepository.save(output);
         List<OutputDetail> outputDetailList = createDetailList(output, param);
         output = outputRepository.save(output);
         for (OutputDetail outputDetail : outputDetailList) {
@@ -121,8 +122,11 @@ public class OutputApplyService {
             output.setOperateTime(new Date());
 
             output = outputRepository.save(output);
-
             List<OutputDetail> outputDetailList = createDetailList(output, param);
+//            output = outputRepository.save(output);
+//            for (OutputDetail outputDetail : outputDetailList) {
+//                outputDetail.setOutput(output);
+//            }
             outputDetailRepository.save(outputDetailList);
         } else {
             throw new ParamException("只有草稿状态下才可以修改");
@@ -137,7 +141,11 @@ public class OutputApplyService {
             if (detailParam.getOutNumber() > inventory.getSkuAmount()) {
                 throw new ParamException("物料(" + detailParam.getSku() + ")申请数量(" + detailParam.getOutNumber() + ")大于库存量(" + inventory.getSkuAmount() + ")");
             }
-            OutputDetail outputDetail = outputDetailRepository.findByOutputAndSku(output, detailParam.getSku());
+            OutputDetail outputDetail = null;
+            if (output.getId() != null) {
+                outputDetail = outputDetailRepository.findByOutputAndSku(output, detailParam.getSku());
+            }
+//            OutputDetail outputDetail = outputDetailRepository.findByOutputAndSku(output, detailParam.getSku());
             if (outputDetail == null) {
                 outputDetail = OutputDetail.builder().output(output).sku(detailParam.getSku()).skuDesc(detailParam.getSkuDesc()).spec(detailParam.getSpec()).actualNumber(0.0).returnNumber(0.0).build();
                 outputDetail.setStatus(StatusCode.NORMAL.getCode());
