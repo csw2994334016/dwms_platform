@@ -384,7 +384,7 @@ public class SysUserService {
             String time = StringUtil.getDateToStr(sysLoginLog.getOperateTime());
             ciShuMap.putIfAbsent(time, 0);
             ciShuMap.put(time, ciShuMap.get(time) + 1);
-            renShuMap.put(time, new HashSet<>());
+            renShuMap.putIfAbsent(time, new HashSet<>());
             renShuMap.get(time).add(sysLoginLog.getUserId());
         }
 

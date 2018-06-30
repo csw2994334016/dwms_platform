@@ -54,6 +54,7 @@ public class SysNoticeService {
         BeanValidator.check(param);
 
         sysNotice.setTitle(param.getTitle());
+        sysNotice.setContent(param.getContent());
         sysNotice.setCreator(RequestHolder.getCurrentUser().getUsername());
         sysNotice.setNoticeType(param.getNoticeType());
         sysNotice.setStatus(param.getStatus());

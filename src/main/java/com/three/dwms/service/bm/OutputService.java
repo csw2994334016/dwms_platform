@@ -152,9 +152,10 @@ public class OutputService {
             List<Inventory> inventoryList = Lists.newArrayList();
             List<OutputDetail> outputDetailList = Lists.newArrayList();
             Map<String, AllocationParam> skuParamMap = new HashMap<>();
+            Output output = this.findByOutputNo(paramList.get(0).getOutputNo());
             for (AllocationParam param : paramList) {
                 BeanValidator.check(param);
-                Output output = this.findByOutputNo(param.getOutputNo());
+//                Output output = this.findByOutputNo(param.getOutputNo());
                 if (output.getState().equals(OutputStateCode.OUTPUT.getCode())) {
                     Inventory inventory = inventoryService.findById(param.getId());
                     if (param.getReturnNumber() > 0.0) { //退还改变Inventory.skuAmount、OutputDetail.returnNumber
@@ -173,7 +174,7 @@ public class OutputService {
                 }
             }
             for (Map.Entry<String, AllocationParam> entry : skuParamMap.entrySet()) {
-                Output output = this.findByOutputNo(entry.getValue().getOutputNo());
+//                Output output = this.findByOutputNo(entry.getValue().getOutputNo());
                 OutputDetail outputDetail = outputDetailRepository.findByOutputAndSku(output, entry.getValue().getSku());
                 Preconditions.checkNotNull(outputDetail, "物料(outputNo:" + output.getOutputNo() + ", sku:" + entry.getValue().getSku() + ")出库单据详情不存在");
                 outputDetail.setReturnNumber(outputDetail.getReturnNumber() + entry.getValue().getAllocateAmount());

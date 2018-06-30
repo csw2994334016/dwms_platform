@@ -147,11 +147,11 @@ public class BorrowService {
         if (CollectionUtils.isNotEmpty(paramList)) {
             List<Inventory> inventoryList = Lists.newArrayList();
             List<BorrowDetail> borrowDetailList = Lists.newArrayList();
-            List<Borrow> borrowList = Lists.newArrayList();
             Map<String, BorrowAllocationParam> skuParamMap = new HashMap<>();
+            Borrow borrow = this.findByBorrowNo(paramList.get(0).getBorrowNo());
             for (BorrowAllocationParam param : paramList) {
                 BeanValidator.check(param);
-                Borrow borrow = this.findByBorrowNo(param.getBorrowNo());
+//                Borrow borrow = this.findByBorrowNo(param.getBorrowNo());
                 if (borrow.getState().equals(BorrowStateCode.BORROW.getCode()) || borrow.getState().equals(BorrowStateCode.RETURN_PART.getCode())) {
                     Inventory inventory = inventoryService.findById(param.getId());
                     if (param.getReturnNumber() > 0.0) { //退还改变Inventory.skuAmount、OutputDetail.returnNumber
@@ -164,25 +164,23 @@ public class BorrowService {
                     throw new ParamException("只有出库状态的单据才能退还");
                 }
             }
+            boolean returnFlag = true;
             for (Map.Entry<String, BorrowAllocationParam> entry : skuParamMap.entrySet()) {
-                Borrow borrow = this.findByBorrowNo(entry.getValue().getBorrowNo());
+//                Borrow borrow = this.findByBorrowNo(entry.getValue().getBorrowNo());
                 BorrowDetail borrowDetail = borrowDetailRepository.findByBorrowAndSku(borrow, entry.getValue().getSku());
                 Preconditions.checkNotNull(borrowDetail, "物料(borrowNo:" + borrow.getBorrowNo() + ", sku:" + entry.getValue().getSku() + ")借出单据详情不存在");
                 borrowDetail.setReturnNumber(borrowDetail.getReturnNumber() + entry.getValue().getAllReturnNumber());
                 borrowDetail.setNotReturnNumber(borrowDetail.getBorrowNumber() - borrowDetail.getReturnNumber());
                 borrowDetailList.add(borrowDetail);
                 if (borrowDetail.getNotReturnNumber() > 0.0) {
-                    borrow.setState(BorrowStateCode.RETURN_PART.getCode());
+                    returnFlag = false;
                 }
-                if (borrowDetail.getNotReturnNumber() == 0.0) {
-                    borrow.setState(BorrowStateCode.RETURN.getCode());
-                }
-                borrow.setActualReturnDate(new Date());
-                borrowList.add(borrow);
             }
+            borrow.setActualReturnDate(new Date());
+            borrow.setState(returnFlag ? BorrowStateCode.RETURN.getCode() : BorrowStateCode.RETURN_PART.getCode());
             inventoryRepository.save(inventoryList);
             borrowDetailRepository.save(borrowDetailList);
-            borrowRepository.save(borrowList);
+            borrowRepository.save(borrow);
         }
     }
 

@@ -21,15 +21,15 @@ public class QueryController {
     @Resource
     private SysUserService sysUserService;
 
-    @RequestMapping(value = "/proposer", method = RequestMethod.GET)
-    public JsonData findAllProposer() {
+    @RequestMapping(value = "/findAllUser", method = RequestMethod.GET)
+    public JsonData findAllUser() {
         List<SysUser> sysUserList = sysUserService.findAll();
         return JsonData.success(sysUserList);
     }
 
-    @RequestMapping(value = "/approver", method = RequestMethod.GET)
-    public JsonData findAllApprover() {
-        List<SysUser> sysUserList = sysUserService.findAll();
+    @RequestMapping(value = "/findAllUserByRoleType", method = RequestMethod.GET)
+    public JsonData findAllByRoleType() {
+        List<SysUser> sysUserList = sysUserService.findAllByRoleType();
         return JsonData.success(sysUserList);
     }
 }
