@@ -146,6 +146,7 @@ public class BorrowApplyService {
                 borrowDetail.setCreateTime(new Date());
             }
             borrowDetail.setBorrowNumber(detailParam.getBorrowNumber());
+            borrowDetail.setNotReturnNumber(borrowDetail.getBorrowNumber());
             borrowDetail.setOperator(RequestHolder.getCurrentUser().getUsername());
             borrowDetail.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
             borrowDetail.setOperateTime(new Date());
