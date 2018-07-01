@@ -11,12 +11,8 @@ import com.three.dwms.constant.RoleTypeCode;
 import com.three.dwms.constant.StatusCode;
 import com.three.dwms.entity.sys.*;
 import com.three.dwms.exception.ParamException;
-import com.three.dwms.param.statics.StaticsParam;
 import com.three.dwms.param.statics.Statics;
-import com.three.dwms.param.sys.AclMenu;
-import com.three.dwms.param.sys.User;
-import com.three.dwms.param.sys.UserParam;
-import com.three.dwms.param.sys.UserRoleParam;
+import com.three.dwms.param.sys.*;
 import com.three.dwms.repository.sys.SysLoginLogRepository;
 import com.three.dwms.repository.sys.SysRoleAclRepository;
 import com.three.dwms.repository.sys.SysUserRepository;
@@ -198,18 +194,66 @@ public class SysUserService {
     }
 
     @Transactional
-    public SysUser updatePassword(User user) {
-        SysUser before = sysUserRepository.findOne(user.getId());
-        Preconditions.checkNotNull(before, "待更改密码的用户(id:" + user.getId() + ")不存在");
+    public SysUser updateUser(UserUpdateParam param) {
+        BeanValidator.check(param);
+        SysUser before = this.findById(param.getId());
+        if (!before.getUsername().equals(param.getUsername())) {
+            throw new ParamException("用户名不能修改");
+        }
+        if (checkUsernameExist(param.getUsername(), param.getId())) {
+            throw new ParamException("用户名已经存在");
+        }
+        if (checkTelExist(param.getTel(), param.getId())) {
+            throw new ParamException("电话已被占用");
+        }
+        if (checkEmailExist(param.getEmail(), param.getId())) {
+            throw new ParamException("邮箱已被占用");
+        }
 
-        if (!before.getPassword().equals(MD5Util.encrypt(user.getOldPassword()))) {
+        before.setUsername(param.getUsername());
+        before.setRealName(param.getRealName());
+        before.setEmail(param.getEmail());
+        before.setTel(param.getTel());
+
+        before.setStatus(param.getStatus());
+        before.setRemark(param.getRemark());
+        before.setOperator(RequestHolder.getCurrentUser().getUsername());
+        before.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
+        before.setOperateTime(new Date());
+
+        before = sysUserRepository.save(before);
+
+        //更新用户，要更新session
+        before = bindUserWithAcl(before);
+        RequestHolder.getCurrentRequest().setAttribute("user", before);
+
+        return before;
+    }
+
+    @Transactional
+    public SysUser updatePassword(UserPasswordParam param) {
+        BeanValidator.check(param);
+        SysUser before = RequestHolder.getCurrentUser();
+        Preconditions.checkNotNull(before, "session不存在当前用户");
+        before = this.findById(before.getId());
+
+        if (!before.getPassword().equals(MD5Util.encrypt(param.getOldPassword()))) {
             throw new ParamException("旧密码不正确");
         }
-        before.setPassword(MD5Util.encrypt(user.getPassword()));
+        String newP = MD5Util.encrypt(param.getNewPassword());
+        String sueP = MD5Util.encrypt(param.getSuePassword());
+        if (newP == null || sueP == null) {
+            throw new ParamException("系统无法生成密码");
+        }
+        if (!newP.equals(sueP)) {
+            throw new ParamException("新密码与确认密码不一致");
+        }
+        before.setPassword(sueP);
 
         SysUser update = sysUserRepository.save(before);
 
         //更新用户，要更新session
+        update = bindUserWithAcl(update);
         RequestHolder.getCurrentRequest().setAttribute("user", update);
 
         return update;
@@ -359,7 +403,6 @@ public class SysUserService {
         for (SysRoleAcl sysRoleAcl : sysRoleAclList) {
             sysUser.getAlcIdList().add(sysRoleAcl.getAclId());
         }
-
         return sysUser;
     }
 
@@ -403,4 +446,5 @@ public class SysUserService {
         }
         return statics;
     }
+
 }

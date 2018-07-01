@@ -6,10 +6,7 @@ import com.three.dwms.beans.PageQuery;
 import com.three.dwms.entity.sys.SysUser;
 import com.three.dwms.param.statics.StaticsParam;
 import com.three.dwms.param.statics.Statics;
-import com.three.dwms.param.sys.AclMenu;
-import com.three.dwms.param.sys.User;
-import com.three.dwms.param.sys.UserParam;
-import com.three.dwms.param.sys.UserRoleParam;
+import com.three.dwms.param.sys.*;
 import com.three.dwms.service.sys.SysUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -59,10 +56,16 @@ public class SysUserController {
         return JsonData.success(sysUser);
     }
 
-    @RequestMapping(value = "/password/{id}", method = RequestMethod.PUT)
-    public JsonData updatePassword(@PathVariable int id, User user) {
-        user.setId(id);
-        SysUser sysUser = sysUserService.updatePassword(user);
+    @RequestMapping(value = "update/{id}", method = RequestMethod.PUT)
+    public JsonData updateUser(@PathVariable int id, @RequestBody UserUpdateParam userParam) {
+        userParam.setId(id);
+        SysUser sysUser = sysUserService.updateUser(userParam);
+        return JsonData.success(sysUser);
+    }
+
+    @RequestMapping(value = "/password", method = RequestMethod.POST)
+    public JsonData updatePassword(@RequestBody UserPasswordParam param) {
+        SysUser sysUser = sysUserService.updatePassword(param);
         return JsonData.success(sysUser);
     }
 
