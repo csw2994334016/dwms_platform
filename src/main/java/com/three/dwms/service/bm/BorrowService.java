@@ -2,16 +2,18 @@ package com.three.dwms.service.bm;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.three.dwms.common.RequestHolder;
 import com.three.dwms.constant.BorrowStateCode;
 import com.three.dwms.entity.bm.*;
 import com.three.dwms.exception.ParamException;
 import com.three.dwms.param.bm.BorrowAllocationParam;
+import com.three.dwms.param.statics.Statics;
+import com.three.dwms.param.statics.StaticsParam;
 import com.three.dwms.repository.bm.BorrowDetailRepository;
 import com.three.dwms.repository.bm.BorrowRepository;
 import com.three.dwms.repository.bm.InventoryRepository;
-import com.three.dwms.utils.BeanValidator;
-import com.three.dwms.utils.CriteriaUtil;
+import com.three.dwms.utils.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
@@ -127,6 +129,9 @@ public class BorrowService {
                         if (param.getAllocateAmount() > borrowDetail.getBorrowNumber()) {
                             throw new ParamException("领用数量大于单据申请数量，无法出库");
                         }
+                        borrowDetail.setOperator(RequestHolder.getCurrentUser().getUsername());
+                        borrowDetail.setOperateTime(new Date());
+                        borrowDetail.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
                         borrowDetailList.add(borrowDetail);
                         borrow.setState(BorrowStateCode.BORROW.getCode());
                         borrow.setBorrowDate(new Date());
@@ -171,6 +176,9 @@ public class BorrowService {
                 Preconditions.checkNotNull(borrowDetail, "物料(borrowNo:" + borrow.getBorrowNo() + ", sku:" + entry.getValue().getSku() + ")借出单据详情不存在");
                 borrowDetail.setReturnNumber(borrowDetail.getReturnNumber() + entry.getValue().getAllReturnNumber());
                 borrowDetail.setNotReturnNumber(borrowDetail.getBorrowNumber() - borrowDetail.getReturnNumber());
+                borrowDetail.setOperator(RequestHolder.getCurrentUser().getUsername());
+                borrowDetail.setOperateTime(new Date());
+                borrowDetail.setOperateIp(IpUtil.getRemoteIp(RequestHolder.getCurrentRequest()));
                 borrowDetailList.add(borrowDetail);
                 if (borrowDetail.getNotReturnNumber() > 0.0) {
                     returnFlag = false;
@@ -194,5 +202,36 @@ public class BorrowService {
         Borrow borrow = borrowRepository.findOne(id);
         Preconditions.checkNotNull(borrow, "借出申请单(id:" + id + ")不存在");
         return borrow;
+    }
+
+    public Statics borrowStatics(StaticsParam param) {
+        String startTime = StringUtil.getStartTime(param.getYear(), param.getMonth());
+        String endTime = StringUtil.getEndTime(param.getYear(), param.getMonth());
+        List<BorrowDetail> borrowDetailList = Lists.newArrayList();
+        Specification<BorrowDetail> specification = (root, criteriaQuery, criteriaBuilder) -> {
+            List<Predicate> predicateList = Lists.newArrayList();
+            if (StringUtils.isNotBlank(param.getSku())) {
+                predicateList.add(criteriaBuilder.equal(root.get("sku"), param.getSku()));
+            }
+            Date st = StringUtil.getStrToDate(startTime);
+            Date et = StringUtil.getStrToDate(endTime);
+            if (st != null && et != null) {
+                predicateList.add(criteriaBuilder.greaterThanOrEqualTo(root.get("operateTime"), st));
+                predicateList.add(criteriaBuilder.lessThanOrEqualTo(root.get("operateTime"), et));
+            }
+            return criteriaBuilder.and(predicateList.toArray(new Predicate[0]));
+        };
+        borrowDetailList.addAll(borrowDetailRepository.findAll(specification));
+        Map<String, Double> dayNumberMap = Maps.newHashMap();
+        for (BorrowDetail borrowDetail : borrowDetailList) {
+            if (borrowDetail.getOperateTime() != null) {
+                String operateTimeStr = StringUtil.getDateToStr(borrowDetail.getOperateTime());
+                String day = operateTimeStr.split("-")[2];
+                dayNumberMap.putIfAbsent(day, 0.0);
+                dayNumberMap.put(day, CalculateUtil.add(dayNumberMap.get(day), borrowDetail.getBorrowNumber()));
+            }
+        }
+        Statics statics = Statics.builder().labelList(Lists.newArrayList()).dataList(Lists.newArrayList()).build();
+        return CriteriaUtil.createStatics(startTime, endTime, dayNumberMap, statics);
     }
 }

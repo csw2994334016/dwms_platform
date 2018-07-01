@@ -55,7 +55,7 @@ public class OutputController {
     }
 
     @RequestMapping(value = "/outputStatics", method = RequestMethod.POST)
-    public JsonData inputStatics(@RequestBody StaticsParam param) {
+    public JsonData outputStatics(@RequestBody StaticsParam param) {
         Statics statics = outputService.outputStatics(param);
         return JsonData.success(statics);
     }

@@ -4,6 +4,8 @@ import com.three.dwms.beans.JsonData;
 import com.three.dwms.entity.bm.Borrow;
 import com.three.dwms.entity.bm.Inventory;
 import com.three.dwms.param.bm.BorrowAllocationParam;
+import com.three.dwms.param.statics.Statics;
+import com.three.dwms.param.statics.StaticsParam;
 import com.three.dwms.service.bm.BorrowService;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,5 +52,11 @@ public class BorrowController {
     public JsonData giveBack(@RequestBody List<BorrowAllocationParam> paramList) {
         borrowService.giveBack(paramList);
         return JsonData.success();
+    }
+
+    @RequestMapping(value = "/borrowStatics", method = RequestMethod.POST)
+    public JsonData borrowStatics(@RequestBody StaticsParam param) {
+        Statics statics = borrowService.borrowStatics(param);
+        return JsonData.success(statics);
     }
 }
