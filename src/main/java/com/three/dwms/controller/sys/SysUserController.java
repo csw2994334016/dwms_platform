@@ -65,8 +65,14 @@ public class SysUserController {
 
     @RequestMapping(value = "/password", method = RequestMethod.POST)
     public JsonData updatePassword(@RequestBody UserPasswordParam param) {
-        SysUser sysUser = sysUserService.updatePassword(param);
-        return JsonData.success(sysUser);
+        sysUserService.updatePassword(param);
+        return JsonData.success();
+    }
+
+    @RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
+    public JsonData resetPassword(@RequestBody UserParam param) {
+        sysUserService.resetPassword(param);
+        return JsonData.success();
     }
 
     @RequestMapping(method = RequestMethod.GET)

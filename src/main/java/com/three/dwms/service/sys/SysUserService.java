@@ -231,7 +231,7 @@ public class SysUserService {
     }
 
     @Transactional
-    public SysUser updatePassword(UserPasswordParam param) {
+    public void updatePassword(UserPasswordParam param) {
         BeanValidator.check(param);
         SysUser before = RequestHolder.getCurrentUser();
         Preconditions.checkNotNull(before, "session不存在当前用户");
@@ -256,7 +256,18 @@ public class SysUserService {
         update = bindUserWithAcl(update);
         RequestHolder.getCurrentRequest().setAttribute("user", update);
 
-        return update;
+    }
+
+    @Transactional
+    public void resetPassword(UserParam param) {
+        if (param.getId() == null) {
+            throw new ParamException("用户(id:" + param.getId() + ")不可以为空");
+        }
+        SysUser sysUser = this.findById(param.getId());
+        String password = MD5Util.encrypt(defaultPassword);
+        sysUser.setPassword(password);
+
+        sysUserRepository.save(sysUser);
     }
 
     public List<SysUser> findAll() {
@@ -446,5 +457,4 @@ public class SysUserService {
         }
         return statics;
     }
-
 }
