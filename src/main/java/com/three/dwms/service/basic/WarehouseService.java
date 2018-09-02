@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.three.dwms.beans.PageQuery;
 import com.three.dwms.common.RequestHolder;
+import com.three.dwms.constant.RoleTypeCode;
 import com.three.dwms.constant.StatusCode;
 import com.three.dwms.constant.WhTypeCode;
 import com.three.dwms.entity.basic.Area;
@@ -11,6 +12,7 @@ import com.three.dwms.entity.basic.Loc;
 import com.three.dwms.entity.basic.Warehouse;
 import com.three.dwms.entity.basic.Zone;
 import com.three.dwms.entity.bm.Inventory;
+import com.three.dwms.entity.sys.SysUser;
 import com.three.dwms.exception.ParamException;
 import com.three.dwms.param.basic.*;
 import com.three.dwms.repository.basic.AreaRepository;
@@ -59,10 +61,10 @@ public class WarehouseService {
     @Transactional
     public void create(WarehouseParam param) {
         BeanValidator.check(param);
-        long whCount = warehouseRepository.count();
-        if (whCount >= 2) {
-            throw new ParamException("系统最多支持创建两个仓库");
-        }
+//        long whCount = warehouseRepository.count();
+//        if (whCount >= 2) {
+//            throw new ParamException("系统最多支持创建两个仓库");
+//        }
         if (checkWhCodeExist(param.getWhCode(), param.getId())) {
             throw new ParamException("仓库编号已经存在");
         }
@@ -143,20 +145,33 @@ public class WarehouseService {
 
     public List<Warehouse> findAll() {
         List<Warehouse> warehouseList;
-        String whCodes = RequestHolder.getCurrentUser().getWhCodes();
-        if (StringUtils.isBlank(whCodes)) {
-            throw new ParamException("用户没有访问仓库的权限");
+        SysUser sysUser = RequestHolder.getCurrentUser();
+        if (RoleTypeCode.ADMIN.getType().equals(sysUser.getSysRole().getType())) {
+            warehouseList = (List<Warehouse>) warehouseRepository.findAll();
+        } else {
+            String whCodes = sysUser.getWhCodes();
+            if (StringUtils.isBlank(whCodes)) {
+                throw new ParamException("用户没有访问仓库的权限");
+            }
+            List<String> whCodeList = Arrays.asList(StringUtils.split(whCodes, ","));
+            warehouseList = warehouseRepository.findAllByWhCodeIn(whCodeList);
         }
-        List<String> whCodeList = Arrays.asList(StringUtils.split(whCodes, ","));
-        warehouseList = warehouseRepository.findAllByWhCodeIn(whCodeList);
         return warehouseList;
     }
 
     public List<WarehouseTree> findAllByTree() {
         List<WarehouseTree> warehouseTreeList = Lists.newArrayList();
-        String whCodes = RequestHolder.getCurrentUser().getWhCodes();
-        List<String> whCodeList = Arrays.asList(StringUtils.split(whCodes, ","));
-        List<Warehouse> warehouseList = warehouseRepository.findAllByWhCodeIn(whCodeList);
+        List<Warehouse> warehouseList = Lists.newArrayList();
+        SysUser sysUser = RequestHolder.getCurrentUser();
+        if (RoleTypeCode.ADMIN.getType().equals(sysUser.getSysRole().getType())) {
+            warehouseList = (List<Warehouse>) warehouseRepository.findAll();
+        } else {
+            String whCodes = RequestHolder.getCurrentUser().getWhCodes();
+            if (StringUtils.isNotBlank(whCodes)) {
+                List<String> whCodeList = Arrays.asList(StringUtils.split(whCodes, ","));
+                warehouseList = warehouseRepository.findAllByWhCodeIn(whCodeList);
+            }
+        }
         WarehouseTree root = WarehouseTree.builder().id(0).text(WhTypeCode.ROOT.getDesc()).type(WhTypeCode.ROOT.getCode()).nodes(Lists.newArrayList()).build();
         for (Warehouse warehouse : warehouseList) {
             WarehouseTree warehouseTree1 = WarehouseTree.builder().id(warehouse.getId()).text(warehouse.getWhName()).type(WhTypeCode.WAREHOUSE.getCode()).build();
