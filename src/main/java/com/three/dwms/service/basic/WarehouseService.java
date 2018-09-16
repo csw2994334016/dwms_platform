@@ -273,8 +273,15 @@ public class WarehouseService {
                     allNum += locList.size();
                 }
             }
-            double usedRatio = new BigDecimal((float) usedNum / allNum).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
-            double unUsedRatio = new BigDecimal(1 - usedRatio).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+            double usedRatio;
+            double unUsedRatio;
+            if (allNum > 0) {
+                usedRatio = new BigDecimal((float) usedNum / allNum).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+                unUsedRatio = new BigDecimal(1 - usedRatio).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+            } else {
+                unUsedRatio = 1.0;
+                usedRatio = 0.0;
+            }
             WarehouseUses warehouseUses = WarehouseUses.builder().whName(warehouse.getWhName()).usedRatio(usedRatio).unUsedRatio(unUsedRatio).build();
             warehouseUsesList.add(warehouseUses);
         }
