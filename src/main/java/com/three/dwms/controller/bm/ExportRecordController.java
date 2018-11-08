@@ -1,6 +1,7 @@
 package com.three.dwms.controller.bm;
 
 import com.three.dwms.beans.JsonData;
+import com.three.dwms.constant.ResultCode;
 import com.three.dwms.entity.bm.ExportRecord;
 import com.three.dwms.entity.bm.InputDetail;
 import com.three.dwms.param.bm.ExportRecordParam;
@@ -38,7 +39,7 @@ public class ExportRecordController {
 
     @RequestMapping(value = "/export", method = RequestMethod.POST)
     public JsonData exportRecord(@RequestBody List<ExportRecordParam> paramList) {
-        exportRecordService.exportRecord(paramList);
-        return JsonData.success();
+        String fileName = exportRecordService.exportRecord(paramList);
+        return JsonData.success(fileName, ResultCode.SUCCESS.getDesc());
     }
 }

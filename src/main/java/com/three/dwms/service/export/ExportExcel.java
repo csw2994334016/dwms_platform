@@ -17,7 +17,7 @@ import java.util.UUID;
 @Slf4j
 public class ExportExcel {
 
-    public void export(ExportData exportData) {
+    public String export(ExportData exportData) {
         HSSFWorkbook wb = new HSSFWorkbook();
         HSSFSheet sheet = wb.createSheet("物料导出表");
         // 为文件添加密码，设置文件只读
@@ -178,9 +178,12 @@ public class ExportExcel {
             e.printStackTrace();
         }
 
+        int count = n / 50;
+        count = (count + 1) * 4;
+
         // 生成Excel水印
         try {
-            ExcelWaterUtil.putWaterRemarkToExcel(wb, sheet, imgPath, 0, 0, 0, 10, 1, 4, 0, 0);
+            ExcelWaterUtil.putWaterRemarkToExcel(wb, sheet, imgPath, 0, 0, 0, 10, 1, count, 0, 0);
         } catch (IOException e) {
             log.error("生成Excel水印异常！");
             e.printStackTrace();
@@ -208,5 +211,6 @@ public class ExportExcel {
             log.error("生成导出文件异常！");
             e.printStackTrace();
         }
+        return fileName + ".xls";
     }
 }

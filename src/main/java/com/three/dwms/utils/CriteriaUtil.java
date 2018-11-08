@@ -40,6 +40,27 @@ public class CriteriaUtil {
         }
     }
 
+    public static void getDatePredicate2(HttpServletRequest request, CriteriaBuilder criteriaBuilder, List<Predicate> predicateList, Path<Date> createTime) {
+        if (StringUtils.isNotBlank(request.getParameter("startTime2")) && StringUtils.isNotBlank(request.getParameter("endTime2"))) {
+            Date st = StringUtil.getStrToDate(request.getParameter("startTime2"));
+            Date et = StringUtil.getStrToDate(request.getParameter("endTime2"));
+            if (st != null && et != null) {
+                predicateList.add(criteriaBuilder.greaterThanOrEqualTo(createTime, st));
+                predicateList.add(criteriaBuilder.lessThanOrEqualTo(createTime, et));
+            }
+        } else if (StringUtils.isNotBlank(request.getParameter("startTime2"))) {
+            Date st = StringUtil.getStrToDate(request.getParameter("startTime2"));
+            if (st != null) {
+                predicateList.add(criteriaBuilder.greaterThanOrEqualTo(createTime, st));
+            }
+        } else if (StringUtils.isNotBlank(request.getParameter("endTime2"))) {
+            Date et = StringUtil.getStrToDate(request.getParameter("endTime2"));
+            if (et != null) {
+                predicateList.add(criteriaBuilder.lessThanOrEqualTo(createTime, et));
+            }
+        }
+    }
+
     public static Predicate getPredicate(HttpServletRequest request, CriteriaBuilder criteriaBuilder, Path<Object> proposer, Path<Object> approver, Path<Object> state, Path<Date> createTime) {
         List<Predicate> predicateList = Lists.newArrayList();
         if (StringUtils.isNotBlank(request.getParameter("proposer"))) {

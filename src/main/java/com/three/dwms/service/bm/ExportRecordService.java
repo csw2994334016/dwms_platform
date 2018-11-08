@@ -44,7 +44,21 @@ public class ExportRecordService {
     private InputDetailRepository inputDetailRepository;
 
     public List<ExportRecord> findAll() {
-        return null;
+        List<ExportRecord> exportRecordList = Lists.newArrayList();
+        HttpServletRequest request = RequestHolder.getCurrentRequest();
+        if (request != null) {
+            Specification<ExportRecord> specification = (root, criteriaQuery, criteriaBuilder) -> {
+                List<Predicate> predicateList = Lists.newArrayList();
+                if (StringUtils.isNotBlank(request.getParameter("exportNo"))) {
+                    predicateList.add(criteriaBuilder.equal(root.get("exportNo"), request.getParameter("exportNo")));
+                }
+                predicateList.add(criteriaBuilder.equal(root.get("purchaser"), RequestHolder.getCurrentUser().getUsername()));
+                CriteriaUtil.getDatePredicate2(request, criteriaBuilder, predicateList, root.get("createTime"));
+                return criteriaBuilder.and(predicateList.toArray(new Predicate[0]));
+            };
+            exportRecordList = exportRecordRepository.findAll(specification);
+        }
+        return exportRecordList;
     }
 
     public List<InputDetail> findInputDetails() {
@@ -70,7 +84,8 @@ public class ExportRecordService {
     }
 
     @Transactional
-    public void exportRecord(List<ExportRecordParam> paramList) {
+    public String exportRecord(List<ExportRecordParam> paramList) {
+        String fileName = "";
         List<Integer> ids = Lists.newArrayList();
         for (ExportRecordParam param : paramList) {
             ids.add(param.getId());
@@ -107,7 +122,8 @@ public class ExportRecordService {
         if (exportRecord != null) {
             ExportData exportData = ExportData.builder().title(title).recordList(recordList).totalMoney(String.valueOf(totalMoney)).build();
             ExportExcel exportExcel = new ExportExcel();
-            exportExcel.export(exportData);
+            fileName = exportExcel.export(exportData);
         }
+        return fileName;
     }
 }
