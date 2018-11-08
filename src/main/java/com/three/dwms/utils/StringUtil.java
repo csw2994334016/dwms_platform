@@ -25,6 +25,10 @@ public class StringUtil {
 
     public static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
+    public static SimpleDateFormat sdf1 = new SimpleDateFormat("yyyyMMddHHmmss");
+
+    public static SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy/MM/dd");
+
     public static List<Integer> splitToIntListByReg(String userIds, String reg) {
         List<Integer> userIdList = new ArrayList<>();
         try {
@@ -56,6 +60,14 @@ public class StringUtil {
         return pre + String.format("%06d", max);
     }
 
+    public static String getCurCode1(String pre, int num, String maxCode) {
+        int max = 1;
+        if (maxCode != null) {
+            max = Integer.valueOf(maxCode.substring(1)) + 1;
+        }
+        return pre + String.format("%0" + num + "d", max);
+    }
+
     public static Date getStrToDate(String time) {
         try {
             return sdf.parse(time);
@@ -67,6 +79,19 @@ public class StringUtil {
 
     public static String getCurDateStr() {
         return sdf.format(new Date());
+    }
+
+    public static String getCurDateStrByPattern(String pattern) {
+        switch (pattern) {
+            case "yyyy-MM-dd":
+                return sdf.format(new Date());
+            case "yyyyMMddHHmmss":
+                return sdf1.format(new Date());
+            case "yyyy/MM/dd":
+                return sdf2.format(new Date());
+            default:
+                return sdf.format(new Date());
+        }
     }
 
     public static String getStartTime(String year, String month) {

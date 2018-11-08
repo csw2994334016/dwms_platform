@@ -7,6 +7,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -33,7 +34,7 @@ public class ImportExcel<T> {
         List<T> dataList = Lists.newArrayList();
         //把spring文件上传的MultipartFile转换成CommonsMultipartFile类型
         CommonsMultipartFile cmf = (CommonsMultipartFile) multipartFile;
-        String path = System.getProperty("catalina.home") + "\\upload";
+        String path = System.getProperty("catalina.home") + "\\dwms\\uploadFile";
         log.debug("上传文件存放地址：{}", path);
         File filepath = new File(path); //获取本地存储路径
         if (!filepath.exists())
@@ -47,7 +48,8 @@ public class ImportExcel<T> {
         } else {
             return dataList;
         }
-        File file = new File(path + "\\" + new Date().getTime() + extension);
+        fileName = fileName.replace(extension, "");
+        File file = new File(path + "\\" + fileName + StringUtil.getCurDateStrByPattern("yyyyMMddHHmmss") + extension);
         //将上传的文件写入新建的文件中
         try {
             cmf.transferTo(file);
