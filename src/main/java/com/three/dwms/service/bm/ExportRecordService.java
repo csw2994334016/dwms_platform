@@ -18,6 +18,7 @@ import com.three.dwms.utils.IpUtil;
 import com.three.dwms.utils.StringUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +34,9 @@ import java.util.List;
  */
 @Service
 public class ExportRecordService {
+
+    @Value("#{props['init.waterContent']}")
+    private String waterContent;
 
     @Autowired
     private ExportRecordRepository exportRecordRepository;
@@ -122,6 +126,7 @@ public class ExportRecordService {
         if (exportRecord != null) {
             ExportData exportData = ExportData.builder().title(title).recordList(recordList).totalMoney(String.valueOf(totalMoney)).build();
             exportData.setPurchaser(userName);
+            exportData.setWaterContent(waterContent);
             ExportExcel exportExcel = new ExportExcel();
             fileName = exportExcel.export(exportData);
         }

@@ -168,7 +168,7 @@ public class ExportExcel {
         }
 
         // 生成水印图片
-        String waterContent = "山东省民族中等专业学校";
+        String waterContent = exportData.getWaterContent();
         String path = System.getProperty("catalina.home");
         String imgPath = path + "\\dwms\\water\\" + waterContent + ".png";
         try {

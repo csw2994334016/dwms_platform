@@ -16,6 +16,8 @@ import java.util.List;
 @ToString
 public class ExportData {
 
+    private String waterContent;
+
     private String purchaser;
 
     private String title;
