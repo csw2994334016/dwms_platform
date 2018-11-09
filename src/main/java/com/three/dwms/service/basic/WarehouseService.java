@@ -24,6 +24,7 @@ import com.three.dwms.utils.BeanValidator;
 import com.three.dwms.utils.IpUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -43,6 +44,9 @@ import java.util.List;
 @Service
 public class WarehouseService {
 
+    @Value("#{props['init.warehouseNum']}")
+    private Integer warehouseNum;
+
     @Resource
     private WarehouseRepository warehouseRepository;
 
@@ -61,10 +65,10 @@ public class WarehouseService {
     @Transactional
     public void create(WarehouseParam param) {
         BeanValidator.check(param);
-//        long whCount = warehouseRepository.count();
-//        if (whCount >= 2) {
-//            throw new ParamException("系统最多支持创建两个仓库");
-//        }
+        long whCount = warehouseRepository.count();
+        if (whCount >= warehouseNum) {
+            throw new ParamException("系统最多支持创建" + warehouseNum + "个仓库");
+        }
         if (checkWhCodeExist(param.getWhCode(), param.getId())) {
             throw new ParamException("仓库编号已经存在");
         }
