@@ -121,6 +121,7 @@ public class ExportRecordService {
         // 导出表格
         if (exportRecord != null) {
             ExportData exportData = ExportData.builder().title(title).recordList(recordList).totalMoney(String.valueOf(totalMoney)).build();
+            exportData.setPurchaser(userName);
             ExportExcel exportExcel = new ExportExcel();
             fileName = exportExcel.export(exportData);
         }

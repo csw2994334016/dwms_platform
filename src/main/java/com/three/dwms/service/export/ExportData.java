@@ -16,6 +16,8 @@ import java.util.List;
 @ToString
 public class ExportData {
 
+    private String purchaser;
+
     private String title;
 
     private List<Record> recordList;

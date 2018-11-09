@@ -198,7 +198,7 @@ public class ExportExcel {
 //        wb.close();
         byte[] content = os.toByteArray();
 
-        String fileName = exportData.getTitle() + StringUtil.getCurDateStrByPattern("yyyyMMddHHmmss");
+        String fileName = exportData.getPurchaser() + StringUtil.getCurDateStrByPattern("yyyyMMddHHmmss");
         String filePath = path + "\\dwms\\exportFile\\" + fileName + ".xls";
         File file1 = new File(filePath);// Excel文件生成后存储的位置
         OutputStream fos;

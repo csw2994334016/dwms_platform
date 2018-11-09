@@ -51,6 +51,7 @@ public class ExcelWaterUtil {
         if (null == bufferImg) {
             throw new RuntimeException("向Excel上面打印水印，读取水印图片失败(2)。");
         }
+        ImageIO.setUseCache(false);
         ImageIO.write(bufferImg, "png", byteArrayOut);
 
         // 开始打水印
