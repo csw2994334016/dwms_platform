@@ -98,9 +98,9 @@ public class ImportExcel<T> {
             log.debug(row.toString());
             // 1.若当前行的列数不等于标题行列数就放弃整行数据(若想放弃此功能注释4个步骤即可)
             int lastCellNum = row.getLastCellNum();
-            if (titleCellNum != lastCellNum) {
-                continue;
-            }
+//            if (titleCellNum != lastCellNum) {
+//                continue;
+//            }
 
             // 2.标记
             boolean judge = true;
@@ -111,10 +111,10 @@ public class ImportExcel<T> {
                 String value = this.getCellValue(cell);
 
                 // 3.单元格中的值等于null或等于"" 就放弃整行数据
-//                if (value == null || "".equals(value)) {
+                if (value == null || "".equals(value.trim())) {
 //                    judge = false;
-//                    break;
-//                }
+                    continue;
+                }
 
                 Field field = clazz.getDeclaredField(attributes.get(columnIndex));
                 Class<?> fieldType = field.getType();
