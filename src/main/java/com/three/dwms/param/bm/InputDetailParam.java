@@ -53,9 +53,9 @@ public class InputDetailParam {
 
     private String purchaseDept; //采购部门
 
+    @NotBlank(message = "验收人不可以为空")
     private String purchaser; //采购人
 
-    @NotBlank(message = "验收人不可以为空")
     private String receiver; //验收人
 
     private String supplierName; //供应商
