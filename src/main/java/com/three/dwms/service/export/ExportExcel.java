@@ -6,6 +6,7 @@ import com.three.dwms.utils.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.*;
 import java.util.UUID;
@@ -19,7 +20,7 @@ public class ExportExcel {
 
     public String export(ExportData exportData) {
         HSSFWorkbook wb = new HSSFWorkbook();
-        HSSFSheet sheet = wb.createSheet("物料导出表");
+        HSSFSheet sheet = wb.createSheet(exportData.getExportTitle());
         // 为文件添加密码，设置文件只读
         sheet.protectSheet(UUID.randomUUID().toString());
         // 标题，在sheet里创建第一行，参数为行索引(excel的行)，可以是0～65535之间的任何一个
@@ -198,7 +199,7 @@ public class ExportExcel {
 //        wb.close();
         byte[] content = os.toByteArray();
 
-        String fileName = exportData.getPurchaser() + StringUtil.getCurDateStrByPattern("yyyyMMddHHmmss");
+        String fileName = exportData.getPurchaser() + StringUtil.getCurDateStrByPattern("yyyy-MM-dd HH mm ss");
         String filePath = path + "\\dwms\\exportFile\\" + fileName + ".xls";
         File file1 = new File(filePath);// Excel文件生成后存储的位置
         OutputStream fos;

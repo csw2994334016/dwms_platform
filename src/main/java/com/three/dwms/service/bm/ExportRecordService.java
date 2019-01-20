@@ -38,6 +38,9 @@ public class ExportRecordService {
     @Value("#{props['init.waterContent']}")
     private String waterContent;
 
+    @Value("#{props['init.exportTitle']}")
+    private String exportTitle;
+
     @Autowired
     private ExportRecordRepository exportRecordRepository;
 
@@ -127,6 +130,7 @@ public class ExportRecordService {
             ExportData exportData = ExportData.builder().title(title).recordList(recordList).totalMoney(String.valueOf(totalMoney)).build();
             exportData.setPurchaser(userName);
             exportData.setWaterContent(waterContent);
+            exportData.setExportTitle(exportTitle);
             ExportExcel exportExcel = new ExportExcel();
             fileName = exportExcel.export(exportData);
         }

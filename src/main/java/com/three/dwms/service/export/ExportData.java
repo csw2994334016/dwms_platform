@@ -18,6 +18,8 @@ public class ExportData {
 
     private String waterContent;
 
+    private String exportTitle;
+
     private String purchaser;
 
     private String title;
