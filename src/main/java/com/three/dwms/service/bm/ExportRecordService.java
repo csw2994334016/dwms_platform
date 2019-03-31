@@ -81,7 +81,7 @@ public class ExportRecordService {
                     Warehouse warehouse = warehouseService.findById(Integer.valueOf(request.getParameter("whId")));
                     predicateList.add(criteriaBuilder.equal(root.get("whCode"), warehouse.getWhCode()));
                 }
-                predicateList.add(criteriaBuilder.equal(root.get("purchaser"), RequestHolder.getCurrentUser().getUsername()));
+                predicateList.add(criteriaBuilder.equal(root.get("purchaser"), RequestHolder.getCurrentUser().getRealName()));
                 CriteriaUtil.getDatePredicate(request, criteriaBuilder, predicateList, root.get("createTime"));
                 return criteriaBuilder.and(predicateList.toArray(new Predicate[0]));
             };
@@ -101,7 +101,7 @@ public class ExportRecordService {
         String maxCode = exportRecordRepository.findMaxExportCode();
         String exportNo = StringUtil.getCurCode1("E", 8, maxCode);
         String userName = RequestHolder.getCurrentUser().getUsername();
-        String title = exportNo + "--物料导出表--" + userName;
+        String title = exportNo + "--" + exportTitle + "--" + userName;
         double totalMoney = 0;
         List<Record> recordList = Lists.newArrayList();
         for (InputDetail inputDetail : inputDetailList) {
